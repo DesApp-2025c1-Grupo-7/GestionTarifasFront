@@ -8,6 +8,9 @@ body{
 
 }
 .boton{
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: #ff7b00e3;
   color: #212402;
   padding: 14px 25px;
@@ -16,4 +19,12 @@ body{
   cursor: pointer;
   border: 0;
   outline: 0;
+  gap: 5px;
+}
+
+.boton strong{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size:x-large;
 }
