@@ -2,14 +2,12 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   font-size: x-large;
-  color: white;
 }
 
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
-  display: flex;
   flex-direction: column;
 }
 .form-box{
@@ -55,14 +53,14 @@ h2 {
   grid-column: span 2;
 }
 
-select,
+.form-group select,
 input[type="text"],
 input[type="number"] {
   padding: 8px;
   border: 1px solid orange;
   border-radius: 5px;
   background-color: transparent;
-  color: white;
+  color: black;
   height: 3rem;
 }
 
