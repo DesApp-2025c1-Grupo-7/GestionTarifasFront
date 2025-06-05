@@ -20,6 +20,8 @@ body{
   border: 0;
   outline: 0;
   gap: 5px;
+  min-width: 10rem;
+  min-height: 4rem;
 }
 
 .boton strong{
