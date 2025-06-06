@@ -1,0 +1,90 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  font-size: x-large;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.form-box{
+    width: 80%;
+}
+
+.form-box {
+  border-radius: 12px;
+}
+
+.logo-acme {
+  color: orange;
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  height: 8rem;
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+}
+
+.form-group.wide {
+  grid-column: span 2;
+}
+
+.form-group select,
+input[type="text"],
+input[type="number"] {
+  padding: 8px;
+  border: 1px solid orange;
+  border-radius: 5px;
+  background-color: transparent;
+  color: black;
+  height: 3rem;
+}
+
+.checkbox-row {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.checkbox-row input[type="checkbox"] {
+  margin-right: 5px;
+  
+}
+
+.cost-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.total-cost {
+  color: orange;
+}

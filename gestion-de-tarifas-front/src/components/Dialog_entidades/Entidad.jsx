@@ -65,7 +65,8 @@ const Entidad = ({entidad,handleSubmit}) => {
                 <div style={buttonGroupStyle}>
                 <AlertDialog.Cancel asChild>
                     <button type="button" style={cancelButtonStyle}>Cancelar</button>
-                </AlertDialog.Cancel>cambiar de ramas
+                </AlertDialog.Cancel>
+
                 <button type="submit" style={submitButtonStyle}>Crear</button>
                 </div>
             </form>
