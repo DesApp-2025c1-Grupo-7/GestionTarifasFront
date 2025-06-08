@@ -1,0 +1,15 @@
+.container {
+  width: 100vw;
+  max-width: 100%;
+  padding: 20px;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.historial-item {
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #f1f1f1;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}

@@ -1,9 +1,138 @@
+import { useEffect, useState } from 'react';
+import './HistoricoTarifas.css'; // opcional
+
 const HistoricoTarifas = () => {
-    return ( 
-        <div>
-            Historico de tarifas
-        </div>
-     );
-}
- 
+  const [historial, setHistorial] = useState([]);
+  const [editIndex, setEditIndex] = useState(null);
+  const [tarifaEditada, setTarifaEditada] = useState({});
+
+  useEffect(() => {
+    const datos = JSON.parse(localStorage.getItem('tarifas')) || [];
+    setHistorial(datos);
+  }, []);
+
+  const eliminarTarifa = (index) => {
+    const nuevoHistorial = [...historial];
+    nuevoHistorial.splice(index, 1);
+    setHistorial(nuevoHistorial);
+    localStorage.setItem('tarifas', JSON.stringify(nuevoHistorial));
+  };
+
+  const activarEdicion = (index) => {
+    setEditIndex(index);
+    setTarifaEditada({ ...historial[index] });
+  };
+
+  const cancelarEdicion = () => {
+    setEditIndex(null);
+    setTarifaEditada({});
+  };
+
+  const guardarEdicion = () => {
+    const nuevoHistorial = [...historial];
+    nuevoHistorial[editIndex] = { ...tarifaEditada };
+    setHistorial(nuevoHistorial);
+    localStorage.setItem('tarifas', JSON.stringify(nuevoHistorial));
+    setEditIndex(null);
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setTarifaEditada((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  return (
+    <div className="container">
+      <h2>Historial de Tarifas</h2>
+
+      {historial.length === 0 ? (
+        <p>No hay tarifas registradas.</p>
+      ) : (
+        <ul>
+          {historial.map((tarifa, index) => (
+            <li key={index} className="historial-item">
+              {editIndex === index ? (
+                <>
+                  <p>
+                    <strong>Transportista:</strong>
+                    <input
+                      type="text"
+                      name="transportista"
+                      value={tarifaEditada.transportista}
+                      onChange={handleChange}
+                    />
+                  </p>
+                  <p>
+                    <strong>Ayudantes:</strong>
+                    <input
+                      type="number"
+                      name="ayudantes"
+                      value={tarifaEditada.ayudantes}
+                      onChange={handleChange}
+                    />
+                  </p>
+                  <p>
+                    <strong>Estadía:</strong>
+                    <input
+                      type="checkbox"
+                      name="estadia"
+                      checked={tarifaEditada.estadia}
+                      onChange={handleChange}
+                    />
+                  </p>
+                  <p>
+                    <strong>Carga peligrosa:</strong>
+                    <input
+                      type="checkbox"
+                      name="esPeligrosa"
+                      checked={tarifaEditada.esPeligrosa}
+                      onChange={handleChange}
+                    />
+                  </p>
+                  <p>
+                    <strong>Otros:</strong>
+                    <input
+                      type="text"
+                      name="otros"
+                      value={tarifaEditada.otros}
+                      onChange={handleChange}
+                    />
+                  </p>
+                  <p>
+                    <strong>Costo total:</strong>
+                    <input
+                      type="number"
+                      name="costoTotal"
+                      value={tarifaEditada.costoTotal}
+                      onChange={handleChange}
+                    />
+                  </p>
+                  <button onClick={guardarEdicion}>Guardar</button>
+                  <button onClick={cancelarEdicion}>Cancelar</button>
+                </>
+              ) : (
+                <>
+                  <p><strong>Fecha:</strong> {tarifa.fecha}</p>
+                  <p><strong>Transportista:</strong> {tarifa.transportista}</p>
+                  <p><strong>Ayudantes:</strong> {tarifa.ayudantes}</p>
+                  <p><strong>Estadía:</strong> {tarifa.estadia ? 'Sí' : 'No'}</p>
+                  <p><strong>Carga peligrosa:</strong> {tarifa.esPeligrosa ? 'Sí' : 'No'}</p>
+                  <p><strong>Otros:</strong> {tarifa.otros}</p>
+                  <p><strong>Costo total:</strong> ${tarifa.costoTotal}</p>
+                  <button onClick={() => activarEdicion(index)}>Editar</button>
+                  <button onClick={() => eliminarTarifa(index)}>Eliminar</button>
+                </>
+              )}
+              <hr />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
 export default HistoricoTarifas;
