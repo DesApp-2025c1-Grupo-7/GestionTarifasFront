@@ -37,6 +37,7 @@ nav h1{
     font-size: xx-large;
     display: flex;
     gap: 0.5rem;
+    align-items: center;
 }
 hr{
     margin: 0 20px;
