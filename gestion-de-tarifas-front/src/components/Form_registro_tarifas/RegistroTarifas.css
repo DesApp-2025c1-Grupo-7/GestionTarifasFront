@@ -53,6 +53,11 @@ h2 {
   grid-column: span 2;
 }
 
+.form-group.wide input::placeholder{
+  color:black;
+}
+
+
 .form-group select,
 input[type="text"],
 input[type="number"] {
@@ -87,4 +92,8 @@ input[type="number"] {
 
 .total-cost {
   color: orange;
+}
+
+label input {
+  margin-left: 10px;
 }
