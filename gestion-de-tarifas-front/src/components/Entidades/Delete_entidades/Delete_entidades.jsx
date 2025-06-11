@@ -11,10 +11,22 @@ const Delete_entidades = ({ entidad, id }) => {
   };
 
   return (
-    <button onClick={handleDelete} className="boton">
-      Eliminar
+    <button onClick={handleDelete} style={botonStyle}>
+      X
     </button>
   );
+};
+
+const botonStyle = {
+  backgroundColor: "red",
+  color: "white",
+  padding: "10px 20px",
+  borderRadius: "5px",
+  border: "none",
+  cursor: "pointer",
+  fontSize: "16px",
+  fontWeight: "bold",
+  margin: "10px",
 };
 
 

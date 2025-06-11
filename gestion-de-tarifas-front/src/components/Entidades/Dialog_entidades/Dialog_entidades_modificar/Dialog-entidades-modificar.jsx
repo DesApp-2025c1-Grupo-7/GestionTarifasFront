@@ -35,6 +35,7 @@ const Dialog_entidades_modificar = ({ datos }) => {
           <div key={key} style={fieldStyle}>
             <label>{key}</label>
             <select {...sharedProps}>
+              <option>Ninguno</option>
               {renderOptions(tipoDeCargaArray, d => key+ " [ID: "+ d.id+" ]")}
             </select>
           </div>
@@ -44,6 +45,7 @@ const Dialog_entidades_modificar = ({ datos }) => {
           <div key={key} style={fieldStyle}>
             <label>{key}</label>
             <select {...sharedProps}>
+              <option>Ninguno</option>
               {renderOptions(zonaDeViajeArray, d => `${d.origen} - ${d.destino}` +" " + key + " [ID: "+d.id+" ]")}
             </select>
           </div>
@@ -53,6 +55,7 @@ const Dialog_entidades_modificar = ({ datos }) => {
           <div key={key} style={fieldStyle}>
             <label>{key}</label>
             <select {...sharedProps}>
+              <option>Ninguno</option>
               {renderOptions(tipoDeVehiculoArray, d => key + " [ID: " +d.id+" ]")}
             </select>
           </div>
@@ -62,6 +65,7 @@ const Dialog_entidades_modificar = ({ datos }) => {
           <div key={key} style={fieldStyle}>
             <label>{key}</label>
             <select {...sharedProps}>
+              <option>Ninguno</option>
               {renderOptions(transportistaArray, d => d.nombre +" "+   key + " [ID: "+d.id+" ]")}
             </select>
           </div>
@@ -71,6 +75,7 @@ const Dialog_entidades_modificar = ({ datos }) => {
           <div key={key} style={fieldStyle}>
             <label>{key}</label>
             <select {...sharedProps}>
+              <option>Ninguno</option>
               {renderOptions(vehiculoArray, d => d.patente +" "+ key +" [ID: "+d.id+" ]")}
             </select>
           </div>
@@ -80,6 +85,7 @@ const Dialog_entidades_modificar = ({ datos }) => {
           <div key={key} style={fieldStyle}>
             <label>{key}</label>
             <select {...sharedProps}>
+              <option>Ninguno</option>
               {renderOptions(adicional, d => d.nombre)}
             </select>
           </div>
@@ -115,7 +121,7 @@ const Dialog_entidades_modificar = ({ datos }) => {
 
   return (
     <AlertDialog.Root>
-      <AlertDialog.Trigger className='boton'>
+      <AlertDialog.Trigger style={botonModificarStyle}>
         Modificar entidad
       </AlertDialog.Trigger>
 
@@ -196,6 +202,18 @@ const buttonGroupStyle = {
   justifyContent: 'flex-end',
   gap: '10px',
   marginTop: '15px',
+};
+
+const botonModificarStyle = {
+  backgroundColor: '#4CAF50',
+  padding: "10px 20px",
+  borderRadius: "5px",
+  border: "none",
+  cursor: "pointer",
+  fontSize: "16px",
+  fontWeight: "bold",
+  margin: "10px",
+  color: 'white',
 };
 
 export default Dialog_entidades_modificar;
