@@ -138,6 +138,7 @@ const Entidad_form = ({ entidad, handleSubmit }) => {
           <div style={fieldStyle}>
             <label htmlFor="id_transportista">Transportista:</label>
             <select name="id_transportista" style={inputStyle}>
+              <option>Ninguno</option>
               {transportistaArray.map((t) => (
                 <option key={t.id} value={t.id}>
                   {getNombreLegible(t)}
@@ -163,6 +164,7 @@ const Entidad_form = ({ entidad, handleSubmit }) => {
           <div style={fieldStyle}>
             <label htmlFor="id_vehiculo">Vehículo:</label>
             <select name="id_vehiculo" style={inputStyle}>
+              <option>Ninguno</option>
               {vehiculoArray.map((v) => (
                 <option key={v.id} value={v.id}>
                   {getNombreLegible(v)}
@@ -213,7 +215,14 @@ const Entidad_form = ({ entidad, handleSubmit }) => {
           </div>
           <div style={fieldStyle}>
             <label htmlFor="id_tarifa_costo">ID Tarifa Costo:</label>
-            <input type="number" name="id_tarifa_costo" required style={inputStyle} />
+            <select name="id_tarifa_costo" style={inputStyle}>
+              <option>Ninguno</option>
+              {adicional.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {getNombreLegible(a)}
+                </option>
+              ))}
+            </select>
           </div>
           <div style={fieldStyle}>
             <label htmlFor="es_obligatorio">¿Es obligatorio?</label>

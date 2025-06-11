@@ -44,7 +44,7 @@ const Dialog_entidades_modificar = ({ datos }) => {
                   value={value}
                   onChange={e => handleChange(key, e.target.value)}
                   style={inputStyle}
-                  disabled={key === 'id'} // id no debe modificarse
+                  disabled={key === 'id'} 
                 />
               </div>
             ))}
