@@ -57,7 +57,6 @@ export default function FormAlertDialog() {
               <option value="TipoDeVehiculo">Tipo de vehiculo</option>
               <option value="Vehiculo">Vehiculo</option>
               <option value="Transportista">Transportista</option>
-              <option value="TarifaDeCosto">Tarifa Costo</option>
               <option value="Adicional">Adicional</option>
             </select>
           </div>
