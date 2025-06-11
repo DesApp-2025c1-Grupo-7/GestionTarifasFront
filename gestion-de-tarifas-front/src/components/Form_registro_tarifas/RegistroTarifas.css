@@ -35,7 +35,7 @@ h2 {
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 15px;
   margin-bottom: 20px;
 }
@@ -52,6 +52,11 @@ h2 {
 .form-group.wide {
   grid-column: span 2;
 }
+
+.form-group.wide input::placeholder{
+  color:black;
+}
+
 
 .form-group select,
 input[type="text"],
@@ -87,4 +92,8 @@ input[type="number"] {
 
 .total-cost {
   color: orange;
+}
+
+label input {
+  margin-left: 10px;
 }
