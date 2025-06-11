@@ -1,24 +1,36 @@
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import React, { useState } from 'react';
-import Entidad from './Entidad';
+import Entidad_form from './Entidad_form';
+import Entidad from '../Entidad';
 import { TfiServer } from "react-icons/tfi";
 
 export default function FormAlertDialog() {
   const [entidad, setEntidad] = useState("");
+  const [count, setCount] = useState(JSON.parse(localStorage.getItem('entidades') || "[]").length);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    const data = new FormData(e.target);
-    const datos = {};
-    for (let pair of data.entries()) {
-      datos[pair[0]] = pair[1];
-    }
-    const entidadesGuardadas = JSON.parse(localStorage.getItem('entidades')) || [];
-    entidadesGuardadas.push({ tipo: entidad, ...datos });
-    localStorage.setItem('entidades', JSON.stringify(entidadesGuardadas));
-    console.log(JSON.parse(localStorage.getItem("entidades")));
-    alert(`Entidad creada:\n${JSON.stringify(datos, null, 2)}`);
-  };
+  e.preventDefault();
+  const data = new FormData(e.target);
+  const id = count;
+
+  const datos = { id }; 
+
+  for (let [key, value] of data.entries()) {
+    datos[key] = value; 
+  }
+
+  const entidadesGuardadas = JSON.parse(localStorage.getItem('entidades')) || [];
+  entidadesGuardadas.push({ tipo: entidad, datos });
+  localStorage.setItem('entidades', JSON.stringify(entidadesGuardadas));
+
+  setCount(count + 1);
+  window.dispatchEvent(new Event("entidades_actualizadas"));
+
+  console.log(JSON.parse(localStorage.getItem("entidades")));
+  alert(`Entidad creada:\nTipo: ${entidad}\nDatos: ${JSON.stringify(datos, null, 2)}`);
+};
+
+
 
   const setNewEntidad = (valor) => {
     setEntidad(valor);
@@ -61,7 +73,7 @@ export default function FormAlertDialog() {
             </select>
           </div>
 
-          <Entidad entidad={entidad} handleSubmit={handleSubmit} />
+          <Entidad_form entidad={entidad} handleSubmit={handleSubmit} />
 
           {entidad === '' && (
             <div style={buttonGroupStyle}>
@@ -126,3 +138,4 @@ const buttonGroupStyle = {
   gap: '10px',
   marginTop: '15px',
 };
+  

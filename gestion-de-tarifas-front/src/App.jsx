@@ -3,6 +3,7 @@ import Header from './components/Header/Header'
 import RegistrarTarifa from './components/Form_registro_tarifas/RegistroTarifas'
 import HistoricoTarifas from './components/Historico_tarifas/HistoricoTarifas'
 import './App.css'
+import Entidades_page from './components/Entidades/Entidades_page'
 
 const App = () => {
   return (
@@ -13,6 +14,7 @@ const App = () => {
           <Routes>
             <Route path="/registrarTarifa" element={<RegistrarTarifa />} />
             <Route path="/historicoTarifas" element={<HistoricoTarifas />} />
+            <Route path="/entidades" element={<Entidades_page />} />
           </Routes>
         </main>
       </div>

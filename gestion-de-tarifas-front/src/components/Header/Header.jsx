@@ -3,7 +3,7 @@ import './Header.css'
 import { RxCountdownTimer } from "react-icons/rx";
 import { VscNewFolder } from "react-icons/vsc";
 import { TbTruckDelivery } from "react-icons/tb";
-import FormAlertDialog from '../Dialog_entidades/Dialog-entidades';
+import FormAlertDialog from '../Entidades/Dialog_entidades/Dialog-entidades';
 
 import { Link } from 'react-router-dom';
 
@@ -18,7 +18,7 @@ const Header = () => {
 
             <li><Link to="/registrarTarifa" className='boton'><strong><VscNewFolder /></strong>  Registrar tarifa </Link></li>
             <li><Link to="/historicoTarifas" className='boton'><strong><RxCountdownTimer /></strong>  Historico de tarifas </Link></li>
-            <li><FormAlertDialog/></li>
+            <li><Link to="/entidades" className='boton'>Entidades</Link></li>
 
         </ul>
       
