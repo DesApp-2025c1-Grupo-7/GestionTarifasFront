@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import './HistoricoTarifas.css'; 
+import { getTarifas} from '../../services/tarifaCosto.service';
+
+
 
 const HistoricoTarifas = () => {
   const [historial, setHistorial] = useState([]);
@@ -7,9 +10,11 @@ const HistoricoTarifas = () => {
   const [tarifaEditada, setTarifaEditada] = useState({});
 
   useEffect(() => {
-    const datos = JSON.parse(localStorage.getItem('tarifas')) || [];
-    setHistorial(datos);
+    getTarifas()
+      .then(res => setHistorial(res.data))
+      .catch(err => console.error(err));
   }, []);
+
 
   const eliminarTarifa = (index) => {
     const nuevoHistorial = [...historial];
@@ -114,17 +119,20 @@ const HistoricoTarifas = () => {
                   <button onClick={cancelarEdicion}>Cancelar</button>
                 </>
               ) : (
-                <>
-                  <p><strong>Fecha:</strong> {tarifa.fecha}</p>
-                  <p><strong>Transportista:</strong> {tarifa.transportista}</p>
-                  <p><strong>Ayudantes:</strong> {tarifa.ayudantes}</p>
-                  <p><strong>Estadía:</strong> {tarifa.estadia ? 'Sí' : 'No'}</p>
-                  <p><strong>Carga peligrosa:</strong> {tarifa.esPeligrosa ? 'Sí' : 'No'}</p>
-                  <p><strong>Otros:</strong> {tarifa.otros}</p>
-                  <p><strong>Costo total:</strong> ${tarifa.costoTotal}</p>
-                  <button onClick={() => activarEdicion(index)}>Editar</button>
-                  <button onClick={() => eliminarTarifa(index)}>Eliminar</button>
-                </>
+                  <>
+                  
+                    <p><strong>Fecha:</strong> {tarifa.fecha}</p>
+                    <p><strong>Transportista:</strong> {tarifa.transportista?.nombre}</p>
+                    <p> <strong>Vehículo:</strong> {tarifa.vehiculo?.patente} - {tarifa.vehiculo?.tipoVehiculo?.descripcion} </p>
+                    <p><strong>Origen:</strong> {tarifa.zonaDeViaje?.origen}</p>
+                    <p><strong>Destino:</strong> {tarifa.zonaDeViaje?.destino}</p>
+                    <p><strong>Distancia:</strong> {tarifa.zonaDeViaje?.distancia} km</p>
+                    <p><strong>Costo/km:</strong> ${tarifa.zonaDeViaje?.costoKilometro}</p>
+                    <p>
+                      <strong>Costo base:</strong> ${tarifa.valor_base + tarifa.transportista?.costoServicio + tarifa.vehiculo?.precioBase + (tarifa.zonaDeViaje?.distancia * tarifa.zonaDeViaje?.costoKilometro)}
+                    </p>
+          
+                  </>
               )}
               <hr />
             </li>

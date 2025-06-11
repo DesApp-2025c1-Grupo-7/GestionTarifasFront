@@ -1,66 +1,68 @@
 import { useState, useEffect } from 'react';
 import './RegistroTarifas.css';
+import { getTransportista, getVehiculos, getZonas, postTarifa} from '../../services/tarifaCosto.service';
 
 const RegistroTarifas = () => {
   const [vehiculos, setVehiculos] = useState([]);
-  const [cargas, setCargas] = useState([]);
+  // const [cargas, setCargas] = useState([]); no necesario por ahora
   const [zonas, setZonas] = useState([]);
   const [transportistas, setTransportistas] = useState([]);
 
   const [vehiculo, setVehiculo] = useState('');
-  const [carga, setCarga] = useState('');
+  // const [carga, setCarga] = useState('');
   const [zona, setZona] = useState('');
   const [transportista, setTransportista] = useState('');
   const [adicionales, setAdicionales] = useState('');
-  const [infoCarga, setInfoCarga] = useState('');
-  const [ayudantes, setAyudantes] = useState(2);
-  const [esPeligrosa, setEsPeligrosa] = useState(false);
-  const [estadia, setEstadia] = useState(false);
-  const [otros, setOtros] = useState('');
-  const [costoTotal, setCostoTotal] = useState(1000);
+  // const [infoCarga, setInfoCarga] = useState('');
+  // const [ayudantes, setAyudantes] = useState(2);
+  // const [esPeligrosa, setEsPeligrosa] = useState(false);
+  // const [estadia, setEstadia] = useState(false);
+  // const [otros, setOtros] = useState('');
+  const [valorBase, setValorBase] = useState(1000);
 
- useEffect(() => {
-    setVehiculos(JSON.parse(localStorage.getItem('Vehiculo')) || []);
-    setCargas(JSON.parse(localStorage.getItem('TipoDeCarga')) || []);
-    setZonas(JSON.parse(localStorage.getItem('ZonaDeViaje')) || []);
-    setTransportistas(JSON.parse(localStorage.getItem('Transportista')) || []);
+  useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const [zonasData,vehiculoData,transportistaData] = await Promise.all([
+            getZonas(),
+            getVehiculos(),
+            getTransportista()
+          ]);
+          setZonas(zonasData);
+          setVehiculos(vehiculoData)
+          setTransportistas(transportistaData)
+        } catch (error) {
+          console.error('Error al cargar datos del backend:', error);
+        }
+      };
+
+      fetchData();
   }, []);
 
 
-const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-
     const nuevaTarifa = {
-      fecha: new Date().toLocaleString(),
+      valorBase,
       vehiculo,
-      carga,
-      zona,
-      transportista,
-      infoCarga,
-      ayudantes,
-      esPeligrosa,
-      estadia,
-      otros,
-      costoTotal
+      zonaDeViaje: zona,
+      transportista
     };
 
-    const historialAnterior = JSON.parse(localStorage.getItem('tarifas')) || [];
-    const nuevoHistorial = [nuevaTarifa, ...historialAnterior];
-    localStorage.setItem('tarifas', JSON.stringify(nuevoHistorial));
+    try {
+      await postTarifa(nuevaTarifa);
+      alert('Tarifa registrada con éxito en el backend');
 
-    alert('Tarifa registrada con éxito');
-
-    setVehiculo('');
-    setCarga('');
-    setZona('');
-    setTransportista('');
-    setInfoCarga('');
-    setAyudantes(2);
-    setEsPeligrosa(false);
-    setEstadia(false);
-    setOtros('');
-    setCostoTotal(1000);
+      // Limpiar el formulario
+      setVehiculo('');
+      setZona('');
+      setTransportista('');
+      setValorBase(1000);
+    } catch (error) {
+      console.error('Error al registrar la tarifa:', error);
+      alert('Error al registrar tarifa. Intente nuevamente.');
+    }
   };
   
 // vehiculo tiene que traer y mostrar: patente- tipo de vehiculo - tipo de carga
@@ -73,7 +75,7 @@ const handleSubmit = (e) => {
           <div className="form-grid">
             <div className="form-group">
               <label>Vehículo</label>
-              <select value={vehiculo} onChange={e => setVehiculo(e.target.value)} required>
+              <select value={vehiculo} onChange={e => setVehiculo(Number(e.target.value))} required>
                 <option value="">Seleccione vehículo</option>
                 {vehiculos.map(v => (
                   <option key={v.id} value={v.id}>{v.patente || `Vehículo ${v.id}`}</option>
@@ -83,17 +85,17 @@ const handleSubmit = (e) => {
 
             <div className="form-group">
               <label>Zona de viaje</label>
-              <select value={zona} onChange={e => setZona(e.target.value)} required>
+              <select value={zona} onChange={e => setZona(Number(e.target.value))} required>
                 <option value="">Seleccione zona</option>
                 {zonas.map(z => (
-                  <option key={z.id} value={z.id}>{z.origen} → {z.destino}</option>
+                  <option key={z.id} value={z.id}>{z.origen} → {z.destino} - precio: ${z.distancia * z.costoKilometro}</option>
                 ))}
               </select>
             </div>
 
             <div className="form-group">
               <label>Transportista</label>
-              <select value={transportista} onChange={e => setTransportista(e.target.value)} required>
+              <select value={transportista} onChange={e => setTransportista(Number(e.target.value))} required>
                 <option value="">Seleccione transportista</option>
                 {transportistas.map(t => (
                   <option key={t.id} value={t.id}>{t.nombre}</option>
@@ -114,7 +116,7 @@ const handleSubmit = (e) => {
           </div>
 
           <div className="cost-row">
-            Costo total estimado: <span className="total-cost">${costoTotal}</span>
+            Costo total estimado: <span className="total-cost">${valorBase}</span>
           </div>
 
           <button type="submit">Registrar tarifa</button>
