@@ -6,7 +6,7 @@ const RegistroTarifas = () => {
   const [carga, setCarga] = useState('');
   const [zona, setZona] = useState('');
   const [transportista, setTransportista] = useState('');
-  const [infoCarga, setInfoCarga] = useState('');
+  const [adicionales, setAdicionales] = useState('');
   const [ayudantes, setAyudantes] = useState(2);
   const [esPeligrosa, setEsPeligrosa] = useState(false);
   const [estadia, setEstadia] = useState(false);
@@ -22,7 +22,7 @@ const RegistroTarifas = () => {
       carga,
       zona,
       transportista,
-      infoCarga,
+      adicionales,
       ayudantes,
       esPeligrosa,
       estadia,
@@ -39,7 +39,7 @@ const RegistroTarifas = () => {
     setCarga('');
     setZona('');
     setTransportista('');
-    setInfoCarga('');
+    setAdicionales('');
     setAyudantes(2);
     setEsPeligrosa(false);
     setEstadia(false);
@@ -56,21 +56,11 @@ const RegistroTarifas = () => {
             <label>Vehículo</label>
             <select value={vehiculo} onChange={(e) => setVehiculo(e.target.value)}>
               <option value="">Seleccione el vehículo</option>
-              <option value="camion1">Camión 1</option>
-              <option value="camion2">Camión 2</option>
+              <option value="camion1">patente- tipo de vehiculo - tipo de carga</option>
+              <option value="camion2">patente- tipo de vehiculo - tipo de carga</option>
             </select>
           </div>
-
-          <div className="form-group">
-            <label>Carga</label>
-            <select value={carga} onChange={(e) => setCarga(e.target.value)}>
-              <option value="">Seleccione el tipo de carga</option>
-              <option value="granel">Granel</option>
-              <option value="contenedor">Contenedor</option>
-              <option value="refrigerada">Refrigerada</option>
-            </select>
-          </div>
-
+          
           <div className="form-group">
             <label>Zona de viaje</label>
             <select value={zona} onChange={(e) => setZona(e.target.value)}>
@@ -91,54 +81,15 @@ const RegistroTarifas = () => {
             </select>
           </div>
 
-          <div className="form-group wide">
-            <label>Información de carga</label>
-            <input
-              type="text"
-              value={infoCarga}
-              onChange={(e) => setInfoCarga(e.target.value)}
-              placeholder="Escriba aquí la información de carga..."
-            />
+          <div className="form-group">
+            <label>Adicionales</label>
+            <select value={adicionales} onChange={(e) => setAdicionales(e.target.value)}>
+              <option value="">Seleccione un adicional</option>
+              <option value="litoral">Carga peligrosa</option>
+              <option value="rapidos">Ayudantes</option>
+              <option value="pr">estadia</option>
+            </select>
           </div>
-        </div>
-
-        <div className="checkbox-row">
-          <label>
-            <input
-              type="checkbox"
-              checked={esPeligrosa}
-              onChange={() => setEsPeligrosa(!esPeligrosa)}
-            />
-            Es carga peligrosa
-          </label>
-
-          <label>
-            Ayudantes
-            <input
-              type="number"
-              value={ayudantes}
-              onChange={(e) => setAyudantes(Number(e.target.value))}
-              min="0"
-            />
-          </label>
-
-          <label>
-            <input
-              type="checkbox"
-              checked={estadia}
-              onChange={() => setEstadia(!estadia)}
-            />
-            Estadía
-          </label>
-
-          <label>
-            Otros
-            <input
-              type="text"
-              value={otros}
-              onChange={(e) => setOtros(e.target.value)}
-            />
-          </label>
         </div>
 
         <div className="cost-row">
