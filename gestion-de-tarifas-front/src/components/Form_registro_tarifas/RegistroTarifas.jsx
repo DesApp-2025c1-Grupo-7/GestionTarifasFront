@@ -78,7 +78,7 @@ const RegistroTarifas = () => {
               <select value={vehiculo} onChange={e => setVehiculo(Number(e.target.value))} required>
                 <option value="">Seleccione vehículo</option>
                 {vehiculos.map(v => (
-                  <option key={v.id} value={v.id}>{v.patente || `Vehículo ${v.id}`}</option>
+                  <option key={v.id} value={v.id}>{v.patente} - {v.tipoVehiculo?.tipoCargas?.map(carga => carga.categoria) || `Vehículo ${v.id}`}</option>
                 ))}
               </select>
             </div>
@@ -88,7 +88,7 @@ const RegistroTarifas = () => {
               <select value={zona} onChange={e => setZona(Number(e.target.value))} required>
                 <option value="">Seleccione zona</option>
                 {zonas.map(z => (
-                  <option key={z.id} value={z.id}>{z.origen} → {z.destino} - precio: ${z.distancia * z.costoKilometro}</option>
+                  <option key={z.id} value={z.id}>{z.origen} → {z.destino} - ${z.distancia * z.costoKilometro}</option>
                 ))}
               </select>
             </div>
@@ -114,10 +114,12 @@ const RegistroTarifas = () => {
           </div>
 
           </div>
-
-          <div className="cost-row">
+          
+          {/* queda pendiente funcionalidad de calculo del valorBase */}
+          {/* valor base: costo de carga + costo vehiculo + costo de zona + costo transportista */}
+          {/* <div className="cost-row">
             Costo total estimado: <span className="total-cost">${valorBase}</span>
-          </div>
+          </div> */}
 
           <button type="submit">Registrar tarifa</button>
         </form>
