@@ -1,6 +1,8 @@
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import React, { useState } from 'react';
 import Entidad_form from './Entidad_form';
+import Entidad from '../Entidad';
+import { TfiServer } from "react-icons/tfi";
 
 export default function FormAlertDialog() {
   const [entidad, setEntidad] = useState("");
@@ -41,7 +43,7 @@ export default function FormAlertDialog() {
 
   return (
     <AlertDialog.Root>
-      <AlertDialog.Trigger className='boton'>
+      <AlertDialog.Trigger className='boton' > <TfiServer />
         Crear entidad
       </AlertDialog.Trigger>
 
@@ -86,7 +88,6 @@ export default function FormAlertDialog() {
   );
 }
 
-// Estilos
 const overlayStyle = {
   position: 'fixed',
   inset: 0,

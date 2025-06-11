@@ -2,7 +2,7 @@ nav{
     width: 100%;
     background: #444240;
     color: rgba(14, 8, 3, 0.842);
-    padding: 40px 3rem;
+    padding: 2px 3rem;
     position: fixed;
     top: 0;
     left: 0;
@@ -11,7 +11,7 @@ nav{
     justify-content: center;
     justify-content: space-between;
     z-index: 10;
-    gap: 2rem;
+    gap: 10px;
 }
 
 nav ul{
@@ -36,8 +36,14 @@ nav h1{
     color: #fff;
     font-size: xx-large;
     display: flex;
+    align-items: center;
     gap: 0.5rem;
+    align-items: center;
 }
 hr{
     margin: 0 20px;
+}
+
+.boton {
+    text-decoration: none;
 }
