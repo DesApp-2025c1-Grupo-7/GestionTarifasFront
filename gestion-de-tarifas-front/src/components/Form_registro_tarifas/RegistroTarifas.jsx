@@ -11,7 +11,7 @@ const RegistroTarifas = () => {
   const [carga, setCarga] = useState('');
   const [zona, setZona] = useState('');
   const [transportista, setTransportista] = useState('');
-  const [infoCarga, setInfoCarga] = useState('');
+  const [adicionales, setAdicionales] = useState('');
   const [ayudantes, setAyudantes] = useState(2);
   const [esPeligrosa, setEsPeligrosa] = useState(false);
   const [estadia, setEstadia] = useState(false);
@@ -34,7 +34,7 @@ const RegistroTarifas = () => {
       carga,
       zona,
       transportista,
-      infoCarga,
+      adicionales,
       ayudantes,
       esPeligrosa,
       estadia,
@@ -52,7 +52,7 @@ const RegistroTarifas = () => {
     setCarga('');
     setZona('');
     setTransportista('');
-    setInfoCarga('');
+    setAdicionales('');
     setAyudantes(2);
     setEsPeligrosa(false);
     setEstadia(false);
@@ -164,6 +164,51 @@ const RegistroTarifas = () => {
 
           <button type="submit">Registrar tarifa</button>
         </form>
+        <div className="form-grid">
+          <div className="form-group">
+            <label>Vehículo</label>
+            <select value={vehiculo} onChange={(e) => setVehiculo(e.target.value)}>
+              <option value="">Seleccione el vehículo</option>
+              <option value="camion1">patente- tipo de vehiculo - tipo de carga</option>
+              <option value="camion2">patente- tipo de vehiculo - tipo de carga</option>
+            </select>
+          </div>
+          
+          <div className="form-group">
+            <label>Zona de viaje</label>
+            <select value={zona} onChange={(e) => setZona(e.target.value)}>
+              <option value="">Seleccione la zona</option>
+              <option value="norte">Zona Norte</option>
+              <option value="sur">Zona Sur</option>
+              <option value="centro">Zona Centro</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Transportista</label>
+            <select value={transportista} onChange={(e) => setTransportista(e.target.value)}>
+              <option value="">Seleccione el transportista</option>
+              <option value="litoral">Logística del Litoral SA</option>
+              <option value="rapidos">Transportes Rápidos SRL</option>
+              <option value="pr">PR Transportes</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Adicionales</label>
+            <select value={adicionales} onChange={(e) => setAdicionales(e.target.value)}>
+              <option value="">Seleccione un adicional</option>
+              <option value="litoral">Carga peligrosa</option>
+              <option value="rapidos">Ayudantes</option>
+              <option value="pr">estadia</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="cost-row">
+          <span>Costo base: ${costoTotal.toLocaleString()}</span>
+          <span className="total-cost">Costo total: ${costoTotal.toLocaleString()}</span>
+        </div>
       </div>
     </div>
   );
