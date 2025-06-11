@@ -27,6 +27,7 @@ const Entidad = ({ entidad, onClose }) => {
 
     if (onClose) onClose();
   };
+  
 
   return (
     <>

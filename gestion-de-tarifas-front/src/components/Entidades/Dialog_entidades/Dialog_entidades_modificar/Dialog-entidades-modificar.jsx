@@ -4,6 +4,97 @@ import React, { useState } from 'react';
 const Dialog_entidades_modificar = ({ datos }) => {
   const [formData, setFormData] = useState({ ...datos });
 
+  const entidades = JSON.parse(localStorage.getItem("entidades") || "[]");
+  const tipoDeCargaArray = entidades.filter((e) => e.tipo === "TipoDeCarga");
+  const zonaDeViajeArray = entidades.filter((e) => e.tipo === "ZonaDeViaje");
+  const tipoDeVehiculoArray = entidades.filter((e) => e.tipo === "TipoDeVehiculo");
+  const transportistaArray = entidades.filter((e) => e.tipo === "Transportista");
+  const vehiculoArray = entidades.filter((e) => e.tipo === "Vehiculo");
+  const adicional = entidades.filter((e) => e.tipo === "Adicional");
+
+  const selectParaModificar = (key, value) => {
+    const sharedProps = {
+      value,
+      onChange: e => handleChange(key, e.target.value),
+      style: inputStyle,
+      disabled: key === 'id'
+    };
+
+    const renderOptions = (array, renderLabel) =>
+      array.map((e) => (
+        <option key={e.datos.id} value={e.datos.id}>
+          {renderLabel(e.datos)}
+        </option>
+      ));
+
+    switch (key) {
+      case "id_tipo_carga":
+        console.log("tipoDeCargaArray", tipoDeCargaArray);
+        
+        return (
+          <div key={key} style={fieldStyle}>
+            <label>{key}</label>
+            <select {...sharedProps}>
+              {renderOptions(tipoDeCargaArray, d => key+ " [ID: "+ d.id+" ]")}
+            </select>
+          </div>
+        );
+      case "id_zona_viaje":
+        return (
+          <div key={key} style={fieldStyle}>
+            <label>{key}</label>
+            <select {...sharedProps}>
+              {renderOptions(zonaDeViajeArray, d => `${d.origen} - ${d.destino}` +" " + key + " [ID: "+d.id+" ]")}
+            </select>
+          </div>
+        );
+      case "id_tipo_vehiculo":
+        return (
+          <div key={key} style={fieldStyle}>
+            <label>{key}</label>
+            <select {...sharedProps}>
+              {renderOptions(tipoDeVehiculoArray, d => key + " [ID: " +d.id+" ]")}
+            </select>
+          </div>
+        );
+      case "id_transportista":
+        return (
+          <div key={key} style={fieldStyle}>
+            <label>{key}</label>
+            <select {...sharedProps}>
+              {renderOptions(transportistaArray, d => d.nombre +" "+   key + " [ID: "+d.id+" ]")}
+            </select>
+          </div>
+        );
+      case "id_vehiculo":
+        return (
+          <div key={key} style={fieldStyle}>
+            <label>{key}</label>
+            <select {...sharedProps}>
+              {renderOptions(vehiculoArray, d => d.patente +" "+ key +" [ID: "+d.id+" ]")}
+            </select>
+          </div>
+        );
+      case "id_adicional":
+        return (
+          <div key={key} style={fieldStyle}>
+            <label>{key}</label>
+            <select {...sharedProps}>
+              {renderOptions(adicional, d => d.nombre)}
+            </select>
+          </div>
+        );
+      default:
+        return (
+          <div key={key} style={fieldStyle}>
+            <label>{key}</label>
+            <input {...sharedProps} />
+          </div>
+        );
+    }
+  };
+
+
   const handleChange = (key, value) => {
     setFormData(prev => ({
       ...prev,
@@ -36,18 +127,7 @@ const Dialog_entidades_modificar = ({ datos }) => {
           </AlertDialog.Title>
 
           <form>
-            {Object.entries(formData).map(([key, value]) => (
-              <div key={key} style={fieldStyle}>
-                <label>{key}</label>
-                <input
-                  type="text"
-                  value={value}
-                  onChange={e => handleChange(key, e.target.value)}
-                  style={inputStyle}
-                  disabled={key === 'id'} 
-                />
-              </div>
-            ))}
+            {Object.entries(formData).map(([key, value]) => selectParaModificar(key, value))}
           </form>
 
           <div style={buttonGroupStyle}>
