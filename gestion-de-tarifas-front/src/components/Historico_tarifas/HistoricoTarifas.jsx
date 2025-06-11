@@ -57,8 +57,10 @@ const HistoricoTarifas = () => {
         <p>No hay tarifas registradas.</p>
       ) : (
         <ul>
-          {historial.map((tarifa, index) => (
+         <div className="container-cards">
+          {historial.map((tarifa, index) => ( 
             <li key={index} className="historial-item">
+            
               {editIndex === index ? (
                 <>
                   <p>
@@ -121,7 +123,7 @@ const HistoricoTarifas = () => {
               ) : (
                   <>
                   
-                    <p><strong>Fecha:</strong> {tarifa.fecha}</p>
+                    <p><strong>Fecha:</strong> {tarifa.fecha }</p>
                     <p><strong>Transportista:</strong> {tarifa.transportista?.nombre}</p>
                     <p> <strong>Vehículo:</strong> {tarifa.vehiculo?.patente} - {tarifa.vehiculo?.tipoVehiculo?.descripcion} </p>
                     <p><strong>Origen:</strong> {tarifa.zonaDeViaje?.origen}</p>
@@ -137,6 +139,7 @@ const HistoricoTarifas = () => {
               <hr />
             </li>
           ))}
+          </div>
         </ul>
       )}
     </div>
