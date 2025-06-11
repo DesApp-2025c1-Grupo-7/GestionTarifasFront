@@ -25,7 +25,7 @@ export default function FormAlertDialog() {
   };
 
   const calcularCostoKm = (distancia) => {
-    const tarifaBase = 100; // por ejemplo
+    const tarifaBase = 100; 
     return (tarifaBase / distancia).toFixed(2);
   };
 
@@ -57,7 +57,6 @@ export default function FormAlertDialog() {
               <option value="TipoDeVehiculo">Tipo de vehiculo</option>
               <option value="Vehiculo">Vehiculo</option>
               <option value="Transportista">Transportista</option>
-              <option value="TarifaDeCosto">Tarifa Costo</option>
               <option value="Adicional">Adicional</option>
             </select>
           </div>
@@ -77,7 +76,6 @@ export default function FormAlertDialog() {
   );
 }
 
-// Estilos
 const overlayStyle = {
   position: 'fixed',
   inset: 0,
