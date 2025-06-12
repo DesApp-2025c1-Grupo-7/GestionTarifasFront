@@ -123,7 +123,7 @@ const HistoricoTarifas = () => {
               ) : (
                   <>
                   
-                    <p><strong>Fecha:</strong> {tarifa.fecha }</p>
+                    <p><strong>Fecha:</strong> {tarifa.fecha || new Date().toLocaleDateString() }</p>
                     <p><strong>Transportista:</strong> {tarifa.transportista?.nombre}</p>
                     <p> <strong>Vehículo:</strong> {tarifa.vehiculo?.patente} - {tarifa.vehiculo?.tipoVehiculo?.descripcion} </p>
                     <p><strong>Origen:</strong> {tarifa.zonaDeViaje?.origen}</p>

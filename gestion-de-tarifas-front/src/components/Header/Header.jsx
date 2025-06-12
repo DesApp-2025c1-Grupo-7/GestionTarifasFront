@@ -18,7 +18,7 @@ const Header = () => {
 
             <li><Link to="/registrarTarifa" className='boton'><strong><VscNewFolder /></strong>  Registrar tarifa </Link></li>
             <li><Link to="/historicoTarifas" className='boton'><strong><RxCountdownTimer /></strong>  Historico de tarifas </Link></li>
-            <li><Link to="/entidades" className='boton'>Entidades</Link></li>
+            <li><Link  className='boton'>Gestion de Servicios</Link></li>
 
         </ul>
       

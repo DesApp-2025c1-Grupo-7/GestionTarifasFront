@@ -78,7 +78,7 @@ const RegistroTarifas = () => {
               <select value={vehiculo} onChange={e => setVehiculo(Number(e.target.value))} required>
                 <option value="">Seleccione vehículo</option>
                 {vehiculos.map(v => (
-                  <option key={v.id} value={v.id}>{v.patente} - {v.tipoVehiculo?.tipoCargas?.map(carga => carga.categoria) || `Vehículo ${v.id}`}</option>
+                  <option key={v.id} value={v.id}>{v.patente} - {v.tipoVehiculo?.tipoCargas?.map(carga => carga.categoria).join(' - ') || `Vehículo ${v.id}`}</option>
                 ))}
               </select>
             </div>
