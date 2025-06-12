@@ -99,6 +99,7 @@ const Entidad_form = ({ entidad, handleSubmit }) => {
           <div style={fieldStyle}>
             <label htmlFor="TipoDeCarga">Tipo de carga (ID):</label>
             <select name="id_tipo_carga" required style={inputStyle}>
+              <option>Ninguno</option>
               {tipoDeCargaArray.map((tipoDeCarga) => (
                 <option key={tipoDeCarga.id} value={tipoDeCarga.id}>
                   {getNombreLegible(tipoDeCarga)}
@@ -128,6 +129,7 @@ const Entidad_form = ({ entidad, handleSubmit }) => {
           <div style={fieldStyle}>
             <label htmlFor="id_tipo_vehiculo">Tipo de vehículo:</label>
             <select name="id_tipo_vehiculo" style={inputStyle}>
+              <option>Ninguno</option>
               {tipoDeVehiculoArray.map((tipo) => (
                 <option key={tipo.id} value={tipo.id}>
                   {getNombreLegible(tipo)}
@@ -175,6 +177,7 @@ const Entidad_form = ({ entidad, handleSubmit }) => {
           <div style={fieldStyle}>
             <label htmlFor="id_zona_viaje">Zona de viaje:</label>
             <select name="id_zona_viaje" style={inputStyle}>
+              <option>Ninguno</option>
               {zonaDeViajeArray.map((z) => (
                 <option key={z.id} value={z.id}>
                   {getNombreLegible(z)}
