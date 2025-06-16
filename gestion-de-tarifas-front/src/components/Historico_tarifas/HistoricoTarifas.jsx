@@ -60,7 +60,6 @@ const HistoricoTarifas = () => {
          <div className="container-cards">
           {historial.map((tarifa, index) => ( 
             <li key={index} className="historial-item">
-            
               {editIndex === index ? (
                 <>
                   <p>

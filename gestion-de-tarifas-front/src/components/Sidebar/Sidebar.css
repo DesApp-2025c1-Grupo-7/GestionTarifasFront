@@ -1,0 +1,73 @@
+.Sidebar {
+  width: 220px;
+  background-color: #383838;
+  color: #fff;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+}
+
+.logo {
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-item {
+  padding: 0;
+}
+
+.parent {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 20px;
+  cursor: pointer;
+}
+
+
+.sub-menu {
+  list-style: none;
+  padding-left: 30px;
+  margin-top: 5px;
+}
+
+.sub-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  color: #bbb;
+  transition: color 0.2s ease;
+}
+
+.sidebar-item .parent:hover .icon,
+.sidebar-item .parent:hover .title,
+.sidebar-item .parent:hover .arrow-icon {
+  color: #f56918; 
+  transition: color 0.5s ease;
+}
+
+.sub-item:hover .icon,
+.sub-item:hover .title {
+  color: #f56918;
+  transition: color 0.5s ease;
+}
+
+.sub-item.active {
+  color: #f56918;
+}
