@@ -1,7 +1,7 @@
 nav{
     width: 100%;
-    background: #444240;
-    color: rgba(14, 8, 3, 0.842);
+    background: #11233F;
+    color: #0e0803d7;
     padding: 2px 3rem;
     position: fixed;
     top: 0;
@@ -16,6 +16,9 @@ nav{
 
 nav ul{
     display: flex;
+   
+    flex-direction: row;
+
     align-items: end;
 }
 
@@ -30,15 +33,19 @@ nav h1 strong{
     color: #ff7b00e3;
     display: flex;
     align-items: center;
+    font-weight: 1000;
+    font-size: 100%;
 }
 nav h1{
     margin: 0 20px;
     color: #fff;
+    font-weight: 1000;
     font-size: xx-large;
     display: flex;
     align-items: center;
     gap: 0.5rem;
     align-items: center;
+    
 }
 hr{
     margin: 0 20px;
@@ -46,4 +53,38 @@ hr{
 
 .boton {
     text-decoration: none;
+}
+
+.navbar-toggler {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+ul.oculto {
+    display: none;
+}
+
+ul.visible {
+    display: flex;
+    flex-direction: column;
+    background: #1d2c4d;
+    padding: 1rem;
+    margin-top: 0.5rem;
+}
+
+@media (min-width: 768px) {
+    .navbar-toggler {
+        display: none;
+    }
+
+    ul.oculto,
+    ul.visible {
+        display: flex !important;
+        flex-direction: row;
+        gap: 1rem;
+        background: transparent;
+    }
 }

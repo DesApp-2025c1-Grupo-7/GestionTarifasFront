@@ -1,29 +1,34 @@
-import React from 'react'
-import './Header.css'
+import React, { useState } from 'react';
+import './Header.css';
 import { RxCountdownTimer } from "react-icons/rx";
 import { VscNewFolder } from "react-icons/vsc";
 import { TbTruckDelivery } from "react-icons/tb";
-import FormAlertDialog from '../Entidades/Dialog_entidades/Dialog-entidades';
-
 import { Link } from 'react-router-dom';
 
-
-
 const Header = () => {
+  const [menuAbierto, setMenuAbierto] = useState(false);
+
+  const toggleMenu = () => setMenuAbierto(!menuAbierto);
+
   return (
     <nav>
-        <h1>Logistica <strong>Acme<TbTruckDelivery /></strong></h1>
-        <hr></hr>
-        <ul>
-
-            <li><Link to="/registrarTarifa" className='boton'><strong><VscNewFolder /></strong>  Registrar tarifa </Link></li>
-            <li><Link to="/historicoTarifas" className='boton'><strong><RxCountdownTimer /></strong>  Historico de tarifas </Link></li>
-            <li><Link  className='boton'>Gestion de Servicios</Link></li>
-
-        </ul>
-      
+      <div className="nav-top">
+        <h1>Logística <strong>Acme<TbTruckDelivery /></strong></h1>
+        <button 
+          className="navbar-toggler" 
+          onClick={toggleMenu}
+          aria-label="Toggle navigation"
+        >
+          ☰
+        </button>
+      </div>
+      <ul className={menuAbierto ? "visible" : "oculto"}>
+        <li><Link to="/registrarTarifa" className='boton'><strong><VscNewFolder /></strong> Registrar tarifa</Link></li>
+        <li><Link to="/historicoTarifas" className='boton'><strong><RxCountdownTimer /></strong> Histórico de tarifas</Link></li>
+        <li><Link className='boton'>Gestión de Servicios</Link></li>
+      </ul>
     </nav>
-  )
+  );
 }
 
-export default Header
+export default Header;

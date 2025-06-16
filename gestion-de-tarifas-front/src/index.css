@@ -5,7 +5,7 @@
 }
 
 body {
-  background: rgb(122, 107, 95); 
+  background: #07102D; 
   font-family: sans-serif;
 }
 
@@ -13,8 +13,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #ff9800; 
-  color: #212121; 
+  background: #ce2f2f; 
+  color: #d0d2d6; 
   padding: 12px 20px;
   font-size: 16px;
   border-radius: 12px; 
@@ -29,7 +29,7 @@ body {
 }
 
 .boton:hover {
-  background: #fb8c00; 
+  background: #640606; 
 }
 
 .boton strong {
@@ -42,3 +42,4 @@ body {
 .boton.active {
   box-shadow: 0 0 0 2px #00b0ff; 
 }
+

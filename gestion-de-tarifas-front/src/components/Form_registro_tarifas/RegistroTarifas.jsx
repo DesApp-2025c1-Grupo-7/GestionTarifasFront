@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './RegistroTarifas.css';
 import { getTransportista, getVehiculos, getZonas, postTarifa} from '../../services/tarifaCosto.service';
+import SelectorZona from "../Selector_Zona/SelectorZona";
 
 const RegistroTarifas = () => {
   const [vehiculos, setVehiculos] = useState([]);
@@ -19,6 +20,7 @@ const RegistroTarifas = () => {
   // const [estadia, setEstadia] = useState(false);
   // const [otros, setOtros] = useState('');
   const [valorBase, setValorBase] = useState(1000);
+  const [filtroZona, setFiltroZona] = useState('');
 
   useEffect(() => {
       const fetchData = async () => {
@@ -82,7 +84,7 @@ const RegistroTarifas = () => {
                 ))}
               </select>
             </div>
-
+{/*}
             <div className="form-group">
               <label>Zona de viaje</label>
               <select value={zona} onChange={e => setZona(Number(e.target.value))} required>
@@ -92,6 +94,7 @@ const RegistroTarifas = () => {
                 ))}
               </select>
             </div>
+ */}           
 
             <div className="form-group">
               <label>Transportista</label>
@@ -102,31 +105,87 @@ const RegistroTarifas = () => {
                 ))}
               </select>
             </div>
+{/*
+          <div className="zona-selector">
+              {zonas.map(z => (
+                <div 
+                  key={z.id} 
+                  className={`zona-card ${zona === z.id ? 'seleccionada' : ''}`}
+                  onClick={() => setZona(z.id)}
+                >
+                  <div><strong>Origen:</strong> {z.origen}</div>
+                  <div><strong>Destino:</strong> {z.destino}</div>
+                  <div><strong>Precio:</strong> ${z.distancia * z.costoKilometro}</div>
+                </div>
+              ))}
+            </div>
+*/}
+{/*
+            <div className="form-group">
+              <label>Buscar zona</label>
+              <input 
+                type="text" 
+                placeholder="Buscar por origen o destino"
+                value={filtroZona}
+                onChange={e => setFiltroZona(e.target.value)}
+              />
+
+              <label>Zona de viaje</label>
+              <select value={zona} onChange={e => setZona(Number(e.target.value))} required>
+                <option value="">Seleccione zona</option>
+                {zonas
+                  .filter(z => {
+                    const texto = `${z.origen} ${z.destino}`.toLowerCase();
+                    const match = texto.includes(filtroZona.toLowerCase());
+                    console.log("Buscando:", filtroZona, "Texto:", texto, "¿Coincide?", match);
+                    return match;
+                  })
+                  .map(z => (
+                    <option key={z.id} value={z.id}>
+                      {z.origen} → {z.destino} - ${z.distancia * z.costoKilometro}
+                    </option>
+                  ))
+                }
+              </select>
+            </div>
+*/}
+    <div>
+      <strong>Zona de viaje</strong>
+      <div className="zona-selector">
+              <SelectorZona
+                zonas={zonas}
+                zona={zona}
+                setZona={setZona}
+                filtroZona={filtroZona}
+                setFiltroZona={setFiltroZona}
+              />
+      </div>
+    </div>
+
 
             <div className="form-group">
-            <label>Adicionales</label>
-            <select value={adicionales} onChange={(e) => setAdicionales(e.target.value)}>
-              <option value="">Seleccione un adicional</option>
-              <option value="litoral">Carga peligrosa</option>
-              <option value="rapidos">Ayudantes</option>
-              <option value="pr">estadia</option>
-            </select>
-          </div>
+              <label>Adicionales</label>
+              <select value={adicionales} onChange={(e) => setAdicionales(e.target.value)}>
+                <option value="">Seleccione un adicional</option>
+                <option value="litoral">Carga peligrosa</option>
+                <option value="rapidos">Ayudantes</option>
+                <option value="pr">estadia</option>
+              </select>
+            </div>
+            
+            {/* queda pendiente funcionalidad de calculo del valorBase */}
+            {/* valor base: costo de carga + costo vehiculo + costo de zona + costo transportista */}
+            {/* <div className="cost-row">
+              Costo total estimado: <span className="total-cost">${valorBase}</span>
+            </div> */}
 
+            <button type="submit">Registrar tarifa</button>
           </div>
-          
-          {/* queda pendiente funcionalidad de calculo del valorBase */}
-          {/* valor base: costo de carga + costo vehiculo + costo de zona + costo transportista */}
-          {/* <div className="cost-row">
-            Costo total estimado: <span className="total-cost">${valorBase}</span>
-          </div> */}
-
-          <button type="submit">Registrar tarifa</button>
         </form>
       </div>
     </div>
   );
-};
+}
 
 export default RegistroTarifas;
 

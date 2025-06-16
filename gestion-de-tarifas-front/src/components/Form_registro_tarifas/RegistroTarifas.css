@@ -16,7 +16,7 @@ body {
   background: white;
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-shadow: 0 0 10px rgba(175, 172, 13, 0.1);
   width: 100%;
   max-width: 800px;
 }
@@ -32,10 +32,9 @@ h2 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 20px;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
   margin-bottom: 20px;
 }
+
 
 .form-group {
   display: flex;
@@ -52,7 +51,7 @@ select,
 input[type="text"],
 input[type="number"] {
   padding: 10px;
-  border: 1px solid orange;
+  border: 1px solid rgb(117, 16, 212);
   border-radius: 5px;
   background-color: #fff;
   color: #000;
@@ -90,7 +89,7 @@ input::placeholder {
 }
 
 button[type="submit"] {
-  background-color: orange;
+  background-color: rgb(111, 0, 255);
   color: white;
   font-size: 16px;
   padding: 12px 24px;
@@ -102,5 +101,48 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-  background-color: darkorange;
+  background-color: rgb(114, 99, 175);
+
 }
+
+
+.zona-card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.zona-card.seleccionada {
+  border-color: #007bff;
+  background-color: #e6f0ff;
+}
+
+
+.zona-selector {
+  border: 2px solid #4A90E2; /* podés cambiar el color */
+  border-radius: 8px; /* opcional, para bordes redondeados */
+  padding: 10px;       /* opcional, espacio interno */
+  margin: 10px 0;      /* opcional, separación con otros elementos */
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+
+  .form-box {
+    padding: 20px;
+  }
+
+  button[type="submit"] {
+    font-size: 15px;
+    padding: 10px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+}
+
