@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Search, Edit, Trash2, Phone, Mail, MapPin } from 'lucide-react';
+import { Search, Edit, Trash2, Phone, DollarSign, Truck, MapPin } from 'lucide-react';
 
-const Transportistas = ({ showNotification, tabColor }) => {
+const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasViaje = [] }) => {
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -9,8 +9,9 @@ const Transportistas = ({ showNotification, tabColor }) => {
     nombre: '',
     contacto: '',
     telefono: '',
-    email: '',
-    direccion: ''
+    costoServicio: '',
+    tipoVehiculoId: '',
+    zonaViajeId: ''
   });
 
   const generateId = () => {
@@ -22,8 +23,9 @@ const Transportistas = ({ showNotification, tabColor }) => {
       nombre: '',
       contacto: '',
       telefono: '',
-      email: '',
-      direccion: ''
+      costoServicio: '',
+      tipoVehiculoId: '',
+      zonaViajeId: ''
     });
     setEditingId(null);
   };
@@ -34,7 +36,7 @@ const Transportistas = ({ showNotification, tabColor }) => {
   };
 
   const validateForm = () => {
-    return form.nombre && form.contacto && form.telefono;
+    return form.nombre && form.contacto && form.telefono && form.costoServicio && form.tipoVehiculoId && form.zonaViajeId;
   };
 
   const handleSubmit = () => {
@@ -46,6 +48,8 @@ const Transportistas = ({ showNotification, tabColor }) => {
     const entityData = {
       id: editingId || generateId(),
       ...form,
+      telefono: parseInt(form.telefono),
+      costoServicio: parseFloat(form.costoServicio),
       fechaCreacion: editingId ?
         data.find(item => item.id === editingId).fechaCreacion :
         new Date().toISOString()
@@ -65,7 +69,14 @@ const Transportistas = ({ showNotification, tabColor }) => {
   const editEntity = (id) => {
     const entity = data.find(item => item.id === id);
     if (entity) {
-      setForm(entity);
+      setForm({
+        nombre: entity.nombre,
+        contacto: entity.contacto,
+        telefono: entity.telefono.toString(),
+        costoServicio: entity.costoServicio.toString(),
+        tipoVehiculoId: entity.tipoVehiculoId,
+        zonaViajeId: entity.zonaViajeId
+      });
       setEditingId(id);
     }
   };
@@ -77,14 +88,29 @@ const Transportistas = ({ showNotification, tabColor }) => {
     }
   };
 
+  const getTipoVehiculoNombre = (tipoVehiculoId) => {
+    const tipoVehiculo = tiposVehiculo.find(tv => tv.id === tipoVehiculoId);
+    return tipoVehiculo ? tipoVehiculo.descripcion : 'No especificado';
+  };
+
+  const getZonaViaje = (zonaViajeId) => {
+    const zona = zonasViaje.find(z => z.id === zonaViajeId);
+    return zona ? zona.nombre : 'No especificado';
+  };
+
   const filteredData = data.filter(item => {
     const searchLower = searchTerm.toLowerCase();
+    const tipoVehiculoNombre = getTipoVehiculoNombre(item.tipoVehiculoId);
+    const zonaNombre = getZonaViaje(item.zonaViajeId);
     return (
       item.nombre.toLowerCase().includes(searchLower) ||
       item.contacto.toLowerCase().includes(searchLower) ||
-      (item.email && item.email.toLowerCase().includes(searchLower))
+      tipoVehiculoNombre.toLowerCase().includes(searchLower) ||
+      zonaNombre.toLowerCase().includes(searchLower)
     );
   });
+
+  const canSubmit = tiposVehiculo.length > 0 && zonasViaje.length > 0;
 
   return (
     <div className="grid lg:grid-cols-3 gap-8">
@@ -99,7 +125,7 @@ const Transportistas = ({ showNotification, tabColor }) => {
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Nombre de la Empresa *
+                  Nombre *
                 </label>
                 <input
                   type="text"
@@ -112,7 +138,7 @@ const Transportistas = ({ showNotification, tabColor }) => {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Persona de Contacto *
+                  Contacto *
                 </label>
                 <input
                   type="text"
@@ -128,7 +154,7 @@ const Transportistas = ({ showNotification, tabColor }) => {
                   Teléfono *
                 </label>
                 <input
-                  type="tel"
+                  type="number"
                   name="telefono"
                   value={form.telefono}
                   onChange={handleInputChange}
@@ -138,29 +164,64 @@ const Transportistas = ({ showNotification, tabColor }) => {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email
+                  Costo de Servicio *
                 </label>
                 <input
-                  type="email"
-                  name="email"
-                  value={form.email}
+                  type="number"
+                  name="costoServicio"
+                  value={form.costoServicio}
                   onChange={handleInputChange}
-                  placeholder="Correo electrónico"
+                  placeholder="Costo del servicio"
+                  step="0.01"
+                  min="0"
                   className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Dirección
+                  Tipo de Vehículo *
                 </label>
-                <textarea
-                  name="direccion"
-                  value={form.direccion}
+                <select
+                  name="tipoVehiculoId"
+                  value={form.tipoVehiculoId}
                   onChange={handleInputChange}
-                  placeholder="Dirección completa"
-                  rows="3"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all resize-none`}
-                />
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                >
+                  <option value="">Selecciona un tipo de vehículo</option>
+                  {tiposVehiculo.map(tipo => (
+                    <option key={tipo.id} value={tipo.id}>
+                      {tipo.descripcion}
+                    </option>
+                  ))}
+                </select>
+                {tiposVehiculo.length === 0 && (
+                  <p className="text-sm text-amber-600 mt-1">
+                    ⚠️ Primero debes crear tipos de vehículo en la pestaña correspondiente
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Zona de Viaje *
+                </label>
+                <select
+                  name="zonaViajeId"
+                  value={form.zonaViajeId}
+                  onChange={handleInputChange}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                >
+                  <option value="">Selecciona una zona de viaje</option>
+                  {zonasViaje.map(zona => (
+                    <option key={zona.id} value={zona.id}>
+                      {zona.nombre}
+                    </option>
+                  ))}
+                </select>
+                {zonasViaje.length === 0 && (
+                  <p className="text-sm text-amber-600 mt-1">
+                    ⚠️ Primero debes crear zonas de viaje en la pestaña correspondiente
+                  </p>
+                )}
               </div>
             </div>
 
@@ -183,10 +244,13 @@ const Transportistas = ({ showNotification, tabColor }) => {
               )}
               <button
                 onClick={handleSubmit}
+                disabled={!canSubmit}
                 className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${
-                  editingId
-                    ? `bg-${tabColor}-500 hover:bg-${tabColor}-600`
-                    : 'bg-green-500 hover:bg-green-600'
+                  !canSubmit 
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : editingId
+                      ? `bg-${tabColor}-500 hover:bg-${tabColor}-600`
+                      : 'bg-green-500 hover:bg-green-600'
                 }`}
               >
                 {editingId ? 'Actualizar' : 'Guardar'}
@@ -218,18 +282,19 @@ const Transportistas = ({ showNotification, tabColor }) => {
           <table className="w-full">
             <thead className="bg-gray-50 sticky top-0">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Empresa</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nombre</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Contacto</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Información</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Detalles</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan="5" className="px-4 py-12 text-center text-gray-500">
                     <div className="flex flex-col items-center">
-                      <div className="text-6xl mb-4">🏢</div>
+                      <div className="text-6xl mb-4">🚛</div>
                       <h3 className="text-lg font-semibold mb-2">No hay transportistas registrados</h3>
                       <p>Comienza agregando un nuevo transportista usando el formulario</p>
                     </div>
@@ -238,30 +303,34 @@ const Transportistas = ({ showNotification, tabColor }) => {
               ) : (
                 filteredData.map((item) => (
                   <tr key={item.id} className={`border-b border-gray-100 hover:bg-${tabColor}-50/50 transition-colors`}>
-                    <td className="px-4 py-3">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{item.nombre}</div>
-                        {item.direccion && (
-                          <div className="flex items-center text-xs text-gray-500 mt-1">
-                            <MapPin size={12} className="mr-1" />
-                            {item.direccion}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm font-medium">{item.contacto}</td>
+                    <td className="px-4 py-3 text-sm font-medium">{item.nombre}</td>
+                    <td className="px-4 py-3 text-sm">{item.contacto}</td>
                     <td className="px-4 py-3">
                       <div className="space-y-1">
                         <div className="flex items-center text-sm text-gray-600">
                           <Phone size={12} className="mr-2" />
                           {item.telefono}
                         </div>
-                        {item.email && (
-                          <div className="flex items-center text-sm text-gray-600">
-                            <Mail size={12} className="mr-2" />
-                            {item.email}
-                          </div>
-                        )}
+                        <div className="flex items-center text-sm text-gray-600">
+                          <DollarSign size={12} className="mr-2" />
+                          ${item.costoServicio?.toFixed(2)}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="space-y-1">
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Truck size={12} className="mr-2" />
+                          <span className="truncate max-w-[150px]" title={getTipoVehiculoNombre(item.tipoVehiculoId)}>
+                            {getTipoVehiculoNombre(item.tipoVehiculoId)}
+                          </span>
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600">
+                          <MapPin size={12} className="mr-2" />
+                          <span className="truncate max-w-[150px]" title={getZonaViaje(item.zonaViajeId)}>
+                            {getZonaViaje(item.zonaViajeId)}
+                          </span>
+                        </div>
                       </div>
                     </td>
                     <td className="px-4 py-3">
