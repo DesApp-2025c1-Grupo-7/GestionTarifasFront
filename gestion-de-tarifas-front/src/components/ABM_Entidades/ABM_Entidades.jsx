@@ -27,25 +27,47 @@ const ABMEntidades = () => {
   const currentTab = tabs.find(tab => tab.id === activeTab);
   const CurrentComponent = currentTab.component;
 
+  const tabsColorActive =  (color) => {
+    switch(color){
+      case 'blue':
+        return 'bg-blue-700';
+      case 'green':
+        return 'bg-green-700';
+      case 'purple':
+        return 'bg-purple-700';
+      case 'orange':
+        return 'bg-orange-500';
+      case 'indigo':
+        return 'bg-indigo-500';
+      case 'emerald':
+        return 'bg-emerald-500';
+      default:
+        return 'bg-gray-500';
+ 
+    }
+
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 p-5">
-      <div className="max-w-7xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
+    <div className="min-h-screen bg-[#242423]">
+      <div className="max-w-screen mx-auto shadow-2xl overflow-hidden">
         {/* Header */}
         
 
         {/* Tabs */}
-        <div className="bg-gray-100 p-6">
+        <div className="bg-[#444240] p-6">
           <div className="flex flex-wrap gap-2 justify-center">
             {tabs.map((tab) => {
               const Icon = tab.icon;
+              const tabColor = tab.color;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
                     activeTab === tab.id
-                      ? `bg-${tab.color}-500 text-white shadow-lg`
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                        ? `${tabsColorActive(tabColor)} text-white shadow-lg`
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   <Icon size={20} />
