@@ -4,6 +4,8 @@ import TiposCarga from './Tipo_De_Carga/Carga';
 import TiposVehiculo from './Tipo_De_Vehiculo/Vehiculo';
 import ZonasViaje from './Zona_De_Viaje/ZonaViaje';
 import Transportistas from './Transportista/Transportista';
+import Adicionales from './Adicionales/Adicionales';
+import RegistroTarifas from './Registro_De_Tarifa/RegistroTarifas';
 
 const ABMEntidades = () => {
   const [activeTab, setActiveTab] = useState('cargoTypes');
@@ -15,8 +17,8 @@ const ABMEntidades = () => {
     { id: 'vehicleTypes', label: 'Tipos de Vehículo', icon: Truck, color: 'green', component: TiposVehiculo },
     { id: 'zones', label: 'Zonas de Viaje', icon: MapPin, color: 'purple', component: ZonasViaje },
     { id: 'transporters', label: 'Transportistas', icon: Building, color: 'orange', component: Transportistas },
-    { id: 'additionals', label: 'Adicionales', icon: Plus, color: 'indigo' },
-    { id: 'rates', label: 'Tarifas', icon: DollarSign, color: 'emerald' }
+    { id: 'additionals', label: 'Adicionales', icon: Plus, color: 'indigo', component: Adicionales },
+    { id: 'rates', label: 'Tarifas', icon: DollarSign, color: 'emerald', component: RegistroTarifas }
   ];
 
   const showNotification = (message, type = 'success') => {

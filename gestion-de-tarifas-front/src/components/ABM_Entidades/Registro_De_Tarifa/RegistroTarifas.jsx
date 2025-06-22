@@ -520,4 +520,4 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
   );
 };
 
-// Componente principal con ejemplo de uso
+export default TarifaCosto;
