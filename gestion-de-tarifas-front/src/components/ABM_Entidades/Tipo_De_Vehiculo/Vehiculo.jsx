@@ -85,18 +85,18 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
   });
 
   return (
-    <div className="grid lg:grid-cols-3 gap-8">
+    <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
       {/* Form Section */}
       <div className="lg:col-span-1">
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-          <h2 className={`text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
+        <div className="bg-[#444240] p-8 rounded-2xl shadow-xl border border-gray-900">
+          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
             {editingId ? 'Editar Tipo de Vehículo' : 'Nuevo Tipo de Vehículo'}
           </h2>
 
           <div className="space-y-5">
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Descripción *
                 </label>
                 <textarea
@@ -105,11 +105,11 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
                   onChange={handleInputChange}
                   placeholder="Descripción del tipo de vehículo"
                   rows="3"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all resize-none`}
+                  className={`w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all resize-none`}
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Precio Base *
                 </label>
                 <input
@@ -120,18 +120,18 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
                   placeholder="Precio base del vehículo"
                   step="0.01"
                   min="0"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Tipo de Carga *
                 </label>
                 <select
                   name="tipoCargaId"
                   value={form.tipoCargaId}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
                   <option value="">Selecciona un tipo de carga</option>
                   {tiposCarga.map(tipo => (
@@ -152,7 +152,7 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
               <button
                 type="button"
                 onClick={clearForm}
-                className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-semibold"
+                className="px-6 py-3 bg-[#444240] text-yellow-500 border border-yellow-500 hover:text-white rounded-lg hover:bg-yellow-500 transition-colors font-semibold"
               >
                 Limpiar
               </button>
@@ -160,7 +160,7 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
                 <button
                   type="button"
                   onClick={clearForm}
-                  className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
+                  className="px-6 py-3 bg-[#444240] text-red-500 rounded-lg border border-red-500 hover:text-white hover:bg-red-500 transition-colors font-semibold"
                 >
                   Cancelar
                 </button>
@@ -172,8 +172,8 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
                   tiposCarga.length === 0 
                     ? 'bg-gray-400 cursor-not-allowed'
                     : editingId
-                      ? `bg-${tabColor}-500 hover:bg-${tabColor}-600`
-                      : 'bg-green-500 hover:bg-green-600'
+                      ? `bg-[#444240] text-green-500 border border-green-500 hover:text-white  hover:bg-green-500`
+                      : 'bg-[#444240] border border-green-500 text-green-500 hover:text-white hover:bg-green-500'
                 }`}
               >
                 {editingId ? 'Actualizar' : 'Guardar'}
@@ -184,8 +184,8 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
       </div>
 
       {/* Table Section */}
-      <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className={`bg-gradient-to-r from-${tabColor}-700 to-${tabColor}-800 text-white p-6`}>
+      <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
+        <div className={`bg-gradient-to-r from-green-700 to-green-800 text-white p-6`}>
           <h2 className="text-2xl font-bold mb-4">
             Tipos de Vehículo Registrados
           </h2>
@@ -201,20 +201,20 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
           </div>
         </div>
 
-        <div className="max-h-96 overflow-y-auto">
+        <div className="max-h-96 overflow-y-auto bg-[#444240]">
           <table className="w-full">
-            <thead className="bg-gray-50 sticky top-0">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Descripción</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Precio Base</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Tipo de Carga</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
+            <thead className="bg-[#242423] sticky top-0">
+              <tr className='text-gray-300'>
+                <th className="px-4 py-3 text-left text-sm font-semibold ">Descripción</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold ">Precio Base</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold ">Tipo de Carga</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold ">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan="4" className="px-4 py-12 text-center text-gray-300">
                     <div className="flex flex-col items-center">
                       <div className="text-6xl mb-4">🚛</div>
                       <h3 className="text-lg font-semibold mb-2">No hay tipos de vehículo registrados</h3>
@@ -232,13 +232,13 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => editEntity(item.id)}
-                          className={`p-2 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors`}
+                          className={`p-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors`}
                         >
                           <Edit size={14} />
                         </button>
                         <button
                           onClick={() => deleteEntity(item.id)}
-                          className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                          className="p-2 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-colors"
                         >
                           <Trash2 size={14} />
                         </button>

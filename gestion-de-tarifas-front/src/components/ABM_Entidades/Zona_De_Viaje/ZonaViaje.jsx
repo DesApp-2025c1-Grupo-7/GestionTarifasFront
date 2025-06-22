@@ -8,10 +8,8 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [form, setForm] = useState({ origen: '', destino: '', distanciaKm: '', costoPorKm: '' });
+  console.log(tabColor)
 
-  // const generateId = () => {
-  //   return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  // };
 
   useEffect(() => {
     const fetchZonas = async () => {
@@ -35,6 +33,7 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
   }, []);
 
 
+  
   const clearForm = () => {
     setForm({ origen: '', destino: '', distanciaKm: '', costoPorKm: '' });
     setEditingId(null);
@@ -143,18 +142,18 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
   });
 
   return (
-    <div className="grid lg:grid-cols-3 gap-8">
+    <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
       {/* Form Section */}
       <div className="lg:col-span-1">
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-          <h2 className={`text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
+        <div className="bg-[#444240] p-8 rounded-2xl shadow-xl   border border-gray-900">
+          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
             {editingId ? 'Editar Zona de Viaje' : 'Nueva Zona de Viaje'}
           </h2>
 
           <div className="space-y-5">
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Origen *
                 </label>
                 <input
@@ -163,12 +162,12 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
                   value={form.origen}
                   onChange={handleInputChange}
                   placeholder="Ciudad o zona de origen"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 text-gray-300 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none transition-all`}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Destino *
                 </label>
                 <input
@@ -177,12 +176,12 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
                   value={form.destino}
                   onChange={handleInputChange}
                   placeholder="Ciudad o zona de destino"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition-all`}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Distancia (Km) *
                 </label>
                 <input
@@ -193,12 +192,12 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
                   placeholder="Distancia en kilómetros"
                   min="0"
                   step="0.1"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition-all`}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Costo por Km ($) *
                 </label>
                 <input
@@ -209,7 +208,7 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
                   placeholder="Costo por kilómetro"
                   min="0"
                   step="0.01"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition-all`}
                 />
               </div>
 
@@ -229,7 +228,7 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
               <button
                 type="button"
                 onClick={clearForm}
-                className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-semibold"
+                className="px-6 py-3 bg-[#444240] border border-yellow-500 text-yellow-500 hover:text-white rounded-lg hover:bg-yellow-500 transition-colors font-semibold"
               >
                 Limpiar
               </button>
@@ -237,17 +236,17 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
                 <button
                   type="button"
                   onClick={clearForm}
-                  className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
+                  className="px-6 py-3 bg-[#444240] border border-red-500 text-red-500 hover:text-white rounded-lg hover:bg-red-500 transition-colors font-semibold"
                 >
                   Cancelar
                 </button>
               )}
               <button
                 onClick={handleSubmit}
-                className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${
+                className={`px-6 py-3 rounded-lg transition-colors font-semibold ${
                   editingId
-                    ? `bg-${tabColor}-500 hover:bg-${tabColor}-600`
-                    : 'bg-green-500 hover:bg-green-600'
+                    ? `bg-[#444240] hover:bg-purple-500 border border-purple-500 text-purple-500 hover:text-white`
+                    : 'hover:bg-green-500 hover:text-white border border-green-500 text-green-500'
                 }`}
               >
                 {editingId ? 'Actualizar' : 'Guardar'}
@@ -258,8 +257,8 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
       </div>
 
       {/* Table Section */}
-      <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className={`bg-gradient-to-r from-${tabColor}-700 to-${tabColor}-800 text-white p-6`}>
+      <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
+        <div className={`bg-gradient-to-r from-purple-700 to-purple-800 text-white p-6`}>
           <h2 className="text-2xl font-bold mb-4">
             Zonas de Viaje Registradas
           </h2>
@@ -275,22 +274,22 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
           </div>
         </div>
 
-        <div className="max-h-96 overflow-y-auto">
+        <div className="max-h-96 overflow-y-auto bg-[#444240] ">
           <table className="w-full">
-            <thead className="bg-gray-50 sticky top-0">
+            <thead className=" bg-[#242423] sticky top-0">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Origen</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Destino</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Distancia (Km)</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo/Km ($)</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo Total</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Origen</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Destino</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Distancia (Km)</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Costo/Km ($)</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Costo Total</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan="6" className="px-4 py-12 text-center text-gray-300">
                     <div className="flex flex-col items-center">
                       <div className="text-6xl mb-4">🗺️</div>
                       <h3 className="text-lg font-semibold mb-2">No hay zonas de viaje registradas</h3>
@@ -312,13 +311,13 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => editEntity(item.id)}
-                          className={`p-2 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors`}
+                          className={`p-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 transition-colors`}
                         >
                           <Edit size={14} />
                         </button>
                         <button
                           onClick={() => deleteEntity(item.id)}
-                          className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                          className="p-2 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-colors"
                         >
                           <Trash2 size={14} />
                         </button>

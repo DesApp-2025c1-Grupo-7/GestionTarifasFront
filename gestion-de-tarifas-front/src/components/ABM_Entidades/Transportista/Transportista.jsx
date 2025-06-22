@@ -116,15 +116,15 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Form Section */}
       <div className="lg:col-span-1">
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-          <h2 className={`text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
+        <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
+          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
             {editingId ? 'Editar Transportista' : 'Nuevo Transportista'}
           </h2>
 
           <div className="space-y-5">
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Nombre *
                 </label>
                 <input
@@ -133,11 +133,11 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
                   value={form.nombre}
                   onChange={handleInputChange}
                   placeholder="Nombre del transportista"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-orange-500 focus:outline-none transition-all`}
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Contacto *
                 </label>
                 <input
@@ -146,11 +146,11 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
                   value={form.contacto}
                   onChange={handleInputChange}
                   placeholder="Persona de contacto"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-orange-500 focus:outline-none transition-all`}
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Teléfono *
                 </label>
                 <input
@@ -159,11 +159,11 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
                   value={form.telefono}
                   onChange={handleInputChange}
                   placeholder="Número de teléfono"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-orange-500 focus:outline-none transition-all`}
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Costo de Servicio *
                 </label>
                 <input
@@ -174,18 +174,18 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
                   placeholder="Costo del servicio"
                   step="0.01"
                   min="0"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-orange-500 focus:outline-none transition-all`}
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Tipo de Vehículo *
                 </label>
                 <select
                   name="tipoVehiculoId"
                   value={form.tipoVehiculoId}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-orange-500 focus:outline-none transition-all`}
                 >
                   <option value="">Selecciona un tipo de vehículo</option>
                   {tiposVehiculo.map(tipo => (
@@ -201,14 +201,14 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
                 )}
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Zona de Viaje *
                 </label>
                 <select
                   name="zonaViajeId"
                   value={form.zonaViajeId}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-300 text-gray-300 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
                   <option value="">Selecciona una zona de viaje</option>
                   {zonasViaje.map(zona => (
@@ -229,7 +229,7 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
               <button
                 type="button"
                 onClick={clearForm}
-                className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-semibold"
+                className="px-6 py-3 rounded-lg  bg-[#444240] hover:bg-yellow-500 text-yellow-400 hover:text-white border border-yellow-400 font-semibold transition duration-300"
               >
                 Limpiar
               </button>
@@ -237,7 +237,7 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
                 <button
                   type="button"
                   onClick={clearForm}
-                  className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
+                  className="px-6 py-3 bg-[#444240] text-red-600 border border-red-600 hover:text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
                 >
                   Cancelar
                 </button>
@@ -249,8 +249,8 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
                   !canSubmit 
                     ? 'bg-gray-400 cursor-not-allowed'
                     : editingId
-                      ? `bg-${tabColor}-500 hover:bg-${tabColor}-600`
-                      : 'bg-green-500 hover:bg-green-600'
+                      ? `bg-[#444240] hover:bg-orange-600 text-orange-600 hover:text-white border border-orange-600`
+                      : 'bg-[#444240] hover:bg-green-500 text-green-400 hover:text-white border border-green-400 font-semibold py-2 px-4 rounded-2xl transition duration-300'
                 }`}
               >
                 {editingId ? 'Actualizar' : 'Guardar'}
@@ -261,8 +261,8 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
       </div>
 
       {/* Table Section */}
-      <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className={`bg-gradient-to-r from-${tabColor}-700 to-${tabColor}-800 text-white p-6`}>
+      <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className={`bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6`}>
           <h2 className="text-2xl font-bold mb-4">
             Transportistas Registrados
           </h2>
@@ -280,19 +280,19 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
 
         <div className="max-h-96 overflow-y-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 sticky top-0">
+            <thead className="bg-[#242423] text-gray-300 sticky top-0">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nombre</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Contacto</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Información</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Detalles</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold ">Nombre</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold ">Contacto</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold ">Información</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold ">Detalles</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold ">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan="5" className="px-4 py-12 text-center text-gray-300">
                     <div className="flex flex-col items-center">
                       <div className="text-6xl mb-4">🚛</div>
                       <h3 className="text-lg font-semibold mb-2">No hay transportistas registrados</h3>
@@ -303,15 +303,15 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
               ) : (
                 filteredData.map((item) => (
                   <tr key={item.id} className={`border-b border-gray-100 hover:bg-${tabColor}-50/50 transition-colors`}>
-                    <td className="px-4 py-3 text-sm font-medium">{item.nombre}</td>
-                    <td className="px-4 py-3 text-sm">{item.contacto}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-gray-300">{item.nombre}</td>
+                    <td className="px-4 py-3 text-sm text-gray-300">{item.contacto}</td>
                     <td className="px-4 py-3">
                       <div className="space-y-1">
-                        <div className="flex items-center text-sm text-gray-600">
+                        <div className="flex items-center text-sm text-gray-300">
                           <Phone size={12} className="mr-2" />
                           {item.telefono}
                         </div>
-                        <div className="flex items-center text-sm text-gray-600">
+                        <div className="flex items-center text-sm text-gray-300">
                           <DollarSign size={12} className="mr-2" />
                           ${item.costoServicio?.toFixed(2)}
                         </div>
@@ -319,13 +319,13 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
                     </td>
                     <td className="px-4 py-3">
                       <div className="space-y-1">
-                        <div className="flex items-center text-sm text-gray-600">
+                        <div className="flex items-center text-sm text-gray-300">
                           <Truck size={12} className="mr-2" />
                           <span className="truncate max-w-[150px]" title={getTipoVehiculoNombre(item.tipoVehiculoId)}>
                             {getTipoVehiculoNombre(item.tipoVehiculoId)}
                           </span>
                         </div>
-                        <div className="flex items-center text-sm text-gray-600">
+                        <div className="flex items-center text-sm text-gray-300">
                           <MapPin size={12} className="mr-2" />
                           <span className="truncate max-w-[150px]" title={getZonaViaje(item.zonaViajeId)}>
                             {getZonaViaje(item.zonaViajeId)}
@@ -337,13 +337,13 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
                       <div className="flex gap-2">
                         <button
                           onClick={() => editEntity(item.id)}
-                          className={`p-2 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors`}
+                          className={`p-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors`}
                         >
                           <Edit size={14} />
                         </button>
                         <button
                           onClick={() => deleteEntity(item.id)}
-                          className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                          className="p-2 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-colors"
                         >
                           <Trash2 size={14} />
                         </button>

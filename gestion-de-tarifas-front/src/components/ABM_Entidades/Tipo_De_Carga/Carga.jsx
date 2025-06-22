@@ -159,15 +159,15 @@ const TiposCarga = ({ showNotification, tabColor }) => {
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Form Section */}
       <div className="lg:col-span-1">
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-          <h2 className={`text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
+        <div className="bg-[#444240]  p-8 rounded-2xl shadow-lg border border-gray-900">
+          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
             {editingId ? 'Editar Tipo de Carga' : 'Nuevo Tipo de Carga'}
           </h2>
 
           <div className="space-y-5">
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Nombre *
                 </label>
                 <input
@@ -176,12 +176,12 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                   value={form.nombre}
                   onChange={handleInputChange}
                   placeholder="Nombre del tipo de carga"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-blue-500 focus:outline-none transition-all`}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Descripción *
                 </label>
                 <textarea
@@ -190,12 +190,12 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                   onChange={handleInputChange}
                   placeholder="Descripción del tipo de carga"
                   rows="2"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all resize-none`}
+                  className={`w-full p-3 text-gray-300 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-all resize-none`}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Categoría *
                 </label>
                 <input
@@ -204,12 +204,12 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                   value={form.categoria}
                   onChange={handleInputChange}
                   placeholder="Ej: Electrodomésticos, Productos químicos..."
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all`}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Peso Total Estimado (kg) *
                 </label>
                 <input
@@ -220,12 +220,12 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                   placeholder="Peso estimado en kilogramos"
                   min="0"
                   step="0.1"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all`}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Volumen Total Estimado (m³) *
                 </label>
                 <input
@@ -236,12 +236,12 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                   placeholder="Volumen estimado en metros cúbicos"
                   min="0"
                   step="0.1"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all`}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Valor Base ($) *
                 </label>
                 <input
@@ -252,11 +252,11 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                   placeholder="Valor base del servicio"
                   min="0"
                   step="0.01"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-blue-500 focus:outline-none transition-all`}
                 />
               </div>
 
-              <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-center space-x-3 p-4  rounded-lg">
                 <input
                   type="checkbox"
                   id="esEspecial"
@@ -266,16 +266,16 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                   className={`w-5 h-5 text-${tabColor}-600 border-gray-300 rounded focus:ring-${tabColor}-500`}
                 />
                 <div>
-                  <label htmlFor="esEspecial" className="text-sm font-semibold text-gray-700 cursor-pointer">
+                  <label htmlFor="esEspecial" className="text-sm font-semibold text-gray-300 cursor-pointer">
                     ¿Es carga especial?
                   </label>
-                  <p className="text-xs text-gray-500">Marca si requiere manejo o transporte especial</p>
+                  <p className="text-xs text-gray-300">Marca si requiere manejo o transporte especial</p>
                 </div>
               </div>
 
               {form.esEspecial && (
                 <div className="animate-fadeIn">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
                     Requisito Especial *
                   </label>
                   <textarea
@@ -284,7 +284,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                     onChange={handleInputChange}
                     placeholder="Describe los requisitos especiales para el manejo de esta carga..."
                     rows="3"
-                    className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:outline-none transition-all resize-none"
+                    className="w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-blue -500 focus:outline-none transition-all resize-none"
                   />
                   <p className="text-xs text-red-600 mt-1">
                     <AlertTriangle size={12} className="inline mr-1" />
@@ -330,7 +330,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
               <button
                 type="button"
                 onClick={clearForm}
-                className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-semibold"
+                className="px-6 py-3 bg-[#444240] text-yellow-500 border border-yellow-500 hover:text-white rounded-lg hover:bg-yellow-500 transition-colors font-semibold"
               >
                 Limpiar
               </button>
@@ -338,17 +338,17 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 <button
                   type="button"
                   onClick={clearForm}
-                  className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
+                  className="px-6 py-3 bg-[#444240] text-red-600 hover:text-white rounded-lg border border-red-600 hover:bg-red-600 transition-colors font-semibold"
                 >
                   Cancelar
                 </button>
               )}
               <button
                 onClick={handleSubmit}
-                className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${
+                className={`px-6 py-3 rounded-lg transition-colors font-semibold ${
                   editingId
-                    ? `bg-${tabColor}-500 hover:bg-${tabColor}-600`
-                    : 'bg-green-500 hover:bg-green-600'
+                    ? `bg-[#444240] border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white`
+                    : 'bg-[#444240] border border-green-500 text-green-500 hover:text-white hover:bg-green-500'
                 }`}
               >
                 {editingId ? 'Actualizar' : 'Guardar'}
@@ -359,8 +359,8 @@ const TiposCarga = ({ showNotification, tabColor }) => {
       </div>
 
       {/* Table Section */}
-      <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className={`bg-gradient-to-r from-${tabColor}-700 to-${tabColor}-800 text-white p-6`}>
+      <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
+        <div className={`bg-gradient-to-r from-blue-700 to-blue-800 text-white p-6`}>
           <h2 className="text-2xl font-bold mb-4">
             Tipos de Carga Registrados
           </h2>
@@ -378,19 +378,19 @@ const TiposCarga = ({ showNotification, tabColor }) => {
 
         <div className="max-h-96 overflow-y-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 sticky top-0">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Nombre / Categoría</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Especificaciones</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Valor Base</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Tipo</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
+            <thead className="bg-[#242423] sticky top-0">
+              <tr className='text-gray-300'>
+                <th className="px-4 py-3 text-left text-sm fg-gray-50ont-semibold ">Nombre / Categoría</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold ">Especificaciones</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold ">Valor Base</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold ">Tipo</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold ">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan="5" className="px-4 py-12 text-center text-gray-300">
                     <div className="flex flex-col items-center">
                       <div className="text-6xl mb-4">📦</div>
                       <h3 className="text-lg font-semibold mb-2">No hay tipos de carga registrados</h3>
@@ -400,7 +400,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 </tr>
               ) : (
                 filteredData.map((item) => (
-                  <tr key={item.id} className={`border-b border-gray-100 hover:bg-${tabColor}-50/50 transition-colors`}>
+                  <tr key={item.id} className={`border-b border-gray-900 hover:border-blue-50/50 transition-colors`}>
                     <td className="px-4 py-3">
                       <div className="font-medium text-gray-900">{item.nombre}</div>
                       <div className="text-sm text-gray-600">{item.categoria}</div>
@@ -441,13 +441,13 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => editEntity(item.id)}
-                          className={`p-2 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors`}
+                          className={`p-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors`}
                         >
                           <Edit size={14} />
                         </button>
                         <button
                           onClick={() => deleteEntity(item.id)}
-                          className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                          className="p-2 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-colors"
                         >
                           <Trash2 size={14} />
                         </button>
