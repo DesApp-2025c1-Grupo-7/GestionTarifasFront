@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Edit, Trash2 } from 'lucide-react';
+import Swal from 'sweetalert2';
+import { getZonas, createZona, updateZona, deleteZona } from '../../../services/zona.service';
 
 const ZonasViaje = ({ showNotification, tabColor }) => {
   const [data, setData] = useState([]);
@@ -7,6 +9,28 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [form, setForm] = useState({ origen: '', destino: '', distanciaKm: '', costoPorKm: '' });
   console.log(tabColor)
+
+
+  useEffect(() => {
+    const fetchZonas = async () => {
+      try {
+        const zonas = await getZonas();
+
+        const zonasAdaptadas = zonas.map(zona => ({
+          ...zona,
+          distanciaKm: zona.distancia,
+          costoPorKm: zona.costoKilometro
+        }));
+
+        setData(zonasAdaptadas);
+      } catch (error) {
+        console.error('Error al obtener zonas de viaje:', error);
+        showNotification('Error al cargar las zonas de viaje', 'error');
+      }
+    };
+
+    fetchZonas();
+  }, []);
 
 
   
@@ -25,34 +49,50 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
   };
 
   const calculateTotalCost = (distancia, costoPorKm) => {
-    return (distancia * costoPorKm).toFixed(2);
+    return (distancia * costoPorKm);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) {
       showNotification('Por favor completa todos los campos requeridos', 'error');
       return;
     }
 
     const entityData = {
-      id: editingId || generateId(),
-      ...form,
-      distanciaKm: parseFloat(form.distanciaKm),
-      costoPorKm: parseFloat(form.costoPorKm),
-      fechaCreacion: editingId ?
-        data.find(item => item.id === editingId).fechaCreacion :
-        new Date().toISOString()
+      origen: form.origen,
+      destino: form.destino,
+      distancia: parseFloat(form.distanciaKm),
+      costoKilometro: parseFloat(form.costoPorKm),
     };
 
-    if (editingId) {
-      setData(data.map(item => item.id === editingId ? entityData : item));
-      showNotification('Zona de viaje actualizada correctamente');
-    } else {
-      setData([...data, entityData]);
-      showNotification('Zona de viaje agregada correctamente');
+    try {
+      if (editingId) {
+        const updatedZona = await updateZona(editingId, entityData);
+        setData(data.map(item =>
+          item.id === editingId
+            ? {
+                ...updatedZona,
+                distanciaKm: updatedZona.distancia,
+                costoPorKm: updatedZona.costoKilometro
+              }
+            : item
+        ));
+        showNotification('Zona de viaje actualizada correctamente');
+      } else {
+        const nuevaZona = await createZona(entityData);
+        setData([...data, {
+          ...nuevaZona,
+          distanciaKm: nuevaZona.distancia,
+          costoPorKm: nuevaZona.costoKilometro
+        }]);
+        showNotification('Zona de viaje agregada correctamente');
+      }
+      clearForm();
+    } catch (error) {
+      console.error('Error al guardar zona:', error);
+      const mensaje = error?.response?.data?.message || 'Error al guardar la zona de viaje';
+      showNotification(mensaje, 'error');
     }
-
-    clearForm();
   };
 
   const editEntity = (id) => {
@@ -68,10 +108,28 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
     }
   };
 
-  const deleteEntity = (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta zona de viaje?')) {
-      setData(data.filter(item => item.id !== id));
-      showNotification('Zona de viaje eliminada correctamente');
+  const deleteEntity = async (id) => {
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará la zona de viaje definitivamente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteZona(id);
+        setData(data.filter(item => item.id !== id));
+        showNotification('Zona de viaje eliminada correctamente');
+      } catch (error) {
+        console.error('Error al eliminar zona:', error);
+        const mensaje = error?.response?.data?.message || 'Error al eliminar la zona de viaje';
+        showNotification(mensaje, 'error');
+      }
     }
   };
 
