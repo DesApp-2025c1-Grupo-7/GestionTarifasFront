@@ -402,9 +402,9 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 filteredData.map((item) => (
                   <tr key={item.id} className={`border-b border-gray-900 hover:border-blue-50/50 transition-colors`}>
                     <td className="px-4 py-3">
-                      <div className="font-medium text-gray-900">{item.nombre}</div>
-                      <div className="text-sm text-gray-600">{item.categoria}</div>
-                      <div className="text-xs text-gray-500 mt-1">{item.descripcion}</div>
+                      <div className="font-medium text-white">{item.nombre}</div>
+                      <div className="text-sm text-neutral-200">{item.categoria}</div>
+                      <div className="text-xs text-neutral-300 mt-1">{item.descripcion}</div>
                       {item.esEspecial && item.requisitoEspecial && (
                         <div className="text-xs text-orange-600 mt-1 bg-orange-50 px-2 py-1 rounded max-w-xs">
                           <AlertTriangle size={10} className="inline mr-1" />
@@ -416,15 +416,15 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      <div className="space-y-1">
+                      <div className="space-y-1 text-neutral-300">
                         <div><strong>Peso:</strong> {formatWeight(item.pesoTotalEstimado)}</div>
                         <div><strong>Volumen:</strong> {formatVolume(item.volumenTotalEstimado)}</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-neutral-300">
                           Densidad: {(item.pesoTotalEstimado / item.volumenTotalEstimado).toFixed(2)} kg/m³
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-green-600">
+                    <td className="px-4 py-3 text-sm font-semibold text-green-500">
                       {formatCurrency(item.valorBase)}
                     </td>
                     <td className="px-4 py-3">

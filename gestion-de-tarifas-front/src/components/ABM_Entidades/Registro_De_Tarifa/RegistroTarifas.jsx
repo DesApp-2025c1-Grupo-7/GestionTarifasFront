@@ -196,8 +196,8 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Form Section */}
       <div className="lg:col-span-1">
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-          <h2 className={`text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
+        <div className="bg-[#444240]  p-8 rounded-2xl shadow-lg border border-gray-900">
+          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
             {editingId ? 'Editar Tarifa de Costo' : 'Nueva Tarifa de Costo'}
           </h2>
 
@@ -205,14 +205,14 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
             <div className="grid grid-cols-1 gap-4">
               {/* Tipo de Vehículo */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Tipo de Vehículo *
                 </label>
                 <select
                   name="tipoVehiculo"
                   value={form.tipoVehiculo}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
                   <option value="">Seleccionar tipo de vehículo</option>
                   {apiData.tiposVehiculo.map(vehiculo => (
@@ -225,14 +225,14 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
 
               {/* Tipo de Carga */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Tipo de Carga *
                 </label>
                 <select
                   name="tipoCarga"
                   value={form.tipoCarga}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
                   <option value="">Seleccionar tipo de carga</option>
                   {apiData.tiposCarga.map(carga => (
@@ -245,14 +245,14 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
 
               {/* Zona de Viaje */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Zona de Viaje *
                 </label>
                 <select
                   name="zonaViaje"
                   value={form.zonaViaje}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
                   <option value="">Seleccionar zona de viaje</option>
                   {apiData.zonasViaje.map(zona => (
@@ -265,14 +265,14 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
 
               {/* Transportista */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Transportista *
                 </label>
                 <select
                   name="transportista"
                   value={form.transportista}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
                   <option value="">Seleccionar transportista</option>
                   {apiData.transportistas.map(transportista => (
@@ -286,7 +286,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
               {/* Adicionales */}
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <label className="block text-sm font-semibold text-gray-700">
+                  <label className="block text-sm font-semibold text-gray-300">
                     Adicionales
                   </label>
                   <button
@@ -321,7 +321,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
 
               {/* Costo Final */}
               <div className={`bg-${tabColor}-50 p-4 rounded-lg border border-${tabColor}-200`}>
-                <label className={`block text-sm font-semibold text-${tabColor}-700 mb-2`}>
+                <label className={`block text-sm font-semibold text-gray-300 mb-2`}>
                   Costo Final
                 </label>
                 <input
@@ -330,9 +330,9 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                   onChange={handleCostoFinalChange}
                   min="0"
                   step="0.01"
-                  className={`w-full p-3 border-2 border-${tabColor}-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all text-2xl font-bold text-${tabColor}-800`}
+                  className={`w-full p-3 border-2 border-emerald-300 rounded-lg focus:border-emerald-400 focus:outline-none transition-all text-2xl font-bold text-emerald-500`}
                 />
-                <div className="text-xs text-gray-500 mt-1">
+                <div className="text-xs text-gray-300 mt-1">
                   Costo calculado automáticamente, pero puede modificarse
                 </div>
               </div>
@@ -371,7 +371,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
       </div>
 
       {/* Table Section */}
-      <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
         <div className={`bg-gradient-to-r from-${tabColor}-700 to-${tabColor}-800 text-white p-6`}>
           <h2 className="text-2xl font-bold mb-4">
             Tarifas de Costo Registradas
@@ -429,7 +429,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                     </td>
                     <td className="px-4 py-3 text-sm">
                       {item.adicionales.length > 0 ? (
-                        <div className="text-xs">
+                        <div>
                           {item.adicionales.map(add => add.descripcion).join(', ')}
                         </div>
                       ) : (
