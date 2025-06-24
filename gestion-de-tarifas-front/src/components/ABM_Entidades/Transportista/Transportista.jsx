@@ -1,22 +1,44 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, Edit, Trash2, Phone, DollarSign, Truck, MapPin } from 'lucide-react';
+import { createTransportista, deleteTransportista, getTransportista, updateTransportista } from '../../../services/transportista.service';
+import { getVehiculos } from '../../../services/tipoVehiculo.service';
+import { getZonas } from '../../../services/zona.service';
+import Swal from 'sweetalert2';
 
-const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasViaje = [] }) => {
+
+const Transportistas = ({ showNotification, tabColor }) => {
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [tiposVehiculo, setTiposVehiculo] = useState([]);
+  const [zonasViaje, setZonasViaje] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [form, setForm] = useState({
     nombre: '',
     contacto: '',
     telefono: '',
     costoServicio: '',
-    tipoVehiculoId: '',
-    zonaViajeId: ''
+    tipoVehiculos: [],
+    zonasDeViaje: []
   });
+  
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const [transportistasData, tiposVehiculoData, zonasViajeData] = await Promise.all([
+          getTransportista(),
+          getVehiculos(),
+          getZonas()
+        ]);
+        setData(transportistasData);
+        setTiposVehiculo(tiposVehiculoData);
+        setZonasViaje(zonasViajeData);
+      } catch (error) {
+        showNotification('Error al cargar datos', 'error');
+      }
+    };
+    fetchAll();
+  }, []);
 
-  const generateId = () => {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  };
 
   const clearForm = () => {
     setForm({
@@ -24,46 +46,59 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
       contacto: '',
       telefono: '',
       costoServicio: '',
-      tipoVehiculoId: '',
-      zonaViajeId: ''
+      tipoVehiculos: '',
+      zonasDeViaje: ''
     });
     setEditingId(null);
   };
 
+
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    const { name, value, options, type } = e.target;
+    if (type === 'select-multiple') {
+      const selectedValues = Array.from(options)
+        .filter(option => option.selected)
+        .map(option => option.value);
+      setForm(prev => ({ ...prev, [name]: selectedValues }));
+    } else {
+      setForm(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const validateForm = () => {
-    return form.nombre && form.contacto && form.telefono && form.costoServicio && form.tipoVehiculoId && form.zonaViajeId;
+    return form.nombre && form.contacto && form.telefono && form.costoServicio && form.tipoVehiculos.length > 0 && form.zonasDeViaje.length > 0 
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) {
       showNotification('Por favor completa todos los campos requeridos', 'error');
       return;
     }
 
     const entityData = {
-      id: editingId || generateId(),
       ...form,
-      telefono: parseInt(form.telefono),
+      telefono: form.telefono,
       costoServicio: parseFloat(form.costoServicio),
-      fechaCreacion: editingId ?
-        data.find(item => item.id === editingId).fechaCreacion :
-        new Date().toISOString()
+      tipoVehiculos: form.tipoVehiculos.map(id => parseInt(id)),  
+      zonasDeViaje: form.zonasDeViaje.map(id => parseInt(id)), 
     };
 
-    if (editingId) {
-      setData(data.map(item => item.id === editingId ? entityData : item));
-      showNotification('Transportista actualizado correctamente');
-    } else {
-      setData([...data, entityData]);
-      showNotification('Transportista agregado correctamente');
+    try {
+      if (editingId) {
+        const updated = await updateTransportista(editingId, entityData);
+        setData(data.map(item => (item.id === editingId ? updated : item)));
+        showNotification('Transportista actualizado correctamente');
+      } else {
+        const created = await createTransportista(entityData);
+        setData([...data, created]);
+        showNotification('Transportista agregado correctamente');
+      }
+      clearForm();
+    } catch (error) {
+      console.error('Error al guardar transportista:', error);
+      const msg = error?.response?.data?.message || 'Error al guardar transportista';
+      showNotification(msg, 'error');
     }
-
-    clearForm();
   };
 
   const editEntity = (id) => {
@@ -74,18 +109,36 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
         contacto: entity.contacto,
         telefono: entity.telefono.toString(),
         costoServicio: entity.costoServicio.toString(),
-        tipoVehiculoId: entity.tipoVehiculoId,
-        zonaViajeId: entity.zonaViajeId
+        tipoVehiculos: (entity.tipoVehiculos || []).map(tv => tv.id.toString()),
+        zonasDeViaje: (entity.zonasDeViaje || []).map(zn => zn.id.toString())
       });
       setEditingId(id);
     }
   };
 
-  const deleteEntity = (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este transportista?')) {
-      setData(data.filter(item => item.id !== id));
-      showNotification('Transportista eliminado correctamente');
-    }
+  const deleteEntity = async (id) => {
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Esta acción eliminará el transportista definitivamente.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      });
+  
+      if (result.isConfirmed) {
+        try {
+          await deleteTransportista(id);
+          setData(data.filter(item => item.id !== id));
+          showNotification('Transportista eliminado correctamente');
+        } catch (error) {
+          console.error('Error al eliminar el transportista:', error);
+          const mensaje = error?.response?.data?.message || 'Error al eliminar transportista';
+          showNotification(mensaje, 'error');
+        }
+      }
   };
 
   const getTipoVehiculoNombre = (tipoVehiculoId) => {
@@ -182,12 +235,12 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
                   Tipo de Vehículo *
                 </label>
                 <select
-                  name="tipoVehiculoId"
-                  value={form.tipoVehiculoId}
+                  name="tipoVehiculos"
+                  value={form.tipoVehiculos}
                   onChange={handleInputChange}
+                  multiple
                   className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-orange-500 focus:outline-none transition-all`}
                 >
-                  <option value="">Selecciona un tipo de vehículo</option>
                   {tiposVehiculo.map(tipo => (
                     <option key={tipo.id} value={tipo.id}>
                       {tipo.descripcion}
@@ -205,17 +258,17 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
                   Zona de Viaje *
                 </label>
                 <select
-                  name="zonaViajeId"
-                  value={form.zonaViajeId}
-                  onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-300 text-gray-300 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
-                >
-                  <option value="">Selecciona una zona de viaje</option>
-                  {zonasViaje.map(zona => (
-                    <option key={zona.id} value={zona.id}>
-                      {zona.nombre}
-                    </option>
-                  ))}
+                    name="zonasDeViaje"
+                    value={form.zonasDeViaje}
+                    onChange={handleInputChange}
+                    multiple
+                    className={`w-full p-3 border-2 border-gray-300 text-gray-300 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  >
+                    {zonasViaje.map(zona => (
+                      <option key={zona.id} value={zona.id}>
+                        {`${zona.origen} - ${zona.destino} ($${zona.costoKilometro})`}
+                      </option>
+                    ))}
                 </select>
                 {zonasViaje.length === 0 && (
                   <p className="text-sm text-amber-600 mt-1">
@@ -312,7 +365,7 @@ const Transportistas = ({ showNotification, tabColor, tiposVehiculo = [], zonasV
                           {item.telefono}
                         </div>
                         <div className="flex items-center text-sm text-gray-300">
-                          <DollarSign size={12} className="mr-2" />
+                         
                           ${item.costoServicio?.toFixed(2)}
                         </div>
                       </div>
