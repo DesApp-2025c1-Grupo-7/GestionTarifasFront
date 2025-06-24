@@ -1,32 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Edit, Trash2, AlertTriangle } from 'lucide-react';
+import { createCarga, deleteCarga, getCargas, updateCarga } from '../../../services/tipoCarga.service';
+import Swal from 'sweetalert2';
 
 const TiposCarga = ({ showNotification, tabColor }) => {
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [form, setForm] = useState({ 
-    nombre: '', 
-    descripcion: '',
-    categoria: '', 
-    pesoTotalEstimado: '', 
-    volumenTotalEstimado: '', 
+    categoria: '',
+    pesoTotal: '', 
+    volumenTotal: '', 
     valorBase: '', 
     esEspecial: false,
     requisitoEspecial: ''
   });
 
-  const generateId = () => {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const cargas = await getCargas();
+        setData(cargas);
+      } catch (error) {
+        showNotification('Error al cargar los tipos de carga', 'error');
+      }
+    };
+    fetchData();
+  }, []);
 
   const clearForm = () => {
     setForm({ 
-      nombre: '', 
-      descripcion: '',
       categoria: '', 
-      pesoTotalEstimado: '', 
-      volumenTotalEstimado: '', 
+      pesoTotal: '', 
+      volumenTotal: '', 
       valorBase: '', 
       esEspecial: false,
       requisitoEspecial: ''
@@ -36,12 +42,10 @@ const TiposCarga = ({ showNotification, tabColor }) => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
     if (type === 'checkbox') {
       setForm({ 
         ...form, 
         [name]: checked,
-        // Si no es especial, limpiar el requisito especial
         requisitoEspecial: name === 'esEspecial' && !checked ? '' : form.requisitoEspecial
       });
     } else {
@@ -50,24 +54,42 @@ const TiposCarga = ({ showNotification, tabColor }) => {
   };
 
   const validateForm = () => {
-    const basicValidation = form.nombre && 
-                          form.descripcion &&
-                          form.categoria && 
-                          form.pesoTotalEstimado && 
-                          form.volumenTotalEstimado && 
-                          form.valorBase;
-    
-    if (!basicValidation) return false;
-    
-    // Si es especial, debe tener requisito especial
+    const peso = parseFloat(form.pesoTotal);
+    const volumen = parseFloat(form.volumenTotal);
+    const valor = parseFloat(form.valorBase);
+
+    if (
+      !form.categoria.trim() ||
+      isNaN(peso) || peso < 0 ||
+      isNaN(volumen) || volumen < 0 ||
+      isNaN(valor) || valor < 0
+    ) {
+      return false;
+    }
+
     if (form.esEspecial && !form.requisitoEspecial.trim()) {
       return false;
     }
-    
+
     return true;
   };
+  
+  const editEntity = (id) => {
+    const carga = data.find(item => item.id === id);
+    if (carga) {
+      setForm({
+        categoria: carga.categoria || '',
+        pesoTotal: carga.pesoTotal.toString(),
+        volumenTotal: carga.volumenTotal.toString(),
+        valorBase: carga.valorBase.toString(),
+        esEspecial: carga.esEspecial,
+        requisitoEspecial: carga.requisitoEspecial || '',
+      });
+      setEditingId(id);
+    }
+  };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) {
       if (form.esEspecial && !form.requisitoEspecial.trim()) {
         showNotification('Para cargas especiales, debes especificar el requisito especial', 'error');
@@ -78,64 +100,67 @@ const TiposCarga = ({ showNotification, tabColor }) => {
     }
 
     const entityData = {
-      id: editingId || generateId(),
-      nombre: form.nombre.trim(),
-      descripcion: form.descripcion.trim(),
       categoria: form.categoria.trim(),
-      pesoTotalEstimado: parseFloat(form.pesoTotalEstimado),
-      volumenTotalEstimado: parseFloat(form.volumenTotalEstimado),
+      requisitoEspecial: form.esEspecial ? form.requisitoEspecial.trim() : '',
+      pesoTotal: parseFloat(form.pesoTotal),
+      volumenTotal: parseFloat(form.volumenTotal),
       valorBase: parseFloat(form.valorBase),
       esEspecial: form.esEspecial,
-      requisitoEspecial: form.requisitoEspecial.trim(),
-      fechaCreacion: editingId ? 
-        data.find(item => item.id === editingId).fechaCreacion : 
-        new Date().toISOString()
     };
 
-    if (editingId) {
-      setData(data.map(item => item.id === editingId ? entityData : item));
-      showNotification('Tipo de carga actualizado correctamente');
-    } else {
-      setData([...data, entityData]);
-      showNotification('Tipo de carga agregado correctamente');
-    }
+    try {
+      if (editingId) {
+        const updatedCarga = await updateCarga(editingId, entityData);
+        setData(data.map(item =>
+          item.id === editingId ? { ...item, ...updatedCarga } : item
+        ));
+        showNotification('Tipo de carga actualizado correctamente');
+      } else {
+        const nuevaCarga = await createCarga(entityData);
+        setData([...data, nuevaCarga]);
+        showNotification('Tipo de carga agregada correctamente');
+      }
 
-    clearForm();
-  };
-
-  const editEntity = (id) => {
-    const entity = data.find(item => item.id === id);
-    if (entity) {
-      setForm({
-        nombre: entity.nombre,
-        descripcion: entity.descripcion,
-        categoria: entity.categoria,
-        pesoTotalEstimado: entity.pesoTotalEstimado.toString(),
-        volumenTotalEstimado: entity.volumenTotalEstimado.toString(),
-        valorBase: entity.valorBase.toString(),
-        esEspecial: entity.esEspecial,
-        requisitoEspecial: entity.requisitoEspecial
-      });
-      setEditingId(id);
+      clearForm();
+    } catch (error) {
+      console.error('Error al guardar tipo de carga:', error);
+      const mensaje = error?.response?.data?.message || 'Error al guardar el tipo de carga';
+      showNotification(mensaje, 'error');
     }
   };
 
-  const deleteEntity = (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este tipo de carga?')) {
-      setData(data.filter(item => item.id !== id));
-      showNotification('Tipo de carga eliminado correctamente');
+  const deleteEntity = async (id) => {
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará el tipo de carga definitivamente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteCarga(id);
+        setData(data.filter(item => item.id !== id));
+        showNotification('Tipo de carga eliminado correctamente');
+      } catch (error) {
+        console.error('Error al eliminar tipo de carga:', error);
+        const mensaje = error?.response?.data?.message || 'Error al eliminar el tipo de carga';
+        showNotification(mensaje, 'error');
+      }
     }
   };
 
   const filteredData = data.filter(item => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      item.nombre.toLowerCase().includes(searchLower) ||
-      item.descripcion.toLowerCase().includes(searchLower) ||
       item.categoria.toLowerCase().includes(searchLower) ||
       item.requisitoEspecial.toLowerCase().includes(searchLower) ||
-      item.pesoTotalEstimado.toString().includes(searchTerm) ||
-      item.volumenTotalEstimado.toString().includes(searchTerm) ||
+      item.pesoTotal.toString().includes(searchTerm) ||
+      item.volumenTotal.toString().includes(searchTerm) ||
       item.valorBase.toString().includes(searchTerm)
     );
   });
@@ -159,41 +184,13 @@ const TiposCarga = ({ showNotification, tabColor }) => {
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Form Section */}
       <div className="lg:col-span-1">
-        <div className="bg-[#444240]  p-8 rounded-2xl shadow-lg border border-gray-900">
+        <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
           <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
             {editingId ? 'Editar Tipo de Carga' : 'Nuevo Tipo de Carga'}
           </h2>
 
           <div className="space-y-5">
             <div className="grid grid-cols-1 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Nombre *
-                </label>
-                <input
-                  type="text"
-                  name="nombre"
-                  value={form.nombre}
-                  onChange={handleInputChange}
-                  placeholder="Nombre del tipo de carga"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-blue-500 focus:outline-none transition-all`}
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Descripción *
-                </label>
-                <textarea
-                  name="descripcion"
-                  value={form.descripcion}
-                  onChange={handleInputChange}
-                  placeholder="Descripción del tipo de carga"
-                  rows="2"
-                  className={`w-full p-3 text-gray-300 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-all resize-none`}
-                />
-              </div>
-
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Categoría *
@@ -204,7 +201,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                   value={form.categoria}
                   onChange={handleInputChange}
                   placeholder="Ej: Electrodomésticos, Productos químicos..."
-                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all`}
+                  className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all"
                 />
               </div>
               
@@ -214,13 +211,13 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 </label>
                 <input
                   type="number"
-                  name="pesoTotalEstimado"
-                  value={form.pesoTotalEstimado}
+                  name="pesoTotal"
+                  value={form.pesoTotal}
                   onChange={handleInputChange}
                   placeholder="Peso estimado en kilogramos"
                   min="0"
                   step="0.1"
-                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all`}
+                  className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all"
                 />
               </div>
               
@@ -230,13 +227,13 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 </label>
                 <input
                   type="number"
-                  name="volumenTotalEstimado"
-                  value={form.volumenTotalEstimado}
+                  name="volumenTotal"
+                  value={form.volumenTotal}
                   onChange={handleInputChange}
                   placeholder="Volumen estimado en metros cúbicos"
                   min="0"
                   step="0.1"
-                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all`}
+                  className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all"
                 />
               </div>
               
@@ -252,11 +249,11 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                   placeholder="Valor base del servicio"
                   min="0"
                   step="0.01"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-blue-500 focus:outline-none transition-all`}
+                  className="w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-blue-500 focus:outline-none transition-all"
                 />
               </div>
 
-              <div className="flex items-center space-x-3 p-4  rounded-lg">
+              <div className="flex items-center space-x-3 p-4 rounded-lg">
                 <input
                   type="checkbox"
                   id="esEspecial"
@@ -284,7 +281,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                     onChange={handleInputChange}
                     placeholder="Describe los requisitos especiales para el manejo de esta carga..."
                     rows="3"
-                    className="w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-blue -500 focus:outline-none transition-all resize-none"
+                    className="w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-all resize-none"
                   />
                   <p className="text-xs text-red-600 mt-1">
                     <AlertTriangle size={12} className="inline mr-1" />
@@ -293,7 +290,6 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 </div>
               )}
               
-              {/* Mostrar valor base formateado */}
               {form.valorBase && (
                 <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                   <label className="block text-sm font-semibold text-green-700 mb-1">
@@ -305,21 +301,20 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 </div>
               )}
 
-              {/* Mostrar resumen de especificaciones */}
-              {(form.pesoTotalEstimado || form.volumenTotalEstimado) && (
+              {(form.pesoTotal || form.volumenTotal) && (
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <label className="block text-sm font-semibold text-blue-700 mb-2">
                     Especificaciones
                   </label>
                   <div className="space-y-1 text-sm text-blue-800">
-                    {form.pesoTotalEstimado && (
-                      <p><strong>Peso:</strong> {formatWeight(parseFloat(form.pesoTotalEstimado))}</p>
+                    {form.pesoTotal && (
+                      <p><strong>Peso:</strong> {formatWeight(parseFloat(form.pesoTotal))}</p>
                     )}
-                    {form.volumenTotalEstimado && (
-                      <p><strong>Volumen:</strong> {formatVolume(parseFloat(form.volumenTotalEstimado))}</p>
+                    {form.volumenTotal && (
+                      <p><strong>Volumen:</strong> {formatVolume(parseFloat(form.volumenTotal))}</p>
                     )}
-                    {form.pesoTotalEstimado && form.volumenTotalEstimado && (
-                      <p><strong>Densidad:</strong> {(parseFloat(form.pesoTotalEstimado) / parseFloat(form.volumenTotalEstimado)).toFixed(2)} kg/m³</p>
+                    {form.pesoTotal && form.volumenTotal && (
+                      <p><strong>Densidad:</strong> {(parseFloat(form.pesoTotal) / parseFloat(form.volumenTotal)).toFixed(2)} kg/m³</p>
                     )}
                   </div>
                 </div>
@@ -370,7 +365,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar por nombre, categoría, peso, volumen, valor o requisito..."
+              placeholder="Buscar por categoría, peso, volumen, valor o requisito..."
               className="w-full max-w-md pl-10 pr-4 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:bg-white/20"
             />
           </div>
@@ -379,12 +374,12 @@ const TiposCarga = ({ showNotification, tabColor }) => {
         <div className="max-h-96 overflow-y-auto">
           <table className="w-full">
             <thead className="bg-[#242423] sticky top-0">
-              <tr className='text-gray-300'>
-                <th className="px-4 py-3 text-left text-sm fg-gray-50ont-semibold ">Nombre / Categoría</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold ">Especificaciones</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold ">Valor Base</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold ">Tipo</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold ">Acciones</th>
+              <tr className="text-gray-300">
+                <th className="px-4 py-3 text-left text-sm text-gray-300 font-semibold">Categoría</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Especificaciones</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Valor Base</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Tipo</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -400,11 +395,9 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 </tr>
               ) : (
                 filteredData.map((item) => (
-                  <tr key={item.id} className={`border-b border-gray-900 hover:border-blue-50/50 transition-colors`}>
+                  <tr key={item.id} className="border-b border-gray-900 hover:border-blue-50/50 transition-colors">
                     <td className="px-4 py-3">
-                      <div className="font-medium text-white">{item.nombre}</div>
                       <div className="text-sm text-neutral-200">{item.categoria}</div>
-                      <div className="text-xs text-neutral-300 mt-1">{item.descripcion}</div>
                       {item.esEspecial && item.requisitoEspecial && (
                         <div className="text-xs text-orange-600 mt-1 bg-orange-50 px-2 py-1 rounded max-w-xs">
                           <AlertTriangle size={10} className="inline mr-1" />
@@ -417,10 +410,10 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <div className="space-y-1 text-neutral-300">
-                        <div><strong>Peso:</strong> {formatWeight(item.pesoTotalEstimado)}</div>
-                        <div><strong>Volumen:</strong> {formatVolume(item.volumenTotalEstimado)}</div>
-                        <div className="text-xs text-neutral-300">
-                          Densidad: {(item.pesoTotalEstimado / item.volumenTotalEstimado).toFixed(2)} kg/m³
+                        <div><strong>Peso:</strong> {formatWeight(item.pesoTotal)}</div>
+                        <div><strong>Volumen:</strong> {formatVolume(item.volumenTotal)}</div>
+                        <div className="text-xs text-neutral-400">
+                          Densidad: {(item.pesoTotal / item.volumenTotal).toFixed(2)} kg/m³
                         </div>
                       </div>
                     </td>
@@ -428,11 +421,14 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                       {formatCurrency(item.valorBase)}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        item.esEspecial 
-                          ? 'bg-red-100 text-red-800' 
-                          : 'bg-green-100 text-green-800'
-                      }`}>
+                      <span
+                        title={item.esEspecial ? item.requisitoEspecial : ''}
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          item.esEspecial 
+                            ? 'bg-red-100 text-red-800' 
+                            : 'bg-green-100 text-green-800'
+                        }`}
+                      >
                         {item.esEspecial && <AlertTriangle size={12} className="mr-1" />}
                         {item.esEspecial ? 'Especial' : 'Regular'}
                       </span>
@@ -441,7 +437,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => editEntity(item.id)}
-                          className={`p-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors`}
+                          className="p-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
                         >
                           <Edit size={14} />
                         </button>

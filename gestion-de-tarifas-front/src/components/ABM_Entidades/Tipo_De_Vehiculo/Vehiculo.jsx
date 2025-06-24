@@ -1,18 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, Edit, Trash2 } from 'lucide-react';
+import { createVehiculo, deleteVehiculo, getVehiculos, updateVehiculo } from '../../../services/tipoVehiculo.service';
+import Swal from 'sweetalert2';
+import { getCargas } from '../../../services/tipoCarga.service';
 
-const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
+const TiposVehiculo = ({ showNotification, tabColor }) => {
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [form, setForm] = useState({ descripcion: '', precioBase: '', tipoCargaId: '' });
+  const [form, setForm] = useState({ descripcion: '', precioBase: '', tipoCargaIds: [] });
+  const [tiposCarga, setTiposCarga] = useState([]);
 
-  const generateId = () => {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  };
+  useEffect(() => {
+    const fetchTiposCarga = async () => {
+      try {
+        const cargas = await getCargas();
+        setTiposCarga(cargas);
+      } catch (error) {
+        showNotification('Error al cargar los tipos de carga', 'error');
+      }
+    };
+    fetchTiposCarga();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const vehiculos = await getVehiculos();
+        setData(vehiculos);
+      } catch (error) {
+        console.error('Error al cargar tipos de vehículo', error);
+        showNotification('Error al cargar tipos de vehículo', 'error');
+      }
+    };
+    fetchData();
+  }, []);
 
   const clearForm = () => {
-    setForm({ descripcion: '', precioBase: '', tipoCargaId: '' });
+    setForm({ descripcion: '', precioBase: '', tipoCargaIds: [] });
     setEditingId(null);
   };
 
@@ -21,34 +46,44 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
     setForm({ ...form, [name]: value });
   };
 
-  const validateForm = () => {
-    return form.descripcion && form.precioBase && form.tipoCargaId;
+  const handleTipoCargaChange = (e) => {
+    const selected = Array.from(e.target.selectedOptions, option => parseInt(option.value));
+    setForm({ ...form, tipoCargaIds: selected });
+    console.log("Tipo de carga seleccionados:", selected);
   };
 
-  const handleSubmit = () => {
+  const validateForm = () => {
+    return form.descripcion && form.precioBase && form.tipoCargaIds.length > 0;
+  };
+
+  const handleSubmit = async () => {
     if (!validateForm()) {
       showNotification('Por favor completa todos los campos requeridos', 'error');
       return;
     }
 
     const entityData = {
-      id: editingId || generateId(),
-      ...form,
+      descripcion: form.descripcion.trim(),
       precioBase: parseFloat(form.precioBase),
-      fechaCreacion: editingId ?
-        data.find(item => item.id === editingId).fechaCreacion :
-        new Date().toISOString()
+      tipoCargas: form.tipoCargaIds.map(id => parseInt(id))
     };
 
-    if (editingId) {
-      setData(data.map(item => item.id === editingId ? entityData : item));
-      showNotification('Tipo de vehículo actualizado correctamente');
-    } else {
-      setData([...data, entityData]);
-      showNotification('Tipo de vehículo agregado correctamente');
+    try {
+      if (editingId) {
+        const updated = await updateVehiculo(editingId, entityData);
+        setData(data.map(item => item.id === editingId ? updated : item));
+        showNotification('Tipo de vehículo actualizado correctamente');
+      } else {
+        const creado = await createVehiculo(entityData);
+        setData([...data, creado]);
+        showNotification('Tipo de vehículo agregado correctamente');
+      }
+      clearForm();
+    } catch (error) {
+      console.error('Error al guardar tipo de vehículo', error);
+      const msg = error?.response?.data?.message || 'Error al guardar tipo de vehículo';
+      showNotification(msg, 'error');
     }
-
-    clearForm();
   };
 
   const editEntity = (id) => {
@@ -57,27 +92,47 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
       setForm({
         descripcion: entity.descripcion,
         precioBase: entity.precioBase.toString(),
-        tipoCargaId: entity.tipoCargaId
+        tipoCargaIds: (entity.tipoCargas || []).map(tc => tc.id.toString())
       });
       setEditingId(id);
     }
   };
 
-  const deleteEntity = (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este tipo de vehículo?')) {
-      setData(data.filter(item => item.id !== id));
-      showNotification('Tipo de vehículo eliminado correctamente');
+  const deleteEntity = async (id) => {
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará el tipo de vehículo definitivamente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteVehiculo(id);
+        setData(data.filter(item => item.id !== id));
+        showNotification('Tipo de vehículo eliminado correctamente');
+      } catch (error) {
+        console.error('Error al eliminar tipo de vehículo:', error);
+        const mensaje = error?.response?.data?.message || 'Error al eliminar el tipo de vehículo';
+        showNotification(mensaje, 'error');
+      }
     }
   };
 
-  const getTipoCargaNombre = (tipoCargaId) => {
-    const tipoCarga = tiposCarga.find(tc => tc.id === tipoCargaId);
-    return tipoCarga ? tipoCarga.nombre : 'No especificado';
+  const getTipoCargaNombre = (tipoCargaArr) => {
+    if (Array.isArray(tipoCargaArr) && tipoCargaArr.length > 0) {
+      return tipoCargaArr.map(tc => tc.categoria).join(', ');
+    }
+    return 'No especificado';
   };
 
   const filteredData = data.filter(item => {
     const searchLower = searchTerm.toLowerCase();
-    const tipoCargaNombre = getTipoCargaNombre(item.tipoCargaId);
+    const tipoCargaNombre = getTipoCargaNombre(item.tipoCargas);
     return (
       item.descripcion.toLowerCase().includes(searchLower) ||
       tipoCargaNombre.toLowerCase().includes(searchLower)
@@ -86,7 +141,7 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
 
   return (
     <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
-      {/* Form Section */}
+      {/* Formulario */}
       <div className="lg:col-span-1">
         <div className="bg-[#444240] p-8 rounded-2xl shadow-xl border border-gray-900">
           <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
@@ -96,9 +151,7 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
           <div className="space-y-5">
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Descripción *
-                </label>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">Descripción *</label>
                 <textarea
                   name="descripcion"
                   value={form.descripcion}
@@ -109,9 +162,7 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Precio Base *
-                </label>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">Precio Base *</label>
                 <input
                   type="number"
                   name="precioBase"
@@ -124,19 +175,17 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Tipo de Carga *
-                </label>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">Tipo de Carga *</label>
                 <select
-                  name="tipoCargaId"
-                  value={form.tipoCargaId}
-                  onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  multiple
+                  name="tipoCargaIds"
+                  value={form.tipoCargaIds}
+                  onChange={handleTipoCargaChange}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg bg-white text-black focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
-                  <option value="">Selecciona un tipo de carga</option>
                   {tiposCarga.map(tipo => (
-                    <option key={tipo.id} value={tipo.id}>
-                      {tipo.nombre}
+                    <option key={tipo.id} value={tipo.id} style={{ color: '#000' }}>
+                      {tipo.categoria}
                     </option>
                   ))}
                 </select>
@@ -169,11 +218,11 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
                 onClick={handleSubmit}
                 disabled={tiposCarga.length === 0}
                 className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${
-                  tiposCarga.length === 0 
+                  tiposCarga.length === 0
                     ? 'bg-gray-400 cursor-not-allowed'
                     : editingId
-                      ? `bg-[#444240] text-green-500 border border-green-500 hover:text-white  hover:bg-green-500`
-                      : 'bg-[#444240] border border-green-500 text-green-500 hover:text-white hover:bg-green-500'
+                    ? `bg-[#444240] text-green-500 border border-green-500 hover:text-white  hover:bg-green-500`
+                    : 'bg-[#444240] border border-green-500 text-green-500 hover:text-white hover:bg-green-500'
                 }`}
               >
                 {editingId ? 'Actualizar' : 'Guardar'}
@@ -183,12 +232,10 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
         </div>
       </div>
 
-      {/* Table Section */}
+      {/* Tabla */}
       <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
         <div className={`bg-gradient-to-r from-green-700 to-green-800 text-white p-6`}>
-          <h2 className="text-2xl font-bold mb-4">
-            Tipos de Vehículo Registrados
-          </h2>
+          <h2 className="text-2xl font-bold mb-4">Tipos de Vehículo Registrados</h2>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300" size={20} />
             <input
@@ -227,7 +274,7 @@ const TiposVehiculo = ({ showNotification, tabColor, tiposCarga = [] }) => {
                   <tr key={item.id} className={`border-b border-gray-100 hover:bg-${tabColor}-50/50 transition-colors`}>
                     <td className="px-4 py-3 text-sm">{item.descripcion}</td>
                     <td className="px-4 py-3 text-sm font-medium">${item.precioBase?.toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm">{getTipoCargaNombre(item.tipoCargaId)}</td>
+                    <td className="px-4 py-3 text-sm">{getTipoCargaNombre(item.tipoCargas)}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <button
