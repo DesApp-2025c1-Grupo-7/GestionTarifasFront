@@ -415,25 +415,25 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
               ) : (
                 filteredData.map((item) => (
                   <tr key={item.id} className={`border-b border-gray-100 hover:bg-${tabColor}-50/50 transition-colors`}>
-                    <td className="px-4 py-3 text-sm font-medium">
+                    <td className="px-4 py-3 text-sm font-medium text-neutral-200">
                       {getEntityName(apiData.tiposVehiculo, item.tipoVehiculo)}
                     </td>
-                    <td className="px-4 py-3 text-sm">
+                    <td className="px-4 py-3 text-sm text-neutral-200">
                       {getEntityName(apiData.tiposCarga, item.tipoCarga)}
                     </td>
-                    <td className="px-4 py-3 text-sm">
+                    <td className="px-4 py-3 text-sm text-neutral-200">
                       {getZonaName(item.zonaViaje)}
                     </td>
-                    <td className="px-4 py-3 text-sm">
+                    <td className="px-4 py-3 text-sm text-neutral-200">
                       {getEntityName(apiData.transportistas, item.transportista)}
                     </td>
-                    <td className="px-4 py-3 text-sm">
+                    <td className="px-4 py-3 text-sm text-neutral-200">
                       {item.adicionales.length > 0 ? (
                         <div>
                           {item.adicionales.map(add => add.descripcion).join(', ')}
                         </div>
                       ) : (
-                        <span className="text-gray-400">Sin adicionales</span>
+                        <span className="text-neutral-200">Sin adicionales</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm font-bold text-green-600">

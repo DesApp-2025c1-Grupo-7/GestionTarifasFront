@@ -272,9 +272,9 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
               ) : (
                 filteredData.map((item) => (
                   <tr key={item.id} className={`border-b border-gray-100 hover:bg-${tabColor}-50/50 transition-colors`}>
-                    <td className="px-4 py-3 text-sm">{item.descripcion}</td>
-                    <td className="px-4 py-3 text-sm font-medium">${item.precioBase?.toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm">{getTipoCargaNombre(item.tipoCargas)}</td>
+                    <td className="px-4 py-3 text-sm text-neutral-200">{item.descripcion}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-neutral-200">${item.precioBase?.toFixed(2)}</td>
+                    <td className="px-4 py-3 text-sm text-neutral-200">{getTipoCargaNombre(item.tipoCargas)}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <button

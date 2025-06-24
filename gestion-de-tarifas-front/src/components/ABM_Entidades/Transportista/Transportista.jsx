@@ -356,15 +356,15 @@ const Transportistas = ({ showNotification, tabColor }) => {
               ) : (
                 filteredData.map((item) => (
                   <tr key={item.id} className={`border-b border-gray-100 hover:bg-${tabColor}-50/50 transition-colors`}>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-300">{item.nombre}</td>
-                    <td className="px-4 py-3 text-sm text-gray-300">{item.contacto}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-neutral-200">{item.nombre}</td>
+                    <td className="px-4 py-3 text-sm text-neutral-200">{item.contacto}</td>
                     <td className="px-4 py-3">
                       <div className="space-y-1">
-                        <div className="flex items-center text-sm text-gray-300">
+                        <div className="flex items-center text-sm text-neutral-200">
                           <Phone size={12} className="mr-2" />
                           {item.telefono}
                         </div>
-                        <div className="flex items-center text-sm text-gray-300">
+                        <div className="flex items-center text-sm text-neutral-200">
                          
                           ${item.costoServicio?.toFixed(2)}
                         </div>
@@ -372,13 +372,13 @@ const Transportistas = ({ showNotification, tabColor }) => {
                     </td>
                     <td className="px-4 py-3">
                       <div className="space-y-1">
-                        <div className="flex items-center text-sm text-gray-300">
+                        <div className="flex items-center text-sm text-neutral-200">
                           <Truck size={12} className="mr-2" />
                           <span className="truncate max-w-[150px]" title={getTipoVehiculoNombre(item.tipoVehiculoId)}>
                             {getTipoVehiculoNombre(item.tipoVehiculoId)}
                           </span>
                         </div>
-                        <div className="flex items-center text-sm text-gray-300">
+                        <div className="flex items-center text-sm text-neutral-200">
                           <MapPin size={12} className="mr-2" />
                           <span className="truncate max-w-[150px]" title={getZonaViaje(item.zonaViajeId)}>
                             {getZonaViaje(item.zonaViajeId)}

@@ -6,6 +6,7 @@ import ZonasViaje from './Zona_De_Viaje/ZonaViaje';
 import Transportistas from './Transportista/Transportista';
 import Adicionales from './Adicionales/Adicionales';
 import RegistroTarifas from './Registro_De_Tarifa/RegistroTarifas';
+import logo from '../../assets/logo.png';
 
 const ABMEntidades = () => {
   const [activeTab, setActiveTab] = useState('cargoTypes');
@@ -29,8 +30,8 @@ const ABMEntidades = () => {
   const currentTab = tabs.find(tab => tab.id === activeTab);
   const CurrentComponent = currentTab.component;
 
-  const tabsColorActive =  (color) => {
-    switch(color){
+  const tabsColorActive = (color) => {
+    switch (color) {
       case 'blue':
         return 'bg-blue-700';
       case 'green':
@@ -45,7 +46,7 @@ const ABMEntidades = () => {
         return 'bg-emerald-500';
       default:
         return 'bg-gray-500';
- 
+
     }
 
   }
@@ -54,7 +55,13 @@ const ABMEntidades = () => {
     <div className="min-h-screen bg-[#242423]">
       <div className="max-w-screen mx-auto shadow-2xl overflow-hidden">
         {/* Header */}
-        
+        <div className="flex justify-center bg-[#444240] p-2">
+          <img
+            src={logo}
+            alt="Logo"
+            className="h-20 object-contain"
+          />
+        </div>
 
         {/* Tabs */}
         <div className="bg-[#444240] p-6">
@@ -66,11 +73,10 @@ const ABMEntidades = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-                    activeTab === tab.id
-                        ? `${tabsColorActive(tabColor)} text-white shadow-lg`
-                        : 'bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${activeTab === tab.id
+                    ? `${tabsColorActive(tabColor)} text-white shadow-lg`
+                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
                 >
                   <Icon size={20} />
                   {tab.label}
@@ -82,7 +88,7 @@ const ABMEntidades = () => {
 
         {/* Component Content */}
         <div className="p-8">
-          <CurrentComponent 
+          <CurrentComponent
             showNotification={showNotification}
             tabColor={currentTab.color}
           />
@@ -91,9 +97,8 @@ const ABMEntidades = () => {
 
       {/* Notification */}
       {notification.show && (
-        <div className={`fixed top-5 right-5 px-6 py-4 rounded-lg text-white font-semibold shadow-lg z-50 transition-all ${
-          notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-        }`}>
+        <div className={`fixed top-5 right-5 px-6 py-4 rounded-lg text-white font-semibold shadow-lg z-50 transition-all ${notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+          }`}>
           {notification.message}
         </div>
       )}

@@ -202,14 +202,14 @@ const Adicionales = ({ showNotification, tabColor }) => {
                 filteredData.map((item) => (
                   <tr key={item.id} className={`border-b border-gray-100 hover:bg-${tabColor}-50/50 transition-colors`}>
                     <td className="px-4 py-3 text-sm font-medium max-w-xs">
-                      <div className="truncate" title={item.descripcion}>
+                      <div className="truncate text-neutral-200" title={item.descripcion} text-neutral-20>
                         {item.descripcion}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm font-semibold text-green-600">
                       ${item.costo.toFixed(2)}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-500">
+                    <td className="px-4 py-3 text-sm text-neutral-200">
                       {new Date(item.fechaCreacion).toLocaleDateString('es-ES')}
                     </td>
                     <td className="px-4 py-3">
