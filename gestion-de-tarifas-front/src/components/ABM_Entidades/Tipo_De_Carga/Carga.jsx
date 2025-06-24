@@ -18,15 +18,14 @@ const TiposCarga = ({ showNotification, tabColor }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-        try {
-          const cargas = await getCargas();
-          setData(cargas);
-        } catch (error) {
-          showNotification('Error al cargar los tipos de carga', 'error');
-        }
-      };
-
-      fetchData();
+      try {
+        const cargas = await getCargas();
+        setData(cargas);
+      } catch (error) {
+        showNotification('Error al cargar los tipos de carga', 'error');
+      }
+    };
+    fetchData();
   }, []);
 
   const clearForm = () => {
@@ -43,7 +42,6 @@ const TiposCarga = ({ showNotification, tabColor }) => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
     if (type === 'checkbox') {
       setForm({ 
         ...form, 
@@ -76,7 +74,6 @@ const TiposCarga = ({ showNotification, tabColor }) => {
     return true;
   };
   
-
   const editEntity = (id) => {
     const carga = data.find(item => item.id === id);
     if (carga) {
@@ -111,7 +108,6 @@ const TiposCarga = ({ showNotification, tabColor }) => {
       esEspecial: form.esEspecial,
     };
 
-    
     try {
       if (editingId) {
         const updatedCarga = await updateCarga(editingId, entityData);
@@ -132,8 +128,6 @@ const TiposCarga = ({ showNotification, tabColor }) => {
       showNotification(mensaje, 'error');
     }
   };
-
-
 
   const deleteEntity = async (id) => {
     const result = await Swal.fire({
@@ -159,8 +153,6 @@ const TiposCarga = ({ showNotification, tabColor }) => {
       }
     }
   };
-
-
 
   const filteredData = data.filter(item => {
     const searchLower = searchTerm.toLowerCase();
@@ -192,41 +184,13 @@ const TiposCarga = ({ showNotification, tabColor }) => {
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Form Section */}
       <div className="lg:col-span-1">
-        <div className="bg-[#444240]  p-8 rounded-2xl shadow-lg border border-gray-900">
+        <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
           <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
             {editingId ? 'Editar Tipo de Carga' : 'Nuevo Tipo de Carga'}
           </h2>
 
           <div className="space-y-5">
             <div className="grid grid-cols-1 gap-4">
-              {/* <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Nombre *
-                </label>
-                <input
-                  type="text"
-                  name="nombre"
-                  value={form.nombre}
-                  onChange={handleInputChange}
-                  placeholder="Nombre del tipo de carga"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-blue-500 focus:outline-none transition-all`}
-                />
-              </div>
-               */}
-              {/* <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Descripción *
-                </label>
-                <textarea
-                  name="descripcion"
-                  value={form.descripcion}
-                  onChange={handleInputChange}
-                  placeholder="Descripción del tipo de carga"
-                  rows="2"
-                  className={`w-full p-3 text-gray-300 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-all resize-none`}
-                />
-              </div> */}
-
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Categoría *
@@ -237,7 +201,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                   value={form.categoria}
                   onChange={handleInputChange}
                   placeholder="Ej: Electrodomésticos, Productos químicos..."
-                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all`}
+                  className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all"
                 />
               </div>
               
@@ -253,7 +217,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                   placeholder="Peso estimado en kilogramos"
                   min="0"
                   step="0.1"
-                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all`}
+                  className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all"
                 />
               </div>
               
@@ -269,7 +233,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                   placeholder="Volumen estimado en metros cúbicos"
                   min="0"
                   step="0.1"
-                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all`}
+                  className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all"
                 />
               </div>
               
@@ -285,11 +249,11 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                   placeholder="Valor base del servicio"
                   min="0"
                   step="0.01"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-blue-500 focus:outline-none transition-all`}
+                  className="w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-blue-500 focus:outline-none transition-all"
                 />
               </div>
 
-              <div className="flex items-center space-x-3 p-4  rounded-lg">
+              <div className="flex items-center space-x-3 p-4 rounded-lg">
                 <input
                   type="checkbox"
                   id="esEspecial"
@@ -317,7 +281,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                     onChange={handleInputChange}
                     placeholder="Describe los requisitos especiales para el manejo de esta carga..."
                     rows="3"
-                    className="w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-blue -500 focus:outline-none transition-all resize-none"
+                    className="w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-all resize-none"
                   />
                   <p className="text-xs text-red-600 mt-1">
                     <AlertTriangle size={12} className="inline mr-1" />
@@ -326,7 +290,6 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 </div>
               )}
               
-              {/* Mostrar valor base formateado */}
               {form.valorBase && (
                 <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                   <label className="block text-sm font-semibold text-green-700 mb-1">
@@ -338,7 +301,6 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 </div>
               )}
 
-              {/* Mostrar resumen de especificaciones */}
               {(form.pesoTotal || form.volumenTotal) && (
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                   <label className="block text-sm font-semibold text-blue-700 mb-2">
@@ -348,10 +310,10 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                     {form.pesoTotal && (
                       <p><strong>Peso:</strong> {formatWeight(parseFloat(form.pesoTotal))}</p>
                     )}
-                    {form.volumenTotalEstimado && (
+                    {form.volumenTotal && (
                       <p><strong>Volumen:</strong> {formatVolume(parseFloat(form.volumenTotal))}</p>
                     )}
-                    {form.pesoTotalEstimado && form.volumenTotalEstimado && (
+                    {form.pesoTotal && form.volumenTotal && (
                       <p><strong>Densidad:</strong> {(parseFloat(form.pesoTotal) / parseFloat(form.volumenTotal)).toFixed(2)} kg/m³</p>
                     )}
                   </div>
@@ -403,7 +365,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar por nombre, categoría, peso, volumen, valor o requisito..."
+              placeholder="Buscar por categoría, peso, volumen, valor o requisito..."
               className="w-full max-w-md pl-10 pr-4 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:bg-white/20"
             />
           </div>
@@ -412,12 +374,12 @@ const TiposCarga = ({ showNotification, tabColor }) => {
         <div className="max-h-96 overflow-y-auto">
           <table className="w-full">
             <thead className="bg-[#242423] sticky top-0">
-              <tr className='text-gray-300'>
-                <th className="px-4 py-3 text-left text-sm fg-gray-50ont-semibold ">Nombre / Categoría</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold ">Especificaciones</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold ">Valor Base</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold ">Tipo</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold ">Acciones</th>
+              <tr className="text-gray-300">
+                <th className="px-4 py-3 text-left text-sm text-gray-300 font-semibold">Categoría</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Especificaciones</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Valor Base</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Tipo</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -433,9 +395,9 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 </tr>
               ) : (
                 filteredData.map((item) => (
-                  <tr key={item.id} className={`border-b border-gray-900 hover:border-blue-50/50 transition-colors`}>
+                  <tr key={item.id} className="border-b border-gray-900 hover:border-blue-50/50 transition-colors">
                     <td className="px-4 py-3">
-                      <div className="text-sm text-gray-600">{item.categoria}</div>
+                      <div className="text-sm text-neutral-200">{item.categoria}</div>
                       {item.esEspecial && item.requisitoEspecial && (
                         <div className="text-xs text-orange-600 mt-1 bg-orange-50 px-2 py-1 rounded max-w-xs">
                           <AlertTriangle size={10} className="inline mr-1" />
@@ -447,23 +409,26 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm">
-                      <div className="space-y-1">
+                      <div className="space-y-1 text-neutral-300">
                         <div><strong>Peso:</strong> {formatWeight(item.pesoTotal)}</div>
                         <div><strong>Volumen:</strong> {formatVolume(item.volumenTotal)}</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-neutral-400">
                           Densidad: {(item.pesoTotal / item.volumenTotal).toFixed(2)} kg/m³
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-green-600">
+                    <td className="px-4 py-3 text-sm font-semibold text-green-500">
                       {formatCurrency(item.valorBase)}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        item.esEspecial 
-                          ? 'bg-red-100 text-red-800' 
-                          : 'bg-green-100 text-green-800'
-                      }`}>
+                      <span
+                        title={item.esEspecial ? item.requisitoEspecial : ''}
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          item.esEspecial 
+                            ? 'bg-red-100 text-red-800' 
+                            : 'bg-green-100 text-green-800'
+                        }`}
+                      >
                         {item.esEspecial && <AlertTriangle size={12} className="mr-1" />}
                         {item.esEspecial ? 'Especial' : 'Regular'}
                       </span>
@@ -472,7 +437,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => editEntity(item.id)}
-                          className={`p-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors`}
+                          className="p-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors"
                         >
                           <Edit size={14} />
                         </button>

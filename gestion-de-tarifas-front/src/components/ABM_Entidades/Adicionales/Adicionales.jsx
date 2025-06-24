@@ -78,15 +78,15 @@ const Adicionales = ({ showNotification, tabColor }) => {
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Form Section */}
       <div className="lg:col-span-1">
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-          <h2 className={`text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
+        <div className="bg-[#444240]  p-8 rounded-2xl shadow-lg border border-gray-900">
+          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
             {editingId ? 'Editar Adicional' : 'Nuevo Adicional'}
           </h2>
 
           <div className="space-y-5">
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Descripción *
                 </label>
                 <textarea
@@ -95,12 +95,12 @@ const Adicionales = ({ showNotification, tabColor }) => {
                   onChange={handleInputChange}
                   placeholder="Describe el servicio adicional"
                   rows="3"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all resize-none`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Costo ($) *
                 </label>
                 <input
@@ -111,7 +111,7 @@ const Adicionales = ({ showNotification, tabColor }) => {
                   placeholder="Costo del servicio adicional"
                   min="0"
                   step="0.01"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 />
               </div>
 
@@ -160,7 +160,7 @@ const Adicionales = ({ showNotification, tabColor }) => {
       </div>
 
       {/* Table Section */}
-      <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
         <div className={`bg-gradient-to-r from-${tabColor}-700 to-${tabColor}-800 text-white p-6`}>
           <h2 className="text-2xl font-bold mb-4">
             Servicios Adicionales Registrados
