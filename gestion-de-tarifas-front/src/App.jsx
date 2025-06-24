@@ -1,23 +1,16 @@
-import { Route } from 'react-router-dom'
-import Header from './components/Header/Header'
-import { BrowserRouter, Routes } from 'react-router-dom'
-import RegistrarTarifa from './components/Form_registro_tarifas/RegistroTarifas'
-import HistoricoTarifas from './components/Historico_tarifas/HistoricoTarifas'
-import './App.css'
+import React from 'react'
+import Entidades from './components/ABM_Entidades/ABM_Entidades'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <div className='App'>
-        <Header />
-        <main className="main-content">
-          <Routes>
-            <Route path="/registrarTarifa" element={<RegistrarTarifa />} />
-            <Route path="/historicoTarifas" element={<HistoricoTarifas />} />
-          </Routes>
-        </main>
-      </div>
-    </BrowserRouter>
+    <div className="App">
+      
+      <Entidades />
+      
+    </div>
   )
 }
 
