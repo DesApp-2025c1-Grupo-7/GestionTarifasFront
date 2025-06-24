@@ -12,6 +12,8 @@ const Transportistas = ({ showNotification, tabColor }) => {
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [zonasViaje, setZonasViaje] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTransportista, setSelectedTransportista] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
     nombre: '',
     contacto: '',
@@ -63,6 +65,12 @@ const Transportistas = ({ showNotification, tabColor }) => {
     } else {
       setForm(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+
+  const viewEntity = (transportista) => {
+    setSelectedTransportista(transportista);
+    setShowModal(true);
   };
 
   const validateForm = () => {
@@ -400,6 +408,12 @@ const Transportistas = ({ showNotification, tabColor }) => {
                         >
                           <Trash2 size={14} />
                         </button>
+                        <button
+                          onClick={() => viewEntity(item)}
+                          className="p-2 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-colors"
+                        >
+                          👁️
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -409,6 +423,45 @@ const Transportistas = ({ showNotification, tabColor }) => {
           </table>
         </div>
       </div>
+      {showModal && selectedTransportista && (
+        <div className="fixed inset-0 z-50 backdrop-blur-sm bg-black/20 flex justify-center items-center">
+          <div className="bg-[#333] p-6 rounded-xl max-w-md w-full shadow-lg text-gray-100">
+            <h2 className="text-2xl font-bold mb-4">Detalle del Transportista</h2>
+            <div className="space-y-2 text-sm">
+              <p><strong>Nombre:</strong> {selectedTransportista.nombre}</p>
+              <p><strong>Contacto:</strong> {selectedTransportista.contacto}</p>
+              <p><strong>Teléfono:</strong> {selectedTransportista.telefono}</p>
+              <p><strong>Costo Servicio:</strong> ${selectedTransportista.costoServicio?.toFixed(2)}</p>
+              <div>
+                <strong>Tipos de Vehículo:</strong>
+                <ul className="list-disc list-inside">
+                  {selectedTransportista.tipoVehiculos?.map(tv => (
+                    <li key={tv.id}>{tv.descripcion}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <strong>Zonas de Viaje:</strong>
+                <ul className="list-disc list-inside">
+                  {selectedTransportista.zonasDeViaje?.map(z => (
+                    <li key={z.id}>
+                      {`${z.origen} - ${z.destino} ($${z.costoKilometro})`}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -15,7 +15,7 @@ export const createCarga = async (carga) => {
 };
 
 export const updateCarga = async (id, carga) => {
-  const res = await axios.put(`${API_URL}/tipo-carga/${id}`, carga);
+  const res = await axios.patch(`${API_URL}/tipo-carga/${id}`, carga);
   return res.data;
 };
 
