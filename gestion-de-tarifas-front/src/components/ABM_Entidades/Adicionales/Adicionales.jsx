@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, Edit, Trash2 } from 'lucide-react';
+import Swal from 'sweetalert2';
+import {getAdicionales,createAdicional,updateAdicional,deleteAdicional} from '../../../services/adicional.service';
 
 const Adicionales = ({ showNotification, tabColor }) => {
   const [data, setData] = useState([]);
@@ -7,9 +9,18 @@ const Adicionales = ({ showNotification, tabColor }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [form, setForm] = useState({ descripcion: '', costo: '' });
 
-  const generateId = () => {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  };
+  useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const adicionales = await getAdicionales();
+          const mapped = adicionales.map(a => ({ ...a, id: a.idAdicional }));
+          setData(mapped);
+        } catch (error) {
+          showNotification('Error al cargar los adicionales', 'error');
+        }
+      };
+      fetchData();
+    }, []);
 
   const clearForm = () => {
     setForm({ descripcion: '', costo: '' });
@@ -25,30 +36,36 @@ const Adicionales = ({ showNotification, tabColor }) => {
     return form.descripcion && form.costo;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) {
       showNotification('Por favor completa todos los campos requeridos', 'error');
       return;
     }
 
     const entityData = {
-      id: editingId || generateId(),
       descripcion: form.descripcion,
       costo: parseFloat(form.costo),
-      fechaCreacion: editingId ?
-        data.find(item => item.id === editingId).fechaCreacion :
-        new Date().toISOString()
     };
 
-    if (editingId) {
-      setData(data.map(item => item.id === editingId ? entityData : item));
-      showNotification('Adicional actualizado correctamente');
-    } else {
-      setData([...data, entityData]);
-      showNotification('Adicional agregado correctamente');
-    }
+    try {
+      if (editingId) {
+        const updatedAdicional = await updateAdicional(editingId, entityData);
+        setData(data.map(item =>
+          item.id === editingId ? { ...item, ...updatedAdicional } : item
+        ));
+        showNotification('Adicional actualizado correctamente');
+      } else {
+        const nuevoAdicional = await createAdicional(entityData);
+        setData([...data, nuevoAdicional]);
+        showNotification('Adicional agregado correctamente');
+      }
 
-    clearForm();
+      clearForm();
+    } catch (error) {
+      console.error('Error al guardar adicional:', error);
+      const mensaje = error?.response?.data?.message || 'Error al guardar el adicional';
+      showNotification(mensaje, 'error');
+    }
   };
 
   const editEntity = (id) => {
@@ -62,10 +79,36 @@ const Adicionales = ({ showNotification, tabColor }) => {
     }
   };
 
-  const deleteEntity = (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este adicional?')) {
-      setData(data.filter(item => item.id !== id));
-      showNotification('Adicional eliminado correctamente');
+  const deleteEntity = async (id) => {
+    const idNumber = Number(id);
+    console.log('ID a eliminar:', id, 'Como número:', idNumber);
+
+    if (!idNumber || isNaN(idNumber)) {
+      showNotification('ID inválido para eliminar', 'error');
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará el adicional definitivamente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteAdicional(idNumber);
+        setData(data.filter(item => item.id !== idNumber));
+        showNotification('Adicional eliminado correctamente');
+      } catch (error) {
+        console.error('Error al eliminar adicional:', error);
+        const mensaje = error?.response?.data?.message || 'Error al eliminar el adicional';
+        showNotification(mensaje, 'error');
+      }
     }
   };
 
@@ -183,7 +226,7 @@ const Adicionales = ({ showNotification, tabColor }) => {
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Descripción</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo ($)</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Fecha Creación</th>
+                {/* <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Fecha Creación</th> */}
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
               </tr>
             </thead>
@@ -209,9 +252,9 @@ const Adicionales = ({ showNotification, tabColor }) => {
                     <td className="px-4 py-3 text-sm font-semibold text-green-600">
                       ${item.costo.toFixed(2)}
                     </td>
-                    <td className="px-4 py-3 text-sm text-neutral-200">
+                    {/* <td className="px-4 py-3 text-sm text-neutral-200">
                       {new Date(item.fechaCreacion).toLocaleDateString('es-ES')}
-                    </td>
+                    </td> */}
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <button
@@ -221,7 +264,7 @@ const Adicionales = ({ showNotification, tabColor }) => {
                           <Edit size={14} />
                         </button>
                         <button
-                          onClick={() => deleteEntity(item.id)}
+                          onClick={() => deleteEntity(item.idAdicional)}
                           className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                         >
                           <Trash2 size={14} />
