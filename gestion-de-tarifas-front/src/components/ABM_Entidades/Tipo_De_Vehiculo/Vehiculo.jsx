@@ -181,10 +181,10 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
                   name="tipoCargaIds"
                   value={form.tipoCargaIds}
                   onChange={handleTipoCargaChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg bg-white text-black focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg  text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
                   {tiposCarga.map(tipo => (
-                    <option key={tipo.id} value={tipo.id} style={{ color: '#000' }}>
+                    <option key={tipo.id} value={tipo.id}>
                       {tipo.categoria}
                     </option>
                   ))}

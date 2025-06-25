@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Edit, Trash2, Phone, DollarSign, Truck, MapPin } from 'lucide-react';
+import { Search, Edit, Trash2, Phone, DollarSign, Truck, MapPin, Eye } from 'lucide-react';
 import { createTransportista, deleteTransportista, getTransportista, updateTransportista } from '../../../services/transportista.service';
 import { getVehiculos } from '../../../services/tipoVehiculo.service';
 import { getZonas } from '../../../services/zona.service';
@@ -14,6 +14,8 @@ const Transportistas = ({ showNotification, tabColor }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTransportista, setSelectedTransportista] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  
+
   const [form, setForm] = useState({
     nombre: '',
     contacto: '',
@@ -346,7 +348,7 @@ const Transportistas = ({ showNotification, tabColor }) => {
                 <th className="px-4 py-3 text-left text-sm font-semibold ">Nombre</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold ">Contacto</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold ">Información</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold ">Detalles</th>
+                {/* <th className="px-4 py-3 text-left text-sm font-semibold ">Detalles</th> */}
                 <th className="px-4 py-3 text-left text-sm font-semibold ">Acciones</th>
               </tr>
             </thead>
@@ -378,7 +380,7 @@ const Transportistas = ({ showNotification, tabColor }) => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    {/* <td className="px-4 py-3">
                       <div className="space-y-1">
                         <div className="flex items-center text-sm text-neutral-200">
                           <Truck size={12} className="mr-2" />
@@ -393,7 +395,7 @@ const Transportistas = ({ showNotification, tabColor }) => {
                           </span>
                         </div>
                       </div>
-                    </td>
+                    </td> */}
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <button
@@ -410,9 +412,9 @@ const Transportistas = ({ showNotification, tabColor }) => {
                         </button>
                         <button
                           onClick={() => viewEntity(item)}
-                          className="p-2 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-colors"
-                        >
-                          👁️
+                          className="p-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                          >
+                          <Eye size={14} />
                         </button>
                       </div>
                     </td>
