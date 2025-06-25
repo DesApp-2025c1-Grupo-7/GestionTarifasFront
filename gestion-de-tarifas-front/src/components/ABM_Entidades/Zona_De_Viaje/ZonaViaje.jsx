@@ -300,10 +300,10 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
               ) : (
                 filteredData.map((item) => (
                   <tr key={item.id} className={`border-b border-gray-100 hover:bg-${tabColor}-50/50 transition-colors`}>
-                    <td className="px-4 py-3 text-sm font-medium">{item.origen}</td>
-                    <td className="px-4 py-3 text-sm font-medium">{item.destino}</td>
-                    <td className="px-4 py-3 text-sm">{item.distanciaKm} km</td>
-                    <td className="px-4 py-3 text-sm">${item.costoPorKm}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-neutral-200">{item.origen}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-neutral-200">{item.destino}</td>
+                    <td className="px-4 py-3 text-sm text-neutral-200">{item.distanciaKm} km</td>
+                    <td className="px-4 py-3 text-sm text-neutral-200">${item.costoPorKm}</td>
                     <td className="px-4 py-3 text-sm font-semibold text-green-600">
                       ${calculateTotalCost(item.distanciaKm, item.costoPorKm)}
                     </td>
