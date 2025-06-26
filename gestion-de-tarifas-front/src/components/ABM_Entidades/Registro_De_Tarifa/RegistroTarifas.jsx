@@ -1,82 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Edit, Trash2, Plus, X } from 'lucide-react';
+import { createTarifa, deleteTarifa, getTarifas, updateTarifa } from '../../../services/tarifaCosto.service';
+import Swal from 'sweetalert2';
 
 const TarifaCosto = ({ showNotification, tabColor }) => {
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAdicionalesModal, setShowAdicionalesModal] = useState(false);
-  const [showListaAdicionalesModal, setShowListaAdicionalesModal] = useState(false);
   const [adicionalForm, setAdicionalForm] = useState({ descripcion: '', costo: '' });
-  const [selectedAdicionales, setSelectedAdicionales] = useState([]);
   
   const [form, setForm] = useState({
     tipoVehiculo: '',
     tipoCarga: '',
     zonaViaje: '',
     transportista: '',
-    costoBase: 0,
     adicionales: [],
     costoFinal: 0
   });
 
-   // Datos simulados de API 
-    const [apiData, setApiData] = useState({
-      tiposVehiculo: [
-        { id: 1, nombre: 'Camión', costoPorKm: 2.5 },
-        { id: 2, nombre: 'Camioneta', costoPorKm: 1.8 },
-        { id: 3, nombre: 'Furgón', costoPorKm: 2.0 },
-        { id: 4, nombre: 'Tráiler', costoPorKm: 3.2 }
-      ],
-      tiposCarga: [
-        { id: 1, nombre: 'Carga General', multiplicador: 1.0 },
-        { id: 2, nombre: 'Carga Frágil', multiplicador: 1.3 },
-        { id: 3, nombre: 'Carga Peligrosa', multiplicador: 1.8 },
-        { id: 4, nombre: 'Carga Refrigerada', multiplicador: 1.5 }
-      ],
-      zonasViaje: [
-        { id: 1, origen: 'Buenos Aires', destino: 'Córdoba', distanciaKm: 695 },
-        { id: 2, origen: 'Buenos Aires', destino: 'Rosario', distanciaKm: 300 },
-        { id: 3, origen: 'Córdoba', destino: 'Mendoza', distanciaKm: 600 },
-        { id: 4, origen: 'Buenos Aires', destino: 'Mar del Plata', distanciaKm: 400 }
-      ],
-      transportistas: [
-        { id: 1, nombre: 'Transportes Rápidos SA', tarifaBase: 500 },
-        { id: 2, nombre: 'Logística del Sur', tarifaBase: 450 },
-        { id: 3, nombre: 'Cargas Eficientes', tarifaBase: 480 },
-        { id: 4, nombre: 'Transporte Premium', tarifaBase: 550 }
-      ]
-    });
-  
-
-  // Lista de adicionales predefinidos (esto normalmente vendría de apiData)
-  const adicionalesPredefinidos = [
-    { id: 1, descripcion: 'Seguro adicional', costo: 50 },
-    { id: 2, descripcion: 'Peaje', costo: 25 },
-    { id: 3, descripcion: 'Combustible extra', costo: 75 },
-    { id: 4, descripcion: 'Carga y descarga', costo: 40 },
-    { id: 5, descripcion: 'Tiempo de espera', costo: 30 },
-    { id: 6, descripcion: 'Trabajo nocturno', costo: 60 },
-    { id: 7, descripcion: 'Transporte urgente', costo: 100 },
-    { id: 8, descripcion: 'Embalaje especial', costo: 35 }
-  ]
-
-  const generateId = () => {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const tarifas = await getTarifas();
+        const mapped = tarifas.map(a => ({ ...a, id: a.idTarifa }));
+        setData(mapped);
+      } catch (error) {
+        showNotification('Error al cargar las tarifas', 'error');
+      }
+    };
+    fetchData();
+  }, []);
 
   const clearForm = () => {
-    setForm({
-      tipoVehiculo: '',
-      tipoCarga: '',
-      zonaViaje: '',
-      transportista: '',
-      costoBase: 0,
-      adicionales: [],
-      costoFinal: 0
-    });
+    setForm({ descripcion: '', costo: '' });
     setEditingId(null);
-    setSelectedAdicionales([]);
   };
 
   const handleInputChange = (e) => {
@@ -84,129 +42,133 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
     setForm({ ...form, [name]: value });
   };
 
-  const handleCostoBaseChange = (e) => {
+  const handleCostoFinalChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
-    setForm({ ...form, costoBase: value });
+    setForm({ ...form, costoFinal: value });
   };
 
-  // Calcular costo base automáticamente
-  const calculateCostoBase = () => {
-    const vehiculo = apiData.tiposVehiculo.find(v => v.id.toString() === form.tipoVehiculo);
-    const carga = apiData.tiposCarga.find(c => c.id.toString() === form.tipoCarga);
-    const zona = apiData.zonasViaje.find(z => z.id.toString() === form.zonaViaje);
-    const transportista = apiData.transportistas.find(t => t.id.toString() === form.transportista);
+  // Calcular costo automáticamente
+  const calculateCosto = () => {
+    if (!form.tipoVehiculo || !form.tipoCarga || !form.zonaViaje || !form.transportista) return 0;
 
-    if (!vehiculo || !carga || !zona || !transportista) return 0;
+    const tarifa = tarifas.find(t =>
+      t.vehiculo.id.toString() === form.tipoVehiculo &&
+      t.carga.id.toString() === form.tipoCarga &&
+      t.zona.id.toString() === form.zonaViaje &&
+      t.transportista.id.toString() === form.transportista
+    );
 
-    const costoDistancia = vehiculo.costoPorKm * zona.distanciaKm;
-    const costoConCarga = costoDistancia * carga.multiplicador;
-    const costoBase = costoConCarga + transportista.tarifaBase;
+    if (!tarifa) return 0;
 
-    return costoBase;
-  };
+    const costoDistancia = tarifa.vehiculo.costoPorKm * tarifa.zona.distanciaKm;
+    const costoConCarga = costoDistancia * tarifa.carga.multiplicador;
+    const costoBase = costoConCarga + tarifa.transportista.tarifaBase;
 
-  // Calcular costo final (costo base + adicionales)
-  const calculateCostoFinal = () => {
     const costoAdicionales = form.adicionales.reduce((sum, adicional) => sum + parseFloat(adicional.costo || 0), 0);
-    return form.costoBase + costoAdicionales;
+
+    return costoBase + costoAdicionales;
   };
 
-  // Actualizar costo base automáticamente cuando cambian los campos principales
-  useEffect(() => {
-    const costoBaseCalculado = calculateCostoBase();
-    if (costoBaseCalculado > 0 && costoBaseCalculado !== form.costoBase) {
-      setForm(prev => ({ ...prev, costoBase: costoBaseCalculado }));
-    }
-  }, [form.tipoVehiculo, form.tipoCarga, form.zonaViaje, form.transportista]);
 
-  // Actualizar costo final cuando cambia el costo base o adicionales
+  // Actualizar costo automáticamente cuando cambian los campos
   useEffect(() => {
-    const costoFinalCalculado = calculateCostoFinal();
-    if (costoFinalCalculado !== form.costoFinal) {
-      setForm(prev => ({ ...prev, costoFinal: costoFinalCalculado }));
+    const costoCalculado = calculateCosto();
+    if (costoCalculado > 0 && costoCalculado !== form.costoFinal) {
+      setForm(prev => ({ ...prev, costoFinal: costoCalculado }));
     }
-  }, [form.costoBase, form.adicionales]);
+  }, [form.tipoVehiculo, form.tipoCarga, form.zonaViaje, form.transportista, form.adicionales]);
 
   const validateForm = () => {
     return form.tipoVehiculo && form.tipoCarga && form.zonaViaje && form.transportista;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) {
-      showNotification('Por favor completa todos los campos obligatorios', 'error');
+      showNotification('Por favor completa todos los campos requeridos', 'error');
       return;
     }
 
     const entityData = {
-      id: editingId || generateId(),
-      ...form,
-      costoBase: parseFloat(form.costoBase),
+      tipoVehiculoId: form.tipoVehiculo,
+      tipoCargaId: form.tipoCarga,
+      zonaViajeId: form.zonaViaje,
+      transportistaId: form.transportista,
+      adicionales: form.adicionales,
+      descripcion: form.descripcion,
       costoFinal: parseFloat(form.costoFinal),
-      fechaCreacion: editingId ?
-        data.find(item => item.id === editingId).fechaCreacion :
-        new Date().toISOString()
     };
 
-    if (editingId) {
-      setData(data.map(item => item.id === editingId ? entityData : item));
-      showNotification('Tarifa de costo actualizada correctamente');
-    } else {
-      setData([...data, entityData]);
-      showNotification('Tarifa de costo agregada correctamente');
-    }
+    try {
+      if (editingId) {
+        const updatedTarifa = await updateTarifa(editingId, entityData);
+        setData(data.map(item =>
+          item.id === editingId ? { ...item, ...updatedTarifa } : item
+        ));
+        showNotification('Tarifa actualizada correctamente');
+      } else {
+        const nuevaTarifa = await createTarifa(entityData);
+        setData([...data, nuevaTarifa]);
+        showNotification('Tarifa agregada correctamente');
+      }
 
-    clearForm();
+      clearForm();
+    } catch (error) {
+      console.error('Error al guardar adicional:', error);
+      const mensaje = error?.response?.data?.message || 'Error al guardar el adicional';
+      showNotification(mensaje, 'error');
+    }
   };
 
   const editEntity = (id) => {
     const entity = data.find(item => item.id === id);
     if (entity) {
-      setForm(entity);
+      setForm({
+        descripcion: entity.descripcion,
+        tipoVehiculo: entity.tipoVehiculoId.toString(),
+        tipoCarga: entity.tipoCargaId.toString(),
+        zonaViaje: entity.zonaViajeId.toString(),
+        transportista: entity.transportistaId.toString(),
+        adicionales: entity.adicionales || [],
+        costoFinal: entity.costoFinal?.toString() || '0',
+      });
       setEditingId(id);
-      // Limpiar selección de adicionales predefinidos cuando se edita
-      setSelectedAdicionales([]);
     }
   };
 
-  const deleteEntity = (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta tarifa de costo?')) {
-      setData(data.filter(item => item.id !== id));
-      showNotification('Tarifa de costo eliminada correctamente');
-    }
-  };
+  const deleteEntity = async (id) => {
+    const idNumber = Number(id);
+    console.log('ID a eliminar:', id, 'Como número:', idNumber);
 
-  // Manejar selección de adicionales predefinidos
-  const handleAdicionalPredefinidoChange = (adicionalId) => {
-    setSelectedAdicionales(prev => {
-      if (prev.includes(adicionalId)) {
-        return prev.filter(id => id !== adicionalId);
-      } else {
-        return [...prev, adicionalId];
+    if (!idNumber || isNaN(idNumber)) {
+      showNotification('ID inválido para eliminar', 'error');
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará la tarifa definitivamente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteTarifa(idNumber);
+        setData(data.filter(item => item.id !== idNumber));
+        showNotification('Tarifa eliminada correctamente');
+      } catch (error) {
+        console.error('Error al eliminar tarifa:', error);
+        const mensaje = error?.response?.data?.message || 'Error al eliminar la tarifa';
+        showNotification(mensaje, 'error');
       }
-    });
+    }
   };
 
-  const agregarAdicionalesPredefinidos = () => {
-    const nuevosAdicionales = selectedAdicionales.map(id => {
-      const adicional = adicionalesPredefinidos.find(a => a.id === id);
-      return {
-        id: generateId(),
-        descripcion: adicional.descripcion,
-        costo: adicional.costo
-      };
-    });
-
-    setForm(prev => ({
-      ...prev,
-      adicionales: [...prev.adicionales, ...nuevosAdicionales]
-    }));
-
-    setSelectedAdicionales([]);
-    setShowListaAdicionalesModal(false);
-    showNotification(`${nuevosAdicionales.length} adicionales agregados correctamente`);
-  };
-
-  // Manejar adicionales personalizados
+  // Manejar adicionales
   const handleAdicionalSubmit = () => {
     if (!adicionalForm.descripcion || !adicionalForm.costo) {
       showNotification('Por favor completa descripción y costo del adicional', 'error');
@@ -238,13 +200,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
 
   const filteredData = data.filter(item => {
     const searchLower = searchTerm.toLowerCase();
-    const vehiculo = apiData.tiposVehiculo.find(v => v.id.toString() === item.tipoVehiculo)?.nombre || '';
-    const transportista = apiData.transportistas.find(t => t.id.toString() === item.transportista)?.nombre || '';
-    
-    return (
-      vehiculo.toLowerCase().includes(searchLower) ||
-      transportista.toLowerCase().includes(searchLower)
-    );
+    return item.descripcion.toLowerCase().includes(searchLower);
   });
 
   const getEntityName = (entityArray, id) => {
@@ -391,7 +347,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                     </button>
                   </div>
                 </div>
-                
+
                 {form.adicionales.length > 0 && (
                   <div className="space-y-2">
                     {form.adicionales.map(adicional => (
@@ -424,7 +380,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                   className={`w-full p-3 border-2 border-emerald-300 rounded-lg focus:border-emerald-400 focus:outline-none transition-all text-2xl font-bold text-emerald-600 bg-emerald-50`}
                 />
                 <div className="text-xs text-gray-600 mt-1">
-                  Costo Base + Adicionales 
+                  Costo Base + Adicionales
                 </div>
               </div>
             </div>
@@ -448,11 +404,10 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
               )}
               <button
                 onClick={handleSubmit}
-                className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${
-                  editingId
+                className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${editingId
                     ? `bg-${tabColor}-500 hover:bg-${tabColor}-600`
                     : 'bg-green-500 hover:bg-green-600'
-                }`}
+                  }`}
               >
                 {editingId ? 'Actualizar' : 'Guardar'}
               </button>
@@ -566,11 +521,11 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
             <h3 className="text-xl font-bold mb-4">Seleccionar Adicionales</h3>
-            
+
             <div className="space-y-3 mb-6">
               {adicionalesPredefinidos.map(adicional => (
-                <div 
-                  key={adicional.id} 
+                <div
+                  key={adicional.id}
                   className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center space-x-3">
@@ -581,7 +536,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                       onChange={() => handleAdicionalPredefinidoChange(adicional.id)}
                       className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500"
                     />
-                    <label 
+                    <label
                       htmlFor={`adicional-${adicional.id}`}
                       className="text-sm font-medium text-gray-700 cursor-pointer"
                     >
@@ -637,7 +592,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-xl max-w-md w-full mx-4">
             <h3 className="text-xl font-bold mb-4">Agregar Adicional Personalizado</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -646,12 +601,12 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                 <input
                   type="text"
                   value={adicionalForm.descripcion}
-                  onChange={(e) => setAdicionalForm({...adicionalForm, descripcion: e.target.value})}
+                  onChange={(e) => setAdicionalForm({ ...adicionalForm, descripcion: e.target.value })}
                   placeholder="Ej: Seguro adicional, Peaje, etc."
                   className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Costo ($)
@@ -659,7 +614,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                 <input
                   type="number"
                   value={adicionalForm.costo}
-                  onChange={(e) => setAdicionalForm({...adicionalForm, costo: e.target.value})}
+                  onChange={(e) => setAdicionalForm({ ...adicionalForm, costo: e.target.value })}
                   placeholder="0.00"
                   min="0"
                   step="0.01"
