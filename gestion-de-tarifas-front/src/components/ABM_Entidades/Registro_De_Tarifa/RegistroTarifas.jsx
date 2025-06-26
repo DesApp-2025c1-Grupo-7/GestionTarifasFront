@@ -6,44 +6,60 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAdicionalesModal, setShowAdicionalesModal] = useState(false);
+  const [showListaAdicionalesModal, setShowListaAdicionalesModal] = useState(false);
   const [adicionalForm, setAdicionalForm] = useState({ descripcion: '', costo: '' });
+  const [selectedAdicionales, setSelectedAdicionales] = useState([]);
   
   const [form, setForm] = useState({
     tipoVehiculo: '',
     tipoCarga: '',
     zonaViaje: '',
     transportista: '',
+    costoBase: 0,
     adicionales: [],
     costoFinal: 0
   });
 
-  // Datos simulados de API 
-  const [apiData, setApiData] = useState({
-    tiposVehiculo: [
-      { id: 1, nombre: 'Camión', costoPorKm: 2.5 },
-      { id: 2, nombre: 'Camioneta', costoPorKm: 1.8 },
-      { id: 3, nombre: 'Furgón', costoPorKm: 2.0 },
-      { id: 4, nombre: 'Tráiler', costoPorKm: 3.2 }
-    ],
-    tiposCarga: [
-      { id: 1, nombre: 'Carga General', multiplicador: 1.0 },
-      { id: 2, nombre: 'Carga Frágil', multiplicador: 1.3 },
-      { id: 3, nombre: 'Carga Peligrosa', multiplicador: 1.8 },
-      { id: 4, nombre: 'Carga Refrigerada', multiplicador: 1.5 }
-    ],
-    zonasViaje: [
-      { id: 1, origen: 'Buenos Aires', destino: 'Córdoba', distanciaKm: 695 },
-      { id: 2, origen: 'Buenos Aires', destino: 'Rosario', distanciaKm: 300 },
-      { id: 3, origen: 'Córdoba', destino: 'Mendoza', distanciaKm: 600 },
-      { id: 4, origen: 'Buenos Aires', destino: 'Mar del Plata', distanciaKm: 400 }
-    ],
-    transportistas: [
-      { id: 1, nombre: 'Transportes Rápidos SA', tarifaBase: 500 },
-      { id: 2, nombre: 'Logística del Sur', tarifaBase: 450 },
-      { id: 3, nombre: 'Cargas Eficientes', tarifaBase: 480 },
-      { id: 4, nombre: 'Transporte Premium', tarifaBase: 550 }
-    ]
-  });
+   // Datos simulados de API 
+    const [apiData, setApiData] = useState({
+      tiposVehiculo: [
+        { id: 1, nombre: 'Camión', costoPorKm: 2.5 },
+        { id: 2, nombre: 'Camioneta', costoPorKm: 1.8 },
+        { id: 3, nombre: 'Furgón', costoPorKm: 2.0 },
+        { id: 4, nombre: 'Tráiler', costoPorKm: 3.2 }
+      ],
+      tiposCarga: [
+        { id: 1, nombre: 'Carga General', multiplicador: 1.0 },
+        { id: 2, nombre: 'Carga Frágil', multiplicador: 1.3 },
+        { id: 3, nombre: 'Carga Peligrosa', multiplicador: 1.8 },
+        { id: 4, nombre: 'Carga Refrigerada', multiplicador: 1.5 }
+      ],
+      zonasViaje: [
+        { id: 1, origen: 'Buenos Aires', destino: 'Córdoba', distanciaKm: 695 },
+        { id: 2, origen: 'Buenos Aires', destino: 'Rosario', distanciaKm: 300 },
+        { id: 3, origen: 'Córdoba', destino: 'Mendoza', distanciaKm: 600 },
+        { id: 4, origen: 'Buenos Aires', destino: 'Mar del Plata', distanciaKm: 400 }
+      ],
+      transportistas: [
+        { id: 1, nombre: 'Transportes Rápidos SA', tarifaBase: 500 },
+        { id: 2, nombre: 'Logística del Sur', tarifaBase: 450 },
+        { id: 3, nombre: 'Cargas Eficientes', tarifaBase: 480 },
+        { id: 4, nombre: 'Transporte Premium', tarifaBase: 550 }
+      ]
+    });
+  
+
+  // Lista de adicionales predefinidos (esto normalmente vendría de apiData)
+  const adicionalesPredefinidos = [
+    { id: 1, descripcion: 'Seguro adicional', costo: 50 },
+    { id: 2, descripcion: 'Peaje', costo: 25 },
+    { id: 3, descripcion: 'Combustible extra', costo: 75 },
+    { id: 4, descripcion: 'Carga y descarga', costo: 40 },
+    { id: 5, descripcion: 'Tiempo de espera', costo: 30 },
+    { id: 6, descripcion: 'Trabajo nocturno', costo: 60 },
+    { id: 7, descripcion: 'Transporte urgente', costo: 100 },
+    { id: 8, descripcion: 'Embalaje especial', costo: 35 }
+  ]
 
   const generateId = () => {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -55,10 +71,12 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
       tipoCarga: '',
       zonaViaje: '',
       transportista: '',
+      costoBase: 0,
       adicionales: [],
       costoFinal: 0
     });
     setEditingId(null);
+    setSelectedAdicionales([]);
   };
 
   const handleInputChange = (e) => {
@@ -66,13 +84,13 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
     setForm({ ...form, [name]: value });
   };
 
-  const handleCostoFinalChange = (e) => {
+  const handleCostoBaseChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
-    setForm({ ...form, costoFinal: value });
+    setForm({ ...form, costoBase: value });
   };
 
-  // Calcular costo automáticamente
-  const calculateCosto = () => {
+  // Calcular costo base automáticamente
+  const calculateCostoBase = () => {
     const vehiculo = apiData.tiposVehiculo.find(v => v.id.toString() === form.tipoVehiculo);
     const carga = apiData.tiposCarga.find(c => c.id.toString() === form.tipoCarga);
     const zona = apiData.zonasViaje.find(z => z.id.toString() === form.zonaViaje);
@@ -83,18 +101,31 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
     const costoDistancia = vehiculo.costoPorKm * zona.distanciaKm;
     const costoConCarga = costoDistancia * carga.multiplicador;
     const costoBase = costoConCarga + transportista.tarifaBase;
-    const costoAdicionales = form.adicionales.reduce((sum, adicional) => sum + parseFloat(adicional.costo || 0), 0);
 
-    return costoBase + costoAdicionales;
+    return costoBase;
   };
 
-  // Actualizar costo automáticamente cuando cambian los campos
+  // Calcular costo final (costo base + adicionales)
+  const calculateCostoFinal = () => {
+    const costoAdicionales = form.adicionales.reduce((sum, adicional) => sum + parseFloat(adicional.costo || 0), 0);
+    return form.costoBase + costoAdicionales;
+  };
+
+  // Actualizar costo base automáticamente cuando cambian los campos principales
   useEffect(() => {
-    const costoCalculado = calculateCosto();
-    if (costoCalculado > 0 && costoCalculado !== form.costoFinal) {
-      setForm(prev => ({ ...prev, costoFinal: costoCalculado }));
+    const costoBaseCalculado = calculateCostoBase();
+    if (costoBaseCalculado > 0 && costoBaseCalculado !== form.costoBase) {
+      setForm(prev => ({ ...prev, costoBase: costoBaseCalculado }));
     }
-  }, [form.tipoVehiculo, form.tipoCarga, form.zonaViaje, form.transportista, form.adicionales]);
+  }, [form.tipoVehiculo, form.tipoCarga, form.zonaViaje, form.transportista]);
+
+  // Actualizar costo final cuando cambia el costo base o adicionales
+  useEffect(() => {
+    const costoFinalCalculado = calculateCostoFinal();
+    if (costoFinalCalculado !== form.costoFinal) {
+      setForm(prev => ({ ...prev, costoFinal: costoFinalCalculado }));
+    }
+  }, [form.costoBase, form.adicionales]);
 
   const validateForm = () => {
     return form.tipoVehiculo && form.tipoCarga && form.zonaViaje && form.transportista;
@@ -109,6 +140,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
     const entityData = {
       id: editingId || generateId(),
       ...form,
+      costoBase: parseFloat(form.costoBase),
       costoFinal: parseFloat(form.costoFinal),
       fechaCreacion: editingId ?
         data.find(item => item.id === editingId).fechaCreacion :
@@ -131,6 +163,8 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
     if (entity) {
       setForm(entity);
       setEditingId(id);
+      // Limpiar selección de adicionales predefinidos cuando se edita
+      setSelectedAdicionales([]);
     }
   };
 
@@ -141,7 +175,38 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
     }
   };
 
-  // Manejar adicionales
+  // Manejar selección de adicionales predefinidos
+  const handleAdicionalPredefinidoChange = (adicionalId) => {
+    setSelectedAdicionales(prev => {
+      if (prev.includes(adicionalId)) {
+        return prev.filter(id => id !== adicionalId);
+      } else {
+        return [...prev, adicionalId];
+      }
+    });
+  };
+
+  const agregarAdicionalesPredefinidos = () => {
+    const nuevosAdicionales = selectedAdicionales.map(id => {
+      const adicional = adicionalesPredefinidos.find(a => a.id === id);
+      return {
+        id: generateId(),
+        descripcion: adicional.descripcion,
+        costo: adicional.costo
+      };
+    });
+
+    setForm(prev => ({
+      ...prev,
+      adicionales: [...prev.adicionales, ...nuevosAdicionales]
+    }));
+
+    setSelectedAdicionales([]);
+    setShowListaAdicionalesModal(false);
+    showNotification(`${nuevosAdicionales.length} adicionales agregados correctamente`);
+  };
+
+  // Manejar adicionales personalizados
   const handleAdicionalSubmit = () => {
     if (!adicionalForm.descripcion || !adicionalForm.costo) {
       showNotification('Por favor completa descripción y costo del adicional', 'error');
@@ -212,7 +277,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                   name="tipoVehiculo"
                   value={form.tipoVehiculo}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-700 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
                   <option value="">Seleccionar tipo de vehículo</option>
                   {apiData.tiposVehiculo.map(vehiculo => (
@@ -232,7 +297,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                   name="tipoCarga"
                   value={form.tipoCarga}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-700 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
                   <option value="">Seleccionar tipo de carga</option>
                   {apiData.tiposCarga.map(carga => (
@@ -252,7 +317,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                   name="zonaViaje"
                   value={form.zonaViaje}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-700 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
                   <option value="">Seleccionar zona de viaje</option>
                   {apiData.zonasViaje.map(zona => (
@@ -272,7 +337,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                   name="transportista"
                   value={form.transportista}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-700 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
                   <option value="">Seleccionar transportista</option>
                   {apiData.transportistas.map(transportista => (
@@ -283,27 +348,55 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                 </select>
               </div>
 
+              {/* Costo Base */}
+              <div className={`bg-blue-50 p-4 rounded-lg border border-blue-200`}>
+                <label className={`block text-sm font-semibold text-gray-700 mb-2`}>
+                  Costo Base
+                </label>
+                <input
+                  type="number"
+                  value={form.costoBase}
+                  onChange={handleCostoBaseChange}
+                  min="0"
+                  step="0.01"
+                  className={`w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-400 focus:outline-none transition-all text-xl font-bold text-blue-600`}
+                />
+                <div className="text-xs text-gray-600 mt-1">
+                  Agregar costo
+                </div>
+              </div>
+
               {/* Adicionales */}
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="block text-sm font-semibold text-gray-300">
                     Adicionales
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowAdicionalesModal(true)}
-                    className={`px-3 py-1 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors text-sm flex items-center gap-1`}
-                  >
-                    <Plus size={14} />
-                    Agregar
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowListaAdicionalesModal(true)}
+                      className={`px-3 py-1 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors text-sm flex items-center gap-1`}
+                    >
+                      <Plus size={14} />
+                      Catalogo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowAdicionalesModal(true)}
+                      className={`px-3 py-1 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors text-sm flex items-center gap-1`}
+                    >
+                      <Plus size={14} />
+                      Agregar
+                    </button>
+                  </div>
                 </div>
                 
                 {form.adicionales.length > 0 && (
                   <div className="space-y-2">
                     {form.adicionales.map(adicional => (
                       <div key={adicional.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                        <span className="text-sm">
+                        <span className="text-sm text-gray-700">
                           {adicional.descripcion} - ${adicional.costo}
                         </span>
                         <button
@@ -320,20 +413,18 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
               </div>
 
               {/* Costo Final */}
-              <div className={`bg-${tabColor}-50 p-4 rounded-lg border border-${tabColor}-200`}>
-                <label className={`block text-sm font-semibold text-gray-300 mb-2`}>
-                  Costo Final
+              <div className={`bg-emerald-50 p-4 rounded-lg border border-emerald-200`}>
+                <label className={`block text-sm font-semibold text-gray-700 mb-2`}>
+                  Costo Total Final
                 </label>
                 <input
                   type="number"
                   value={form.costoFinal}
-                  onChange={handleCostoFinalChange}
-                  min="0"
-                  step="0.01"
-                  className={`w-full p-3 border-2 border-emerald-300 rounded-lg focus:border-emerald-400 focus:outline-none transition-all text-2xl font-bold text-emerald-500`}
+                  readOnly
+                  className={`w-full p-3 border-2 border-emerald-300 rounded-lg focus:border-emerald-400 focus:outline-none transition-all text-2xl font-bold text-emerald-600 bg-emerald-50`}
                 />
-                <div className="text-xs text-gray-300 mt-1">
-                  Costo calculado automáticamente, pero puede modificarse
+                <div className="text-xs text-gray-600 mt-1">
+                  Costo Base + Adicionales 
                 </div>
               </div>
             </div>
@@ -396,15 +487,16 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Carga</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Zona</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Transportista</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo Base</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Adicionales</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo Final</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo Total</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan="8" className="px-4 py-12 text-center text-gray-500">
                     <div className="flex flex-col items-center">
                       <div className="text-6xl mb-4">💰</div>
                       <h3 className="text-lg font-semibold mb-2">No hay tarifas de costo registradas</h3>
@@ -427,13 +519,19 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                     <td className="px-4 py-3 text-sm text-neutral-200">
                       {getEntityName(apiData.transportistas, item.transportista)}
                     </td>
+                    <td className="px-4 py-3 text-sm font-bold text-blue-600">
+                      ${item.costoBase?.toFixed(2) || '0.00'}
+                    </td>
                     <td className="px-4 py-3 text-sm text-neutral-200">
                       {item.adicionales.length > 0 ? (
                         <div>
                           {item.adicionales.map(add => add.descripcion).join(', ')}
+                          <div className="text-xs text-gray-400">
+                            (+${item.adicionales.reduce((sum, add) => sum + add.costo, 0).toFixed(2)})
+                          </div>
                         </div>
                       ) : (
-                        <span className="text-neutral-200">Sin adicionales</span>
+                        <span className="text-neutral-400">Sin adicionales</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm font-bold text-green-600">
@@ -463,11 +561,82 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
         </div>
       </div>
 
-      {/* Modal para Adicionales */}
+      {/* Modal para Lista de Adicionales Predefinidos */}
+      {showListaAdicionalesModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-2xl shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <h3 className="text-xl font-bold mb-4">Seleccionar Adicionales</h3>
+            
+            <div className="space-y-3 mb-6">
+              {adicionalesPredefinidos.map(adicional => (
+                <div 
+                  key={adicional.id} 
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id={`adicional-${adicional.id}`}
+                      checked={selectedAdicionales.includes(adicional.id)}
+                      onChange={() => handleAdicionalPredefinidoChange(adicional.id)}
+                      className="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500"
+                    />
+                    <label 
+                      htmlFor={`adicional-${adicional.id}`}
+                      className="text-sm font-medium text-gray-700 cursor-pointer"
+                    >
+                      {adicional.descripcion}
+                    </label>
+                  </div>
+                  <span className="text-sm font-bold text-green-600">
+                    ${adicional.costo}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {selectedAdicionales.length > 0 && (
+              <div className="bg-purple-50 p-3 rounded-lg mb-4">
+                <p className="text-sm text-purple-700">
+                  <strong>Seleccionados:</strong> {selectedAdicionales.length} adicionales
+                </p>
+                <p className="text-sm text-purple-600">
+                  <strong>Total adicional:</strong> $
+                  {selectedAdicionales.reduce((sum, id) => {
+                    const adicional = adicionalesPredefinidos.find(a => a.id === id);
+                    return sum + (adicional ? adicional.costo : 0);
+                  }, 0)}
+                </p>
+              </div>
+            )}
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => {
+                  setShowListaAdicionalesModal(false);
+                  setSelectedAdicionales([]);
+                }}
+                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={agregarAdicionalesPredefinidos}
+                disabled={selectedAdicionales.length === 0}
+                className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                Agregar Seleccionados ({selectedAdicionales.length})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Adicionales Personalizados */}
       {showAdicionalesModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-xl max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold mb-4">Agregar Adicional</h3>
+            <h3 className="text-xl font-bold mb-4">Agregar Adicional Personalizado</h3>
             
             <div className="space-y-4">
               <div>
