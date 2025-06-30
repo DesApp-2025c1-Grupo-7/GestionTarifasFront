@@ -176,11 +176,11 @@ const Transportistas = ({ showNotification, tabColor }) => {
   const canSubmit = tiposVehiculo.length > 0 && zonasViaje.length > 0;
 
   return (
-    <div className="grid lg:grid-cols-3 gap-8">
+    <div className="grid lg:grid-cols-3 gap-8 ">
       {/* Form Section */}
       <div className="lg:col-span-1">
-        <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
-          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
+        <div className="bg-[#444240] p-8 rounded-2xl shadow-lg   border border-gray-900">
+          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-orange-500`}>
             {editingId ? 'Editar Transportista' : 'Nuevo Transportista'}
           </h2>
 

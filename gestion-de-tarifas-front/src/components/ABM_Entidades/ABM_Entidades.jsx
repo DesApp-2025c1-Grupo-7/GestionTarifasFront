@@ -19,7 +19,7 @@ const ABMEntidades = () => {
     { id: 'zones', label: 'Zonas de Viaje', icon: MapPin, color: 'purple', component: ZonasViaje },
     { id: 'transporters', label: 'Transportistas', icon: Building, color: 'orange', component: Transportistas },
     { id: 'additionals', label: 'Adicionales', icon: Plus, color: 'indigo', component: Adicionales },
-    { id: 'rates', label: 'Tarifas', icon: DollarSign, color: 'teal', component: RegistroTarifas }
+    { id: 'rates', label: 'Tarifas', icon: DollarSign, color: 'emerald', component: RegistroTarifas }
   ];
 
   const showNotification = (message, type = 'success') => {

@@ -158,12 +158,12 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
       {/* Formulario */}
       <div className="lg:col-span-1">
         <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
-          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
+          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-emerald-500`}>
             {editingId ? 'Editar Tarifa de Costo' : 'Nueva Tarifa de Costo'}
           </h2>
 
           <div className="space-y-5">
-            <div>
+            <div >
               <label className="block text-sm font-semibold text-gray-300 mb-2">
                 Tipo de Vehículo *
               </label>
@@ -171,7 +171,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                 name="tipoVehiculo"
                 value={form.tipoVehiculo}
                 onChange={handleInputChange}
-                className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-emerald-500 focus:outline-none transition-all`}
               >
                 <option value="" className="text-gray-900">Seleccionar tipo de vehículo</option>
                 {tiposVehiculo.map(vehiculo => (
@@ -287,7 +287,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
 
       {/* Tabla */}
       <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
-        <div className={`bg-gradient-to-r from-${tabColor}-700 to-${tabColor}-800 text-white p-6`}>
+        <div className={`bg-gradient-to-r from-emerald-700 to-emerald-800 text-white p-6`}>
           <h2 className="text-2xl font-bold mb-4">Tarifas de Costo Registradas</h2>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300" size={20} />

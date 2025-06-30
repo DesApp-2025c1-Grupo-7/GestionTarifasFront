@@ -158,7 +158,7 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
                   onChange={handleInputChange}
                   placeholder="Descripción del tipo de vehículo"
                   rows="3"
-                  className={`w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all resize-none`}
+                  className={`w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition-all resize-none`}
                 />
               </div>
               <div>
