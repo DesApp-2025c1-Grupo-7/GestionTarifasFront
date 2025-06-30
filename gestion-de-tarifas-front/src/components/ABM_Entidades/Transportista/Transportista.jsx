@@ -15,12 +15,11 @@ const Transportistas = ({ showNotification, tabColor }) => {
   const [selectedTransportista, setSelectedTransportista] = useState(null);
   const [showModal, setShowModal] = useState(false);
   
-
+  // Modificado: Se quita costoServicio del estado del formulario
   const [form, setForm] = useState({
     nombre: '',
     contacto: '',
     telefono: '',
-    costoServicio: '',
     tipoVehiculos: [],
     zonasDeViaje: []
   });
@@ -45,13 +44,13 @@ const Transportistas = ({ showNotification, tabColor }) => {
 
 
   const clearForm = () => {
+    // Modificado: Se quita costoServicio al limpiar el formulario
     setForm({
       nombre: '',
       contacto: '',
       telefono: '',
-      costoServicio: '',
-      tipoVehiculos: '',
-      zonasDeViaje: ''
+      tipoVehiculos: [], // Corregido: Debe ser un array vacío para el select multiple
+      zonasDeViaje: []  // Corregido: Debe ser un array vacío para el select multiple
     });
     setEditingId(null);
   };
@@ -75,8 +74,9 @@ const Transportistas = ({ showNotification, tabColor }) => {
     setShowModal(true);
   };
 
+  // Modificado: Se quita la validación de costoServicio
   const validateForm = () => {
-    return form.nombre && form.contacto && form.telefono && form.costoServicio && form.tipoVehiculos.length > 0 && form.zonasDeViaje.length > 0 
+    return form.nombre && form.contacto && form.telefono && form.tipoVehiculos.length > 0 && form.zonasDeViaje.length > 0 
   };
 
   const handleSubmit = async () => {
@@ -84,11 +84,12 @@ const Transportistas = ({ showNotification, tabColor }) => {
       showNotification('Por favor completa todos los campos requeridos', 'error');
       return;
     }
-
+    
+    // Modificado: Se quita costoServicio de los datos a enviar
     const entityData = {
-      ...form,
+      nombre: form.nombre,
+      contacto: form.contacto,
       telefono: form.telefono,
-      costoServicio: parseFloat(form.costoServicio),
       tipoVehiculos: form.tipoVehiculos.map(id => parseInt(id)),  
       zonasDeViaje: form.zonasDeViaje.map(id => parseInt(id)), 
     };
@@ -114,11 +115,11 @@ const Transportistas = ({ showNotification, tabColor }) => {
   const editEntity = (id) => {
     const entity = data.find(item => item.id === id);
     if (entity) {
+      // Modificado: Se quita costoServicio al popular el formulario para edición
       setForm({
         nombre: entity.nombre,
         contacto: entity.contacto,
         telefono: entity.telefono.toString(),
-        costoServicio: entity.costoServicio.toString(),
         tipoVehiculos: (entity.tipoVehiculos || []).map(tv => tv.id.toString()),
         zonasDeViaje: (entity.zonasDeViaje || []).map(zn => zn.id.toString())
       });
@@ -151,25 +152,24 @@ const Transportistas = ({ showNotification, tabColor }) => {
       }
   };
 
-  const getTipoVehiculoNombre = (tipoVehiculoId) => {
-    const tipoVehiculo = tiposVehiculo.find(tv => tv.id === tipoVehiculoId);
-    return tipoVehiculo ? tipoVehiculo.descripcion : 'No especificado';
-  };
-
-  const getZonaViaje = (zonaViajeId) => {
-    const zona = zonasViaje.find(z => z.id === zonaViajeId);
-    return zona ? zona.nombre : 'No especificado';
-  };
-
+  // Corregido: Lógica de filtrado para buscar en las listas de vehículos y zonas
   const filteredData = data.filter(item => {
     const searchLower = searchTerm.toLowerCase();
-    const tipoVehiculoNombre = getTipoVehiculoNombre(item.tipoVehiculoId);
-    const zonaNombre = getZonaViaje(item.zonaViajeId);
+    
+    const tieneVehiculo = item.tipoVehiculos?.some(vehiculo => 
+      vehiculo.descripcion.toLowerCase().includes(searchLower)
+    );
+
+    const cubreZona = item.zonasDeViaje?.some(zona => 
+      `${zona.origen} - ${zona.destino}`.toLowerCase().includes(searchLower)
+    );
+
     return (
       item.nombre.toLowerCase().includes(searchLower) ||
       item.contacto.toLowerCase().includes(searchLower) ||
-      tipoVehiculoNombre.toLowerCase().includes(searchLower) ||
-      zonaNombre.toLowerCase().includes(searchLower)
+      item.telefono.toString().includes(searchLower) ||
+      tieneVehiculo ||
+      cubreZona
     );
   });
 
@@ -225,21 +225,9 @@ const Transportistas = ({ showNotification, tabColor }) => {
                   className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-orange-500 focus:outline-none transition-all`}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Costo de Servicio *
-                </label>
-                <input
-                  type="number"
-                  name="costoServicio"
-                  value={form.costoServicio}
-                  onChange={handleInputChange}
-                  placeholder="Costo del servicio"
-                  step="0.01"
-                  min="0"
-                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-orange-500 focus:outline-none transition-all`}
-                />
-              </div>
+              
+              {/* Eliminado: Bloque del input para Costo de Servicio */}
+              
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">
                   Tipo de Vehículo *
@@ -249,7 +237,7 @@ const Transportistas = ({ showNotification, tabColor }) => {
                   value={form.tipoVehiculos}
                   onChange={handleInputChange}
                   multiple
-                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-orange-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-orange-500 focus:outline-none transition-all h-32`}
                 >
                   {tiposVehiculo.map(tipo => (
                     <option key={tipo.id} value={tipo.id}>
@@ -272,11 +260,12 @@ const Transportistas = ({ showNotification, tabColor }) => {
                     value={form.zonasDeViaje}
                     onChange={handleInputChange}
                     multiple
-                    className={`w-full p-3 border-2 border-gray-300 text-gray-300 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                    className={`w-full p-3 border-2 border-gray-300 text-gray-300 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all h-32`}
                   >
                     {zonasViaje.map(zona => (
                       <option key={zona.id} value={zona.id}>
-                        {`${zona.origen} - ${zona.destino} ($${zona.costoKilometro})`}
+                        {/* Modificado: Se quita el costo que ya no existe */}
+                        {`${zona.origen} - ${zona.destino}`}
                       </option>
                     ))}
                 </select>
@@ -347,15 +336,14 @@ const Transportistas = ({ showNotification, tabColor }) => {
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-semibold ">Nombre</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold ">Contacto</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold ">Información</th>
-                {/* <th className="px-4 py-3 text-left text-sm font-semibold ">Detalles</th> */}
+                <th className="px-4 py-3 text-left text-sm font-semibold ">Teléfono</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold ">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-4 py-12 text-center text-gray-300">
+                  <td colSpan="4" className="px-4 py-12 text-center text-gray-300">
                     <div className="flex flex-col items-center">
                       <div className="text-6xl mb-4">🚛</div>
                       <h3 className="text-lg font-semibold mb-2">No hay transportistas registrados</h3>
@@ -369,33 +357,12 @@ const Transportistas = ({ showNotification, tabColor }) => {
                     <td className="px-4 py-3 text-sm font-medium text-neutral-200">{item.nombre}</td>
                     <td className="px-4 py-3 text-sm text-neutral-200">{item.contacto}</td>
                     <td className="px-4 py-3">
-                      <div className="space-y-1">
                         <div className="flex items-center text-sm text-neutral-200">
                           <Phone size={12} className="mr-2" />
                           {item.telefono}
                         </div>
-                        <div className="flex items-center text-sm text-neutral-200">
-                         
-                          ${item.costoServicio?.toFixed(2)}
-                        </div>
-                      </div>
+                        {/* Eliminado: Div que mostraba el costo de servicio */}
                     </td>
-                    {/* <td className="px-4 py-3">
-                      <div className="space-y-1">
-                        <div className="flex items-center text-sm text-neutral-200">
-                          <Truck size={12} className="mr-2" />
-                          <span className="truncate max-w-[150px]" title={getTipoVehiculoNombre(item.tipoVehiculoId)}>
-                            {getTipoVehiculoNombre(item.tipoVehiculoId)}
-                          </span>
-                        </div>
-                        <div className="flex items-center text-sm text-neutral-200">
-                          <MapPin size={12} className="mr-2" />
-                          <span className="truncate max-w-[150px]" title={getZonaViaje(item.zonaViajeId)}>
-                            {getZonaViaje(item.zonaViajeId)}
-                          </span>
-                        </div>
-                      </div>
-                    </td> */}
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <button
@@ -433,7 +400,7 @@ const Transportistas = ({ showNotification, tabColor }) => {
               <p><strong>Nombre:</strong> {selectedTransportista.nombre}</p>
               <p><strong>Contacto:</strong> {selectedTransportista.contacto}</p>
               <p><strong>Teléfono:</strong> {selectedTransportista.telefono}</p>
-              <p><strong>Costo Servicio:</strong> ${selectedTransportista.costoServicio?.toFixed(2)}</p>
+              {/* Eliminado: Párrafo que mostraba el Costo Servicio */}
               <div>
                 <strong>Tipos de Vehículo:</strong>
                 <ul className="list-disc list-inside">
@@ -447,7 +414,8 @@ const Transportistas = ({ showNotification, tabColor }) => {
                 <ul className="list-disc list-inside">
                   {selectedTransportista.zonasDeViaje?.map(z => (
                     <li key={z.id}>
-                      {`${z.origen} - ${z.destino} ($${z.costoKilometro})`}
+                      {/* Modificado: Se quita el costo que ya no existe */}
+                      {`${z.origen} - ${z.destino}`}
                     </li>
                   ))}
                 </ul>
