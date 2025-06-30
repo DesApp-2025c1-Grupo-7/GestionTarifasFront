@@ -149,21 +149,6 @@ const AdicionalesReport = ({ showNotification, tabColor = 'indigo' }) => {
     return 'text-red-600 bg-red-50';
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-center h-64">
-            <div className="flex items-center space-x-2">
-              <RefreshCw className="animate-spin text-blue-500" size={24} />
-              <span className="text-gray-300">Cargando reporte de adicionales...</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#242423] p-8 shadow-lg border border-gray-900">
       <div className="max-w-7xl mx-auto">
