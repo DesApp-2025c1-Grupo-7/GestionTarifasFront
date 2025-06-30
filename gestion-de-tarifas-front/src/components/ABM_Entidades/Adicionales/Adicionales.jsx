@@ -1,26 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Edit, Trash2 } from 'lucide-react';
+import { Search, Edit, Trash2, BarChart3 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import {getAdicionales,createAdicional,updateAdicional,deleteAdicional} from '../../../services/adicional.service';
+import { getAdicionales, createAdicional, updateAdicional, deleteAdicional } from '../../../services/adicional.service';
 
 const Adicionales = ({ showNotification, tabColor }) => {
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [form, setForm] = useState({ descripcion: '', costo: '' });
 
   useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const adicionales = await getAdicionales();
-          const mapped = adicionales.map(a => ({ ...a, id: a.idAdicional }));
-          setData(mapped);
-        } catch (error) {
-          showNotification('Error al cargar los adicionales', 'error');
-        }
-      };
-      fetchData();
-    }, []);
+    const fetchData = async () => {
+      try {
+        const adicionales = await getAdicionales();
+        const mapped = adicionales.map(a => ({ ...a, id: a.idAdicional }));
+        console.log('Datos recibidos:', mapped);
+        setData(mapped);
+      } catch (error) {
+        showNotification('Error al cargar los adicionales', 'error');
+      }
+    };
+    fetchData();
+  }, []);
 
   const clearForm = () => {
     setForm({ descripcion: '', costo: '' });
@@ -112,6 +115,10 @@ const Adicionales = ({ showNotification, tabColor }) => {
     }
   };
 
+  const handleViewReport = () => {
+    navigate('/reports/adicionales');
+  };
+
   const filteredData = data.filter(item => {
     const searchLower = searchTerm.toLowerCase();
     return item.descripcion.toLowerCase().includes(searchLower);
@@ -121,8 +128,8 @@ const Adicionales = ({ showNotification, tabColor }) => {
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Form Section */}
       <div className="lg:col-span-1">
-        <div className="bg-[#444240]  p-8 rounded-2xl shadow-lg border border-gray-900">
-          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
+        <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
+          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-indigo-500`}>
             {editingId ? 'Editar Adicional' : 'Nuevo Adicional'}
           </h2>
 
@@ -138,7 +145,7 @@ const Adicionales = ({ showNotification, tabColor }) => {
                   onChange={handleInputChange}
                   placeholder="Describe el servicio adicional"
                   rows="3"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-indigo-500 focus:outline-none transition-all`}
                 />
               </div>
 
@@ -154,16 +161,16 @@ const Adicionales = ({ showNotification, tabColor }) => {
                   placeholder="Costo del servicio adicional"
                   min="0"
                   step="0.01"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-indigo-500 focus:outline-none transition-all`}
                 />
               </div>
 
               {form.costo && (
-                <div className={`bg-${tabColor}-50 p-4 rounded-lg border border-${tabColor}-200`}>
-                  <label className={`block text-sm font-semibold text-${tabColor}-700 mb-1`}>
+                <div className={`bg-indigo-50 p-4 rounded-lg border border-indigo-200`}>
+                  <label className={`block text-sm font-semibold text-indigo-700 mb-1`}>
                     Costo del Servicio
                   </label>
-                  <div className={`text-2xl font-bold text-${tabColor}-800`}>
+                  <div className={`text-2xl font-bold text-indigo-800`}>
                     ${parseFloat(form.costo).toFixed(2)}
                   </div>
                 </div>
@@ -189,11 +196,10 @@ const Adicionales = ({ showNotification, tabColor }) => {
               )}
               <button
                 onClick={handleSubmit}
-                className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${
-                  editingId
-                    ? `bg-${tabColor}-500 hover:bg-${tabColor}-600`
+                className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${editingId
+                    ? `bg-indigo-500 hover:bg-indigo-600`
                     : 'bg-green-500 hover:bg-green-600'
-                }`}
+                  }`}
               >
                 {editingId ? 'Actualizar' : 'Guardar'}
               </button>
@@ -202,12 +208,22 @@ const Adicionales = ({ showNotification, tabColor }) => {
         </div>
       </div>
 
-      {/* Table Section */}
       <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
-        <div className={`bg-gradient-to-r from-${tabColor}-700 to-${tabColor}-800 text-white p-6`}>
-          <h2 className="text-2xl font-bold mb-4">
-            Servicios Adicionales Registrados
-          </h2>
+        <div className="bg-gradient-to-r from-indigo-700 to-indigo-800 text-white p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold">Adicionales Registrados</h2>
+
+            {/* BOTÓN PARA VER REPORTES */}
+            <button
+              onClick={handleViewReport}
+              className="flex items-center space-x-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors backdrop-blur-sm border border-white/30"
+              title="Ver reportes y análisis de adicionales"
+            >
+              <BarChart3 size={18} />
+              <span className="font-medium">Ver Reportes</span>
+            </button>
+          </div>
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300" size={20} />
             <input
@@ -226,14 +242,13 @@ const Adicionales = ({ showNotification, tabColor }) => {
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Descripción</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo ($)</th>
-                {/* <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Fecha Creación</th> */}
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan="3" className="px-4 py-12 text-center text-gray-500">
                     <div className="flex flex-col items-center">
                       <div className="text-6xl mb-4">🛎️</div>
                       <h3 className="text-lg font-semibold mb-2">No hay servicios adicionales registrados</h3>
@@ -243,29 +258,26 @@ const Adicionales = ({ showNotification, tabColor }) => {
                 </tr>
               ) : (
                 filteredData.map((item) => (
-                  <tr key={item.id} className={`border-b border-gray-100 hover:bg-${tabColor}-50/50 transition-colors`}>
+                  <tr key={item.id} className="border-b border-gray-100 hover:bg-indigo-50/50 transition-colors">
                     <td className="px-4 py-3 text-sm font-medium max-w-xs">
-                      <div className="truncate text-neutral-200" title={item.descripcion} text-neutral-20>
+                      <div className="truncate text-neutral-200" title={item.descripcion}>
                         {item.descripcion}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm font-semibold text-green-600">
                       ${item.costo.toFixed(2)}
                     </td>
-                    {/* <td className="px-4 py-3 text-sm text-neutral-200">
-                      {new Date(item.fechaCreacion).toLocaleDateString('es-ES')}
-                    </td> */}
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <button
                           onClick={() => editEntity(item.id)}
-                          className={`p-2 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors`}
+                          className="p-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors"
                         >
                           <Edit size={14} />
                         </button>
                         <button
                           onClick={() => deleteEntity(item.idAdicional)}
-                          className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                          className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
                         >
                           <Trash2 size={14} />
                         </button>
