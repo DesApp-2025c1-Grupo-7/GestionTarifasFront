@@ -197,8 +197,8 @@ const Adicionales = ({ showNotification, tabColor }) => {
               <button
                 onClick={handleSubmit}
                 className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${editingId
-                    ? `bg-indigo-500 hover:bg-indigo-600`
-                    : 'bg-green-500 hover:bg-green-600'
+                  ? `bg-indigo-500 hover:bg-indigo-600`
+                  : 'bg-green-500 hover:bg-green-600'
                   }`}
               >
                 {editingId ? 'Actualizar' : 'Guardar'}
@@ -239,15 +239,9 @@ const Adicionales = ({ showNotification, tabColor }) => {
         <div className="max-h-96 overflow-y-auto">
           <table className="w-full">
             <thead className="bg-[#242423] sticky top-0">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Descripción</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo ($)</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Descripción</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Costo ($)</th>
-                {/* <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Fecha Creación</th> */}
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Acciones</th>
-              </tr>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Descripción</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo ($)</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
             </thead>
             <tbody>
               {filteredData.length === 0 ? (
@@ -269,7 +263,7 @@ const Adicionales = ({ showNotification, tabColor }) => {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm font-semibold text-green-600">
-                      ${item.costo.toFixed(2)}
+                      ${Number(item.costo).toFixed(2)}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
