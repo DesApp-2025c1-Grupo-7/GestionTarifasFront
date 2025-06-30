@@ -7,11 +7,11 @@ const TiposCarga = ({ showNotification, tabColor }) => {
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  // Modificado: Se quita valorBase del estado
   const [form, setForm] = useState({ 
     categoria: '',
     pesoTotal: '', 
     volumenTotal: '', 
-    valorBase: '', 
     esEspecial: false,
     requisitoEspecial: ''
   });
@@ -29,11 +29,11 @@ const TiposCarga = ({ showNotification, tabColor }) => {
   }, []);
 
   const clearForm = () => {
+    // Modificado: Se quita valorBase al limpiar el formulario
     setForm({ 
       categoria: '', 
       pesoTotal: '', 
       volumenTotal: '', 
-      valorBase: '', 
       esEspecial: false,
       requisitoEspecial: ''
     });
@@ -53,16 +53,15 @@ const TiposCarga = ({ showNotification, tabColor }) => {
     }
   };
 
+  // Modificado: Se quita la validación de valorBase
   const validateForm = () => {
     const peso = parseFloat(form.pesoTotal);
     const volumen = parseFloat(form.volumenTotal);
-    const valor = parseFloat(form.valorBase);
 
     if (
       !form.categoria.trim() ||
       isNaN(peso) || peso < 0 ||
-      isNaN(volumen) || volumen < 0 ||
-      isNaN(valor) || valor < 0
+      isNaN(volumen) || volumen < 0
     ) {
       return false;
     }
@@ -77,11 +76,11 @@ const TiposCarga = ({ showNotification, tabColor }) => {
   const editEntity = (id) => {
     const carga = data.find(item => item.id === id);
     if (carga) {
+      // Modificado: Se quita valorBase al popular el formulario para edición
       setForm({
         categoria: carga.categoria || '',
         pesoTotal: carga.pesoTotal.toString(),
         volumenTotal: carga.volumenTotal.toString(),
-        valorBase: carga.valorBase.toString(),
         esEspecial: carga.esEspecial,
         requisitoEspecial: carga.requisitoEspecial || '',
       });
@@ -99,12 +98,12 @@ const TiposCarga = ({ showNotification, tabColor }) => {
       return;
     }
 
+    // Modificado: Se quita valorBase de los datos a enviar
     const entityData = {
       categoria: form.categoria.trim(),
       requisitoEspecial: form.esEspecial ? form.requisitoEspecial.trim() : '',
       pesoTotal: parseFloat(form.pesoTotal),
       volumenTotal: parseFloat(form.volumenTotal),
-      valorBase: parseFloat(form.valorBase),
       esEspecial: form.esEspecial,
     };
 
@@ -120,7 +119,6 @@ const TiposCarga = ({ showNotification, tabColor }) => {
         setData([...data, nuevaCarga]);
         showNotification('Tipo de carga agregada correctamente');
       }
-
       clearForm();
     } catch (error) {
       console.error('Error al guardar tipo de carga:', error);
@@ -154,24 +152,19 @@ const TiposCarga = ({ showNotification, tabColor }) => {
     }
   };
 
+  // Modificado: Se quita valorBase de los criterios de búsqueda
   const filteredData = data.filter(item => {
     const searchLower = searchTerm.toLowerCase();
     return (
       item.categoria.toLowerCase().includes(searchLower) ||
-      item.requisitoEspecial.toLowerCase().includes(searchLower) ||
+      (item.requisitoEspecial && item.requisitoEspecial.toLowerCase().includes(searchLower)) ||
       item.pesoTotal.toString().includes(searchTerm) ||
-      item.volumenTotal.toString().includes(searchTerm) ||
-      item.valorBase.toString().includes(searchTerm)
+      item.volumenTotal.toString().includes(searchTerm)
     );
   });
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS'
-    }).format(amount);
-  };
-
+  // Eliminado: La función formatCurrency ya no es necesaria
+  
   const formatWeight = (weight) => {
     return `${weight} kg`;
   };
@@ -237,21 +230,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 />
               </div>
               
-              <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Valor Base ($) *
-                </label>
-                <input
-                  type="number"
-                  name="valorBase"
-                  value={form.valorBase}
-                  onChange={handleInputChange}
-                  placeholder="Valor base del servicio"
-                  min="0"
-                  step="0.01"
-                  className="w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-blue-500 focus:outline-none transition-all"
-                />
-              </div>
+              {/* Eliminado: Bloque del input para Valor Base */}
 
               <div className="flex items-center space-x-3 p-4 rounded-lg">
                 <input
@@ -290,16 +269,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 </div>
               )}
               
-              {form.valorBase && (
-                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                  <label className="block text-sm font-semibold text-green-700 mb-1">
-                    Valor Base Formateado
-                  </label>
-                  <div className="text-2xl font-bold text-green-800">
-                    {formatCurrency(parseFloat(form.valorBase))}
-                  </div>
-                </div>
-              )}
+              {/* Eliminado: Bloque que mostraba el valor base formateado */}
 
               {(form.pesoTotal || form.volumenTotal) && (
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
@@ -313,7 +283,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                     {form.volumenTotal && (
                       <p><strong>Volumen:</strong> {formatVolume(parseFloat(form.volumenTotal))}</p>
                     )}
-                    {form.pesoTotal && form.volumenTotal && (
+                    {form.pesoTotal && form.volumenTotal && parseFloat(form.volumenTotal) > 0 && (
                       <p><strong>Densidad:</strong> {(parseFloat(form.pesoTotal) / parseFloat(form.volumenTotal)).toFixed(2)} kg/m³</p>
                     )}
                   </div>
@@ -365,7 +335,8 @@ const TiposCarga = ({ showNotification, tabColor }) => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar por categoría, peso, volumen, valor o requisito..."
+              // Modificado: Placeholder del buscador
+              placeholder="Buscar por categoría, peso, volumen o requisito..."
               className="w-full max-w-md pl-10 pr-4 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:bg-white/20"
             />
           </div>
@@ -377,7 +348,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
               <tr className="text-gray-300">
                 <th className="px-4 py-3 text-left text-sm text-gray-300 font-semibold">Categoría</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Especificaciones</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Valor Base</th>
+                {/* Eliminado: Cabecera de la tabla para Valor Base */}
                 <th className="px-4 py-3 text-left text-sm font-semibold">Tipo</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Acciones</th>
               </tr>
@@ -385,7 +356,8 @@ const TiposCarga = ({ showNotification, tabColor }) => {
             <tbody>
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-4 py-12 text-center text-gray-300">
+                  {/* Modificado: colSpan cambia de 5 a 4 */}
+                  <td colSpan="4" className="px-4 py-12 text-center text-gray-300">
                     <div className="flex flex-col items-center">
                       <div className="text-6xl mb-4">📦</div>
                       <h3 className="text-lg font-semibold mb-2">No hay tipos de carga registrados</h3>
@@ -412,14 +384,14 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                       <div className="space-y-1 text-neutral-300">
                         <div><strong>Peso:</strong> {formatWeight(item.pesoTotal)}</div>
                         <div><strong>Volumen:</strong> {formatVolume(item.volumenTotal)}</div>
-                        <div className="text-xs text-neutral-400">
-                          Densidad: {(item.pesoTotal / item.volumenTotal).toFixed(2)} kg/m³
-                        </div>
+                        {item.volumenTotal > 0 && (
+                          <div className="text-xs text-neutral-400">
+                            Densidad: {(item.pesoTotal / item.volumenTotal).toFixed(2)} kg/m³
+                          </div>
+                        )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-green-500">
-                      {formatCurrency(item.valorBase)}
-                    </td>
+                    {/* Eliminado: Celda de la tabla para mostrar el valorBase */}
                     <td className="px-4 py-3">
                       <span
                         title={item.esEspecial ? item.requisitoEspecial : ''}

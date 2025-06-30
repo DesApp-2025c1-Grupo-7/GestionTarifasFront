@@ -8,7 +8,8 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [form, setForm] = useState({ descripcion: '', precioBase: '', tipoCargaIds: [] });
+  // Modificado: Se quita precioBase del estado inicial del formulario
+  const [form, setForm] = useState({ descripcion: '', tipoCargaIds: [] });
   const [tiposCarga, setTiposCarga] = useState([]);
 
   useEffect(() => {
@@ -37,7 +38,8 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
   }, []);
 
   const clearForm = () => {
-    setForm({ descripcion: '', precioBase: '', tipoCargaIds: [] });
+    // Modificado: Se quita precioBase al limpiar el formulario
+    setForm({ descripcion: '', tipoCargaIds: [] });
     setEditingId(null);
   };
 
@@ -52,8 +54,9 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
     console.log("Tipo de carga seleccionados:", selected);
   };
 
+  // Modificado: Se quita la validación de precioBase
   const validateForm = () => {
-    return form.descripcion && form.precioBase && form.tipoCargaIds.length > 0;
+    return form.descripcion && form.tipoCargaIds.length > 0;
   };
 
   const handleSubmit = async () => {
@@ -62,9 +65,9 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
       return;
     }
 
+    // Modificado: Se quita precioBase de los datos a enviar
     const entityData = {
       descripcion: form.descripcion.trim(),
-      precioBase: parseFloat(form.precioBase),
       tipoCargas: form.tipoCargaIds.map(id => parseInt(id))
     };
 
@@ -89,9 +92,9 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
   const editEntity = (id) => {
     const entity = data.find(item => item.id === id);
     if (entity) {
+      // Modificado: Se quita precioBase al popular el formulario para edición
       setForm({
         descripcion: entity.descripcion,
-        precioBase: entity.precioBase.toString(),
         tipoCargaIds: (entity.tipoCargas || []).map(tc => tc.id.toString())
       });
       setEditingId(id);
@@ -161,19 +164,7 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
                   className={`w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none transition-all resize-none`}
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-300 mb-2">Precio Base *</label>
-                <input
-                  type="number"
-                  name="precioBase"
-                  value={form.precioBase}
-                  onChange={handleInputChange}
-                  placeholder="Precio base del vehículo"
-                  step="0.01"
-                  min="0"
-                  className={`w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-${tabColor}-500 focus:outline-none transition-all`}
-                />
-              </div>
+              {/* Eliminado: Bloque del input para Precio Base */}
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">Tipo de Carga *</label>
                 <select
@@ -181,7 +172,7 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
                   name="tipoCargaIds"
                   value={form.tipoCargaIds}
                   onChange={handleTipoCargaChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg  text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
                   {tiposCarga.map(tipo => (
                     <option key={tipo.id} value={tipo.id}>
@@ -221,7 +212,7 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
                   tiposCarga.length === 0
                     ? 'bg-gray-400 cursor-not-allowed'
                     : editingId
-                    ? `bg-[#444240] text-green-500 border border-green-500 hover:text-white  hover:bg-green-500`
+                    ? `bg-[#444240] text-green-500 border border-green-500 hover:text-white hover:bg-green-500`
                     : 'bg-[#444240] border border-green-500 text-green-500 hover:text-white hover:bg-green-500'
                 }`}
               >
@@ -253,7 +244,7 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
             <thead className="bg-[#242423] sticky top-0">
               <tr className='text-gray-300'>
                 <th className="px-4 py-3 text-left text-sm font-semibold ">Descripción</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold ">Precio Base</th>
+                {/* Eliminado: Cabecera de la tabla para Precio Base */}
                 <th className="px-4 py-3 text-left text-sm font-semibold ">Tipo de Carga</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold ">Acciones</th>
               </tr>
@@ -261,7 +252,8 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
             <tbody>
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-4 py-12 text-center text-gray-300">
+                  {/* Modificado: colSpan cambia de 4 a 3 */}
+                  <td colSpan="3" className="px-4 py-12 text-center text-gray-300">
                     <div className="flex flex-col items-center">
                       <div className="text-6xl mb-4">🚛</div>
                       <h3 className="text-lg font-semibold mb-2">No hay tipos de vehículo registrados</h3>
@@ -273,7 +265,7 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
                 filteredData.map((item) => (
                   <tr key={item.id} className={`border-b border-gray-100 hover:bg-${tabColor}-50/50 transition-colors`}>
                     <td className="px-4 py-3 text-sm text-neutral-200">{item.descripcion}</td>
-                    <td className="px-4 py-3 text-sm font-medium text-neutral-200">${item.precioBase?.toFixed(2)}</td>
+                    {/* Eliminado: Celda de la tabla para mostrar el precioBase */}
                     <td className="px-4 py-3 text-sm text-neutral-200">{getTipoCargaNombre(item.tipoCargas)}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
