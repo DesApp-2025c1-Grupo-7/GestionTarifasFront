@@ -12,18 +12,13 @@ export const createTarifa = async (data) => {
   return res.data;
 };
 
-export const updateTarifa = async (id, tarifa) => {
-  const res = await axios.patch(`${API_URL}/tarifa-costo/${id}`, tarifa);
+
+export const updateTarifaCosto = async (id, tarifa) => {
+  const res = await axios.put(`${API_URL}/tarifa-costo/${id}`, tarifa);
   return res.data;
 };
 
-export const deleteTarifa = async (id) => {
-  const res = await axios.delete(`${API_URL}/tarifa-costo/${id}`);
+export const deleteTarifa= async (id) => {
+  const res = await axios.patch(`${API_URL}/tarifa-costo/${id}/eliminar`);
   return res.data;
 };
-
-export const getTarifaById = async (id) => {
-  const res = await axios.get(`${API_URL}/tarifa-costo/${id}`);
-  return res.data;
-};
-

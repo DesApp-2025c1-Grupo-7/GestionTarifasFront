@@ -19,7 +19,7 @@ const ABMEntidades = () => {
     { id: 'zones', label: 'Zonas de Viaje', icon: MapPin, color: 'purple', component: ZonasViaje },
     { id: 'transporters', label: 'Transportistas', icon: Building, color: 'orange', component: Transportistas },
     { id: 'additionals', label: 'Adicionales', icon: Plus, color: 'indigo', component: Adicionales },
-    { id: 'rates', label: 'Tarifas', icon: DollarSign, color: 'emerald', component: RegistroTarifas }
+    { id: 'rates', label: 'Tarifas', icon: DollarSign, color: 'teal', component: RegistroTarifas }
   ];
 
   const showNotification = (message, type = 'success') => {
@@ -44,9 +44,10 @@ const ABMEntidades = () => {
         return 'bg-indigo-500';
       case 'emerald':
         return 'bg-emerald-500';
+      case 'teal':        
+        return 'bg-teal-500';
       default:
         return 'bg-gray-500';
-
     }
 
   }
