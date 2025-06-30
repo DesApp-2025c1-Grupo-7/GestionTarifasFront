@@ -238,11 +238,15 @@ const Adicionales = ({ showNotification, tabColor }) => {
 
         <div className="max-h-96 overflow-y-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 sticky top-0">
+            <thead className="bg-[#242423] sticky top-0">
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Descripción</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo ($)</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Descripción</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Costo ($)</th>
+                {/* <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Fecha Creación</th> */}
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Acciones</th>
               </tr>
             </thead>
             <tbody>

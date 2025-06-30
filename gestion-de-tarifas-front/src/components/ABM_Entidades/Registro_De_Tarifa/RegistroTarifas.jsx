@@ -2,8 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Search, Edit, Trash2, Plus, X } from 'lucide-react';
 import { createTarifa, deleteTarifa, getTarifas, updateTarifa } from '../../../services/tarifaCosto.service';
 import Swal from 'sweetalert2';
+import { getVehiculos } from '../../../services/tipoVehiculo.service';
+import { getCargas } from '../../../services/tipoCarga.service';
+import { getZonas } from '../../../services/zona.service';
+import { getTransportista } from '../../../services/transportista.service';
+
 
 const TarifaCosto = ({ showNotification, tabColor }) => {
+  const [tiposVehiculo, setTiposVehiculo] = useState([]);
+  const [tiposCarga, setTiposCargas] = useState([]);
+  const [zonasDeViaje, setZonasDeViaje] = useState([])
+  const [transportistas, setTransportista] = useState([])
+
+
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -32,6 +43,73 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
     fetchData();
   }, []);
 
+      const fetchAll = async () => {
+        try {
+          const [tipoVehiculoData, tipoCargaData, zonasDeViajeData, transportistaData] = await Promise.all([
+            getVehiculos(),
+            getCargas(),
+            getZonas(),
+            getTransportista()
+          ]);
+          setTiposVehiculo(tipoVehiculoData),
+          setTiposCargas(tipoCargaData),
+          setZonasDeViaje(zonasDeViajeData),
+          setTransportista(transportistaData)
+
+        } catch (error) {
+          showNotification('Error al cargar datos', 'error');
+        }
+      };
+      fetchAll();
+    }, []);
+
+
+   // Datos simulados de API 
+    const [apiData, setApiData] = useState({
+      // tiposVehiculo: [
+      //   { id: 1, nombre: 'Camión', costoPorKm: 2.5 },
+      //   { id: 2, nombre: 'Camioneta', costoPorKm: 1.8 },
+      //   { id: 3, nombre: 'Furgón', costoPorKm: 2.0 },
+      //   { id: 4, nombre: 'Tráiler', costoPorKm: 3.2 }
+      // ],
+      // tiposCarga: [
+      //   { id: 1, nombre: 'Carga General', multiplicador: 1.0 },
+      //   { id: 2, nombre: 'Carga Frágil', multiplicador: 1.3 },
+      //   { id: 3, nombre: 'Carga Peligrosa', multiplicador: 1.8 },
+      //   { id: 4, nombre: 'Carga Refrigerada', multiplicador: 1.5 }
+      // ],
+      // zonasViaje: [
+      //   { id: 1, origen: 'Buenos Aires', destino: 'Córdoba', distanciaKm: 695 },
+      //   { id: 2, origen: 'Buenos Aires', destino: 'Rosario', distanciaKm: 300 },
+      //   { id: 3, origen: 'Córdoba', destino: 'Mendoza', distanciaKm: 600 },
+      //   { id: 4, origen: 'Buenos Aires', destino: 'Mar del Plata', distanciaKm: 400 }
+      // ],
+      // transportistas: [
+      //   { id: 1, nombre: 'Transportes Rápidos SA', tarifaBase: 500 },
+      //   { id: 2, nombre: 'Logística del Sur', tarifaBase: 450 },
+      //   { id: 3, nombre: 'Cargas Eficientes', tarifaBase: 480 },
+      //   { id: 4, nombre: 'Transporte Premium', tarifaBase: 550 }
+      // ]
+    });
+  
+
+  // Lista de adicionales predefinidos (esto normalmente vendría de apiData)
+  const adicionalesPredefinidos = [
+    { id: 1, descripcion: 'Seguro adicional', costo: 50 },
+    { id: 2, descripcion: 'Peaje', costo: 25 },
+    { id: 3, descripcion: 'Combustible extra', costo: 75 },
+    { id: 4, descripcion: 'Carga y descarga', costo: 40 },
+    { id: 5, descripcion: 'Tiempo de espera', costo: 30 },
+    { id: 6, descripcion: 'Trabajo nocturno', costo: 60 },
+    { id: 7, descripcion: 'Transporte urgente', costo: 100 },
+    { id: 8, descripcion: 'Embalaje especial', costo: 35 }
+  ]
+
+  const generateId = () => {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  };
+
+
   const clearForm = () => {
     setForm({ descripcion: '', costo: '' });
     setEditingId(null);
@@ -50,6 +128,12 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
   // Calcular costo automáticamente
   const calculateCosto = () => {
     if (!form.tipoVehiculo || !form.tipoCarga || !form.zonaViaje || !form.transportista) return 0;
+  // Calcular costo base automáticamente
+  const calculateCostoBase = () => {
+    const vehiculo = tiposVehiculo.find(v => v.id.toString() === form.tipoVehiculo);
+    const carga = tiposCarga.find(c => c.id.toString() === form.tipoCarga);
+    const zona = zonasDeViaje.find(z => z.id.toString() === form.zonaViaje);
+    const transportista = transportistas.find(t => t.id.toString() === form.transportista);
 
     const tarifa = tarifas.find(t =>
       t.vehiculo.id.toString() === form.tipoVehiculo &&
@@ -58,11 +142,22 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
       t.transportista.id.toString() === form.transportista
     );
 
+
     if (!tarifa) return 0;
+    // const costoDistancia = vehiculo.costoPorKm * zona.distanciaKm;
+    const costoVehiculo = vehiculo.precioBase
+    const costoConCarga = costoVehiculo + carga.valorBase;
+    const costoZona = zona.distancia * zona.costoKilometro
+    const costoBase = costoConCarga + costoZona + transportista.costoServicio;
+
 
     const costoDistancia = tarifa.vehiculo.costoPorKm * tarifa.zona.distanciaKm;
     const costoConCarga = costoDistancia * tarifa.carga.multiplicador;
     const costoBase = costoConCarga + tarifa.transportista.tarifaBase;
+
+
+  // Calcular costo final (costo base + adicionales)
+  const calculateCostoFinal = () => {
 
     const costoAdicionales = form.adicionales.reduce((sum, adicional) => sum + parseFloat(adicional.costo || 0), 0);
 
@@ -200,8 +295,19 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
 
   const filteredData = data.filter(item => {
     const searchLower = searchTerm.toLowerCase();
+
     return item.descripcion.toLowerCase().includes(searchLower);
+
+    const vehiculo = tiposVehiculo.find(v => v.id.toString() === item.tipoVehiculo)?.descripcion || '';
+    const transportista = transportistas.find(t => t.id.toString() === item.transportista)?.nombre || '';
+    
+    return (
+      vehiculo.toLowerCase().includes(searchLower) ||
+      transportista.toLowerCase().includes(searchLower)
+    );
+
   });
+
 
   const getEntityName = (entityArray, id) => {
     const entity = entityArray.find(item => item.id.toString() === id);
@@ -209,11 +315,16 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
   };
 
   const getZonaName = (id) => {
-    const zona = apiData.zonasViaje.find(z => z.id.toString() === id);
+    const zona = zonasDeViaje.find(z => z.id.toString() === id);
     return zona ? `${zona.origen} - ${zona.destino}` : 'N/A';
   };
 
-  return (
+  const cargasFiltradas = () => {
+    const vehiculoSeleccionado = tiposVehiculo.find(v => v.id.toString() === form.tipoVehiculo);
+    return vehiculoSeleccionado?.tipoCargas || [];
+  };
+
+ return (
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Form Section */}
       <div className="lg:col-span-1">
@@ -232,13 +343,13 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                 <select
                   name="tipoVehiculo"
                   value={form.tipoVehiculo}
-                  onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-700 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  onChange={handleInputChange} 
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
-                  <option value="">Seleccionar tipo de vehículo</option>
-                  {apiData.tiposVehiculo.map(vehiculo => (
-                    <option key={vehiculo.id} value={vehiculo.id}>
-                      {vehiculo.nombre} (${vehiculo.costoPorKm}/km)
+                  <option value="" className='text-gray-900'>Seleccionar tipo de vehículo</option>
+                  {tiposVehiculo.map(vehiculo => (
+                    <option key={vehiculo.id} value={vehiculo.id} className='text-gray-900'>
+                      {vehiculo.descripcion} (${vehiculo.precioBase}/km)
                     </option>
                   ))}
                 </select>
@@ -253,14 +364,14 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                   name="tipoCarga"
                   value={form.tipoCarga}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-700 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
-                  <option value="">Seleccionar tipo de carga</option>
-                  {apiData.tiposCarga.map(carga => (
-                    <option key={carga.id} value={carga.id}>
-                      {carga.nombre} (x{carga.multiplicador})
-                    </option>
-                  ))}
+                  <option value=""  className='text-gray-900'>Seleccionar tipo de carga</option>
+                  {cargasFiltradas().map(carga => (
+                      <option key={carga.id} value={carga.id} className='text-gray-900'>
+                        {carga.categoria} (${carga.valorBase})
+                      </option>
+                    ))}
                 </select>
               </div>
 
@@ -273,12 +384,12 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                   name="zonaViaje"
                   value={form.zonaViaje}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-700 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
-                  <option value="">Seleccionar zona de viaje</option>
-                  {apiData.zonasViaje.map(zona => (
-                    <option key={zona.id} value={zona.id}>
-                      {zona.origen} - {zona.destino} ({zona.distanciaKm} km)
+                  <option value="" className='text-gray-900'>Seleccionar zona de viaje</option>
+                  {zonasDeViaje.map(zona => (
+                    <option key={zona.id} value={zona.id} className='text-gray-900'>
+                      {zona.origen} - {zona.destino} | {zona.distancia} km (${zona.distancia * zona.costoKilometro})
                     </option>
                   ))}
                 </select>
@@ -293,12 +404,12 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                   name="transportista"
                   value={form.transportista}
                   onChange={handleInputChange}
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-700 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                 >
-                  <option value="">Seleccionar transportista</option>
-                  {apiData.transportistas.map(transportista => (
-                    <option key={transportista.id} value={transportista.id}>
-                      {transportista.nombre} (Base: ${transportista.tarifaBase})
+                  <option value="" className='text-gray-900'>Seleccionar transportista</option>
+                  {transportistas.map(transportista => (
+                    <option key={transportista.id} value={transportista.id} className='text-gray-900'>
+                      {transportista.nombre} (Base: ${transportista.costoServicio})
                     </option>
                   ))}
                 </select>
@@ -436,16 +547,16 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
 
         <div className="max-h-96 overflow-y-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 sticky top-0">
+            <thead className="bg-[#242423] sticky top-0">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Vehículo</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Carga</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Zona</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Transportista</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo Base</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Adicionales</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo Total</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Vehículo</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Carga</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Zona</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Transportista</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Costo Base</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Adicionales</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Costo Total</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Acciones</th>
               </tr>
             </thead>
             <tbody>
