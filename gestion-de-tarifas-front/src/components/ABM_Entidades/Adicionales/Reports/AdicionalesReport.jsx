@@ -1,17 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Package, Star, TrendingDown, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Star, TrendingDown, ArrowLeft, RefreshCw } from 'lucide-react';
 import { getAdicionalesReport } from '../../../../services/adicional.service';
 import { useNavigate } from 'react-router-dom';
-
-const categorizarAdicional = (descripcion) => {
-  const descLower = descripcion.toLowerCase();
-  if (descLower.includes('seguro')) return 'Seguros';
-  if (descLower.includes('almacenamiento')) return 'Almacenamiento';
-  if (descLower.includes('embalaje')) return 'Embalaje';
-  if (descLower.includes('urgente') || descLower.includes('prioritario')) return 'Prioridad';
-  if (descLower.includes('refrigerado') || descLower.includes('frágil')) return 'Manejo Especial';
-  return 'Otros';
-};
 
 const AdicionalesReport = ({ showNotification }) => {
   const [adicionales, setAdicionales] = useState([]);
@@ -32,8 +22,7 @@ const AdicionalesReport = ({ showNotification }) => {
       const mappedData = data.map(item => ({
         ...item,
         id: item.idAdicional,
-        categoria: categorizarAdicional(item.descripcion),
-        costo: parseFloat(item.costo), // ✅ aseguramos que costo sea número
+        costo: parseFloat(item.costo), 
       }));
 
       setAdicionales(mappedData);
@@ -82,6 +71,30 @@ const AdicionalesReport = ({ showNotification }) => {
     return filtered;
   }, [adicionales, searchTerm, sortBy]);
 
+  const agruparYSumar = (items) => {
+    const map = new Map();
+
+    items.forEach(item => {
+      const key = item.descripcion;
+      if (!map.has(key)) {
+        map.set(key, { 
+          ...item, 
+          frecuenciaDeUso: item.frecuenciaDeUso, 
+          apariciones: 1 
+        });
+      } else {
+        const existing = map.get(key);
+        existing.frecuenciaDeUso += item.frecuenciaDeUso;
+        existing.apariciones += 1;
+        map.set(key, existing);
+      }
+    });
+
+    return Array.from(map.values()).sort((a, b) => b.frecuenciaDeUso - a.frecuenciaDeUso);
+  };
+
+  const adicionalesAgrupados = useMemo(() => agruparYSumar(filteredData), [filteredData]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -124,22 +137,7 @@ const AdicionalesReport = ({ showNotification }) => {
           </div>
         </div>
 
-        <div className="bg-[#444240] p-6 rounded-xl shadow-sm border border-gray-700 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4 items-center">
-            <div className="flex-1 w-full">
-              <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Buscar adicionales..." className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400" />
-            </div>
-            <div className="flex gap-4">
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200">
-                <option value="uso">Ordenar por más usados</option>
-                <option value="costo">Ordenar por mayor costo</option>
-                <option value="alfabetico">Ordenar alfabéticamente (A-Z)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[#444240] rounded-xl shadow-sm border border-gray-700 overflow-hidden">
+        <div className="bg-[#444240] rounded-xl shadow-sm border border-gray-700 overflow-hidden mb-8">
           <div className="p-6 border-b border-gray-700">
             <h2 className="text-xl font-bold text-gray-200">Catálogo Detallado ({filteredData.length} adicionales)</h2>
           </div>
@@ -148,7 +146,6 @@ const AdicionalesReport = ({ showNotification }) => {
               <thead className="bg-gray-800">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Adicional</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Categoría</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Costo Estándar</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Frecuencia (en Tarifas)</th>
                 </tr>
@@ -157,12 +154,7 @@ const AdicionalesReport = ({ showNotification }) => {
                 {filteredData.map(item => (
                   <tr key={item.id} className="hover:bg-gray-700">
                     <td className="px-6 py-4 text-sm font-medium text-gray-200">{item.descripcion}</td>
-                    <td className="px-6 py-4">
-                      <span className="px-2 py-1 text-xs font-semibold text-blue-200 bg-blue-900 rounded-full">{item.categoria}</span>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-semibold text-green-400">
-                      ${Number(item.costo).toFixed(2)}
-                    </td>
+                    <td className="px-6 py-4 text-sm font-semibold text-green-400">${item.costo.toFixed(2)}</td>
                     <td className="px-6 py-4 text-sm font-semibold text-indigo-400">{item.frecuenciaDeUso} tarifas</td>
                   </tr>
                 ))}
@@ -177,7 +169,7 @@ const AdicionalesReport = ({ showNotification }) => {
               <Star className="text-yellow-400 mr-2" size={20} /> Más Utilizados
             </h3>
             <div className="space-y-2">
-              {filteredData.slice(0, 5).map(item => (
+              {adicionalesAgrupados.slice(0, 5).map(item => (
                 <div key={item.id} className="flex justify-between p-2 bg-gray-800 rounded">
                   <span className="text-gray-300">{item.descripcion}</span>
                   <span className="font-bold text-indigo-300">{item.frecuenciaDeUso} tarifas</span>
@@ -185,12 +177,13 @@ const AdicionalesReport = ({ showNotification }) => {
               ))}
             </div>
           </div>
+
           <div className="bg-[#444240] p-6 rounded-xl shadow-sm border border-gray-700">
             <h3 className="text-lg font-bold text-gray-200 mb-4 flex items-center">
               <TrendingDown className="text-red-400 mr-2" size={20} /> Menos Utilizados
             </h3>
             <div className="space-y-2">
-              {filteredData.slice(-5).reverse().map(item => (
+              {adicionalesAgrupados.slice(-5).reverse().map(item => (
                 <div key={item.id} className="flex justify-between p-2 bg-gray-800 rounded">
                   <span className="text-gray-300">{item.descripcion}</span>
                   <span className="font-bold text-indigo-300">{item.frecuenciaDeUso} tarifas</span>
@@ -205,3 +198,5 @@ const AdicionalesReport = ({ showNotification }) => {
 };
 
 export default AdicionalesReport;
+
+
