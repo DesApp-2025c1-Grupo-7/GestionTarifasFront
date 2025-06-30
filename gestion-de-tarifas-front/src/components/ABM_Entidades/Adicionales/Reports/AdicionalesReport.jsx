@@ -1,18 +1,27 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, TrendingUp, TrendingDown, DollarSign, Package, BarChart3, PieChart, Calendar, Filter, RefreshCw } from 'lucide-react';
-import { getAdicionales, getAdicionalesReport } from '../../../../services/adicional.service';
+import { Search, Package, Star, TrendingDown, ArrowLeft, RefreshCw } from 'lucide-react';
+import { getAdicionalesReport } from '../../../../services/adicional.service';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
 
-const AdicionalesReport = ({ showNotification, tabColor = 'indigo' }) => {
+// Función auxiliar para agrupar adicionales en categorías
+const categorizarAdicional = (descripcion) => {
+  const descLower = descripcion.toLowerCase();
+  if (descLower.includes('seguro')) return 'Seguros';
+  if (descLower.includes('almacenamiento')) return 'Almacenamiento';
+  if (descLower.includes('embalaje')) return 'Embalaje';
+  if (descLower.includes('urgente') || descLower.includes('prioritario')) return 'Prioridad';
+  if (descLower.includes('refrigerado') || descLower.includes('frágil')) return 'Manejo Especial';
+  return 'Otros';
+};
+
+const AdicionalesReport = ({ showNotification }) => {
   const [adicionales, setAdicionales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [sortBy, setSortBy] = useState('costo');
+  const [sortBy, setSortBy] = useState('uso'); // Orden por defecto: los más usados
   const navigate = useNavigate();
 
-  const [usageData, setUsageData] = useState({});
+  // El estado 'usageData' ya no es necesario y se ha eliminado.
 
   useEffect(() => {
     fetchAdicionales();
@@ -21,80 +30,56 @@ const AdicionalesReport = ({ showNotification, tabColor = 'indigo' }) => {
   const fetchAdicionales = async () => {
     try {
       setLoading(true);
-
+      // 1. Llamamos al backend, que ahora devuelve la estructura simplificada.
       const data = await getAdicionalesReport();
+
+      // 2. Mapeamos los datos para añadir el ID y la categoría.
       const mappedData = data.map(item => ({
-        ...item,
+        ...item, // Esto incluye: idAdicional, descripcion, costo, frecuenciaDeUso
         id: item.idAdicional,
         categoria: categorizarAdicional(item.descripcion)
       }));
 
       setAdicionales(mappedData);
-
-      const usage = {};
-      mappedData.forEach(item => {
-        usage[item.id] = {
-          usosMensuales: item.usosMensuales,
-          tarifasMasUsadas: item.tarifasMasUsadas
-        };
-      });
-      setUsageData(usage);
-
     } catch (error) {
-      console.error('Error al cargar adicionales:', error);
-      showNotification?.('Error al cargar los adicionales', 'error');
+      console.error('Error al cargar el reporte de adicionales:', error);
+      showNotification?.('Error al cargar el reporte', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-
-  const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
-
+  // 3. Las estadísticas ahora se calculan con 'frecuenciaDeUso'.
   const stats = useMemo(() => {
-    if (adicionales.length === 0) return { totalAdicionales: 0, totalUsosMes: 0, promedioUso: 0, ingresosTotales: 0 };
+    if (adicionales.length === 0) return { totalAdicionales: 0, totalInclusiones: 0, promedioInclusiones: 0, masPopular: 'N/A' };
 
     const totalAdicionales = adicionales.length;
-    const totalUsosMes = adicionales.reduce((sum, item) => {
-      const usage = usageData[item.id];
-      return sum + (usage?.usosMensuales?.[5] || 0);
-    }, 0);
-    const promedioUso = totalUsosMes / totalAdicionales;
-    const ingresosTotales = adicionales.reduce((sum, item) => {
-      const usage = usageData[item.id];
-      const usos = usage?.usosMensuales?.[5] || 0;
-      return sum + (item.costo * usos);
-    }, 0);
+    const totalInclusiones = adicionales.reduce((sum, item) => sum + item.frecuenciaDeUso, 0);
+    const promedioInclusiones = totalAdicionales > 0 ? (totalInclusiones / totalAdicionales) : 0;
+    
+    // Encontramos el adicional con la mayor frecuencia de uso.
+    const masPopularItem = adicionales.reduce((max, item) => (item.frecuenciaDeUso > max.frecuenciaDeUso ? item : max), adicionales[0]);
 
     return {
       totalAdicionales,
-      totalUsosMes,
-      promedioUso: promedioUso.toFixed(1),
-      ingresosTotales
+      totalInclusiones,
+      promedioInclusiones: promedioInclusiones.toFixed(1),
+      masPopular: masPopularItem?.descripcion || 'N/A'
     };
-  }, [adicionales, usageData]);
+  }, [adicionales]);
 
-  // Filtrar y ordenar datos
+  // 4. La lógica de filtrado y ordenamiento se simplifica.
   const filteredData = useMemo(() => {
-    let filtered = adicionales.filter(item => {
-      const matchesSearch = item.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = !selectedCategory || item.categoria === selectedCategory;
-      return matchesSearch && matchesCategory;
-    });
+    let filtered = adicionales.filter(item => 
+      item.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-    // Ordenar según criterio seleccionado
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'uso':
-          const usageA = usageData[a.id]?.usosMensuales?.[5] || 0;
-          const usageB = usageData[b.id]?.usosMensuales?.[5] || 0;
-          return usageB - usageA;
+        case 'uso': // Ordena por la frecuencia de uso
+          return b.frecuenciaDeUso - a.frecuenciaDeUso;
         case 'costo':
           return b.costo - a.costo;
-        case 'ingresos':
-          const ingresosA = a.costo * (usageData[a.id]?.usosMensuales?.[5] || 0);
-          const ingresosB = b.costo * (usageData[b.id]?.usosMensuales?.[5] || 0);
-          return ingresosB - ingresosA;
         case 'alfabetico':
           return a.descripcion.localeCompare(b.descripcion);
         default:
@@ -103,328 +88,117 @@ const AdicionalesReport = ({ showNotification, tabColor = 'indigo' }) => {
     });
 
     return filtered;
-  }, [adicionales, usageData, searchTerm, selectedCategory, sortBy]);
-
-  const categorias = useMemo(() => {
-    return [...new Set(adicionales.map(item => item.categoria))];
-  }, [adicionales]);
-
-  const categoriaStats = useMemo(() => {
-    const stats = {};
-    adicionales.forEach(item => {
-      const categoria = item.categoria;
-      const usage = usageData[item.id];
-      const usos = usage?.usosMensuales?.[5] || 0;
-
-      if (!stats[categoria]) {
-        stats[categoria] = { count: 0, totalUsos: 0, ingresos: 0 };
-      }
-      stats[categoria].count++;
-      stats[categoria].totalUsos += usos;
-      stats[categoria].ingresos += item.costo * usos;
-    });
-    return Object.entries(stats).map(([categoria, data]) => ({
-      categoria,
-      ...data
-    }));
-  }, [adicionales, usageData]);
-
-  const getTrendIcon = (id) => {
-    const usage = usageData[id];
-    if (!usage?.usosMensuales) return <div className="w-4 h-4 bg-gray-300 rounded-full"></div>;
-
-    const lastMonth = usage.usosMensuales[5];
-    const previousMonth = usage.usosMensuales[4];
-    if (lastMonth > previousMonth) {
-      return <TrendingUp className="text-green-500" size={16} />;
-    } else if (lastMonth < previousMonth) {
-      return <TrendingDown className="text-red-500" size={16} />;
-    }
-    return <div className="w-4 h-4 bg-gray-300 rounded-full"></div>;
-  };
-
-  const getUsageColor = (uso) => {
-    if (uso >= 70) return 'text-green-600 bg-green-50';
-    if (uso >= 40) return 'text-yellow-600 bg-yellow-50';
-    return 'text-red-600 bg-red-50';
-  };
+  }, [adicionales, searchTerm, sortBy]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-center h-64">
-            <div className="flex items-center space-x-2">
-              <RefreshCw className="animate-spin text-blue-500" size={24} />
-              <span className="text-gray-300">Cargando reporte de adicionales...</span>
-            </div>
-          </div>
-        </div>
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="animate-spin text-blue-500" size={24} />
+        <span className="text-gray-300 ml-2">Cargando reporte de adicionales...</span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#242423] p-8 shadow-lg border border-gray-900">
+    <div className="min-h-screen bg-[#242423] p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-between">
             <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate(-1)}>
               <ArrowLeft size={24} className="text-gray-300 hover:text-gray-200" />
-              <h1 className="text-3xl font-bold text-gray-200 mb-0">
-                Reporte de Adicionales Disponibles
-              </h1>
+              <h1 className="text-3xl font-bold text-gray-200">Reporte de Adicionales</h1>
             </div>
-
-            <div className="flex space-x-2">
-              <button
-                onClick={fetchAdicionales}
-                className={`flex items-center space-x-2 px-4 py-2 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors`}
-              >
-                <RefreshCw size={16} />
-                <span>Actualizar</span>
-              </button>
-            </div>
-
-          </div>
+            <button onClick={fetchAdicionales} className="flex items-center space-x-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600">
+              <RefreshCw size={16} />
+              <span>Actualizar</span>
+            </button>
         </div>
 
+        {/* 5. Tarjetas de estadísticas adaptadas a los nuevos datos */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-[#444240] p-6 rounded-xl shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-300">Total Adicionales</p>
-                <p className="text-2xl font-bold text-gray-200">{stats.totalAdicionales}</p>
-              </div>
-              <Package className="text-blue-500" size={24} />
-            </div>
+          <div className="bg-[#444240] p-5 rounded-xl shadow-sm border border-gray-700">
+            <p className="text-sm font-medium text-gray-400">Total Adicionales</p>
+            <p className="text-2xl font-bold text-gray-100">{stats.totalAdicionales}</p>
           </div>
-
-          <div className="bg-[#444240] p-6 rounded-xl shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-300">Usos Este Mes</p>
-                <p className="text-2xl font-bold text-gray-200">{stats.totalUsosMes}</p>
-              </div>
-              <BarChart3 className="text-green-500" size={24} />
-            </div>
+          <div className="bg-[#444240] p-5 rounded-xl shadow-sm border border-gray-700">
+            <p className="text-sm font-medium text-gray-400">Inclusiones en Tarifas</p>
+            <p className="text-2xl font-bold text-gray-100">{stats.totalInclusiones}</p>
           </div>
-
-          <div className="bg-[#444240] p-6 rounded-xl shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-300">Promedio de Uso</p>
-                <p className="text-2xl font-bold text-gray-200">{stats.promedioUso}</p>
-              </div>
-              <PieChart className="text-purple-500" size={24} />
-            </div>
+          <div className="bg-[#444240] p-5 rounded-xl shadow-sm border border-gray-700">
+            <p className="text-sm font-medium text-gray-400">Promedio Inclusión</p>
+            <p className="text-2xl font-bold text-gray-100">{stats.promedioInclusiones}</p>
           </div>
-
-          <div className="bg-[#444240] p-6 rounded-xl shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-300">Ingresos Mensuales</p>
-                <p className="text-2xl font-bold text-gray-200">${stats.ingresosTotales.toFixed(2)}</p>
-              </div>
-              <DollarSign className="text-green-500" size={24} />
-            </div>
+          <div className="bg-[#444240] p-5 rounded-xl shadow-sm border border-gray-700">
+            <p className="text-sm font-medium text-gray-400">Más Popular</p>
+            <p className="text-xl font-bold text-gray-100 truncate" title={stats.masPopular}>{stats.masPopular}</p>
           </div>
         </div>
 
-        <div className="bg-[#444240] p-6 rounded-xl shadow-sm border mb-8">
+        <div className="bg-[#444240] p-6 rounded-xl shadow-sm border border-gray-700 mb-8">
           <div className="flex flex-col lg:flex-row gap-4 items-center">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Buscar adicionales..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
-                />
-              </div>
+            <div className="flex-1 w-full">
+              <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Buscar adicionales..." className="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200 placeholder-gray-400" />
             </div>
-
             <div className="flex gap-4">
-
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-400 "
-              >
-                <option value="costo">Ordenar por costo</option>
-                <option value="uso">Ordenar por uso</option>
-                <option value="ingresos">Ordenar por ingresos</option>
-                <option value="alfabetico">Ordenar alfabéticamente</option>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="p-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-200">
+                <option value="uso">Ordenar por más usados</option>
+                <option value="costo">Ordenar por mayor costo</option>
+                <option value="alfabetico">Ordenar alfabéticamente (A-Z)</option>
               </select>
             </div>
           </div>
         </div>
 
-        <div className="bg-[#444240] rounded-xl shadow-sm border overflow-hidden">
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-bold text-gray-300">
-              Catálogo Detallado ({filteredData.length} adicionales)
-            </h2>
-          </div>
-
+        {/* 6. Tabla principal completamente rediseñada */}
+        <div className="bg-[#444240] rounded-xl shadow-sm border border-gray-700 overflow-hidden">
+          <div className="p-6 border-b border-gray-700"><h2 className="text-xl font-bold text-gray-200">Catálogo Detallado ({filteredData.length} adicionales)</h2></div>
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-[#444240]">
+              <thead className="bg-gray-800">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Adicional
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Categoría
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Costo
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Uso Mensual
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Tendencia
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Tarifas Populares
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Ingresos
-                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Adicional</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Categoría</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Costo Estándar</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Frecuencia (en Tarifas)</th>
                 </tr>
               </thead>
-              <tbody className="bg-[#444240] divide-y divide-gray-200">
-                {filteredData.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="px-6 py-12 text-center text-gray-300">
-                      <div className="flex flex-col items-center">
-                        <Package className="text-gray-300 mb-4" size={48} />
-                        <h3 className="text-lg font-semibold mb-2">No se encontraron adicionales</h3>
-                        <p>Intenta ajustar los filtros de búsqueda</p>
-                      </div>
-                    </td>
+              <tbody className="bg-[#444240] divide-y divide-gray-700">
+                {filteredData.map(item => (
+                  <tr key={item.id} className="hover:bg-gray-700">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-200">{item.descripcion}</td>
+                    <td className="px-6 py-4"><span className="px-2 py-1 text-xs font-semibold text-blue-200 bg-blue-900 rounded-full">{item.categoria}</span></td>
+                    <td className="px-6 py-4 text-sm font-semibold text-green-400">${item.costo.toFixed(2)}</td>
+                    <td className="px-6 py-4 text-sm font-semibold text-indigo-400">{item.frecuenciaDeUso} tarifas</td>
                   </tr>
-                ) : (
-                  filteredData.map((item) => {
-                    const usage = usageData[item.id];
-                    const usoMensual = usage?.usosMensuales?.[5] || 0;
-                    const ingresoMensual = item.costo * usoMensual;
-
-                    return (
-                      <tr key={item.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-medium text-gray-200 max-w-xs">
-                            {item.descripcion}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {item.categoria}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-semibold text-gray-200">
-                            ${item.costo.toFixed(2)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getUsageColor(usoMensual)}`}>
-                            {usoMensual} usos
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          {getTrendIcon(item.id)}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex flex-wrap gap-1">
-                            {(usage?.tarifasMasUsadas || []).map(tarifa => (
-                              <span key={tarifa} className="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 text-gray-300">
-                                {tarifa}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-semibold text-green-600">
-                            ${ingresoMensual.toFixed(2)}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
+                ))}
               </tbody>
             </table>
           </div>
         </div>
-
+        
+        {/* 7. Tarjetas de resumen adaptadas */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-
-          <div className="bg-[#444240] p-6 rounded-xl shadow-sm border">
-            <h3 className="text-lg font-bold text-gray-300 mb-4">Más Utilizados</h3>
-            <div className="space-y-3">
-              {[...filteredData].sort((a, b) => {
-                const usageA = usageData[a.id]?.usosMensuales?.[5] || 0;
-                const usageB = usageData[b.id]?.usosMensuales?.[5] || 0;
-                return usageB - usageA;
-              }).slice(0, 5).map((item, index) => {
-                const usage = usageData[item.id];
-                const usoMensual = usage?.usosMensuales?.[5] || 0;
-                return (
-                  <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-200 text-sm">{item.descripcion}</p>
-                        <p className="text-xs text-gray-300">${item.costo.toFixed(2)}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-green-600">{usoMensual}</p>
-                      <p className="text-xs text-gray-300">usos</p>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="bg-[#444240] p-6 rounded-xl shadow-sm border border-gray-700">
+                <h3 className="text-lg font-bold text-gray-200 mb-4 flex items-center"><Star className="text-yellow-400 mr-2" size={20} /> Más Utilizados</h3>
+                <div className="space-y-2">
+                    {filteredData.slice(0, 5).map(item => (
+                        <div key={item.id} className="flex justify-between p-2 bg-gray-800 rounded">
+                            <span className="text-gray-300">{item.descripcion}</span>
+                            <span className="font-bold text-indigo-300">{item.frecuenciaDeUso} tarifas</span>
+                        </div>
+                    ))}
+                </div>
             </div>
-          </div>
-
-          <div className="bg-[#444240] p-6 rounded-xl shadow-sm border">
-            <h3 className="text-lg font-bold text-gray-300 mb-4">Mayor Ingreso</h3>
-            <div className="space-y-3">
-              {[...filteredData].sort((a, b) => {
-                const ingresosA = a.costo * (usageData[a.id]?.usosMensuales?.[5] || 0);
-                const ingresosB = b.costo * (usageData[b.id]?.usosMensuales?.[5] || 0);
-                return ingresosB - ingresosA;
-              }).slice(0, 5).map((item, index) => {
-                const usage = usageData[item.id];
-                const usoMensual = usage?.usosMensuales?.[5] || 0;
-                const ingresoMensual = item.costo * usoMensual;
-                return (
-                  <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-200 text-sm">{item.descripcion}</p>
-                        <p className="text-xs text-gray-300">{usoMensual} usos × ${item.costo.toFixed(2)}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-green-600">${ingresoMensual.toFixed(2)}</p>
-                      <p className="text-xs text-gray-300">ingresos</p>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="bg-[#444240] p-6 rounded-xl shadow-sm border border-gray-700">
+                <h3 className="text-lg font-bold text-gray-200 mb-4 flex items-center"><TrendingDown className="text-red-400 mr-2" size={20} /> Menos Utilizados</h3>
+                 <div className="space-y-2">
+                    {filteredData.slice(-5).reverse().map(item => (
+                        <div key={item.id} className="flex justify-between p-2 bg-gray-800 rounded">
+                            <span className="text-gray-300">{item.descripcion}</span>
+                            <span className="font-bold text-indigo-300">{item.frecuenciaDeUso} tarifas</span>
+                        </div>
+                    ))}
+                </div>
             </div>
-          </div>
         </div>
       </div>
     </div>
