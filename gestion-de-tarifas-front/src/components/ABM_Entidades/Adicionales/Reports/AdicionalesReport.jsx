@@ -90,7 +90,7 @@ const AdicionalesReport = ({ showNotification }) => {
     return filtered;
   }, [adicionales, searchTerm, sortBy]);
 
-  if (loading) {
+ if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <RefreshCw className="animate-spin text-blue-500" size={24} />
