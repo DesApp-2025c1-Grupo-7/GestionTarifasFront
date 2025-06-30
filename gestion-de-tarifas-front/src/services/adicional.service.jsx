@@ -26,3 +26,10 @@ export const getAdicionalById = async (id) => {
   const res = await axios.get(`${API_URL}/adicional/${id}`);
   return res.data;
 };
+
+export const getAdicionalesReport = async () => {
+  const res = await fetch(`${API_URL}/adicional/reporte`);
+  const json = await res.json();
+  return json.data
+};
+
