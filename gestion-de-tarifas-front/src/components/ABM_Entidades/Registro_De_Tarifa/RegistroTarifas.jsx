@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Edit, Trash2 } from 'lucide-react';
+import Select from 'react-select';
 import { getVehiculos } from '../../../services/tipoVehiculo.service';
 import { getCargas } from '../../../services/tipoCarga.service';
 import { getZonas } from '../../../services/zona.service';
@@ -13,10 +14,17 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
   const [zonasDeViaje, setZonasDeViaje] = useState([]);
   const [transportistas, setTransportistas] = useState([]);
   const [tarifas, setTarifasCosto] = useState([]);
+  const [filteredTarifas, setFilteredTarifas] = useState([]);
   
-
   const [editingId, setEditingId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Estado para los filtros avanzados
+  const [filters, setFilters] = useState({
+    tipoVehiculo: null,
+    tipoCarga: null,
+    zonaDeViaje: null,
+    transportista: null,
+  });
 
   const [form, setForm] = useState({
     tipoVehiculo: '',
@@ -26,6 +34,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
     valorBase: '',
   });
 
+  // Carga inicial de datos para los formularios y la tabla
   useEffect(() => {
     const fetchAll = async () => {
       try {
@@ -41,12 +50,34 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
         setZonasDeViaje(zonasData);
         setTransportistas(transportistaData);
         setTarifasCosto(tarifasData.data);
+        setFilteredTarifas(tarifasData.data); // Inicialmente mostrar todas las tarifas
       } catch (error) {
         showNotification('Error al cargar datos', 'error');
       }
     };
     fetchAll();
   }, []);
+
+  // Lógica de filtrado que se ejecuta cuando cambian los filtros o las tarifas
+  useEffect(() => {
+    let dataToFilter = [...tarifas];
+
+    if (filters.tipoVehiculo) {
+      dataToFilter = dataToFilter.filter(item => item.tipoVehiculo?.id === filters.tipoVehiculo.value);
+    }
+    if (filters.transportista) {
+      dataToFilter = dataToFilter.filter(item => item.transportista?.id === filters.transportista.value);
+    }
+    if (filters.zonaDeViaje) {
+      dataToFilter = dataToFilter.filter(item => item.zonaDeViaje?.id === filters.zonaDeViaje.value);
+    }
+    if (filters.tipoCarga) {
+      dataToFilter = dataToFilter.filter(item => item.tipoCarga?.id === filters.tipoCarga.value);
+    }
+
+    setFilteredTarifas(dataToFilter);
+  }, [filters, tarifas]);
+
 
   const clearForm = () => {
     setForm({
@@ -143,16 +174,31 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
     }
   };
 
-  const filteredData = tarifas.filter(item => {
-    const searchLower = searchTerm.toLowerCase();
-    const vehiculoDesc = item.tipoVehiculo?.descripcion?.toLowerCase() || '';
-    const transportistaNom = item.transportista?.nombre?.toLowerCase() || '';
-    return (
-      vehiculoDesc.includes(searchLower) ||
-      transportistaNom.includes(searchLower)
-    );
-  });
+  // --- Opciones para los Selectores de Filtro ---
+  const vehiculoOptions = tiposVehiculo.map(v => ({ value: v.id, label: v.descripcion }));
+  const transportistaOptions = transportistas.map(t => ({ value: t.id, label: t.nombre }));
+  const zonaOptions = zonasDeViaje.map(z => ({ value: z.id, label: `${z.origen} - ${z.destino}` }));
+  const cargaOptions = tiposCarga.map(c => ({ value: c.id, label: c.categoria }));
 
+  const customSelectStyles = {
+    control: (base) => ({
+      ...base,
+      backgroundColor: 'rgba(255,255,255,0.1)',
+      borderColor: 'rgba(255,255,255,0.3)',
+      color: 'white',
+      minWidth: '160px',
+      fontSize: '0.875rem',
+    }),
+    singleValue: (base) => ({ ...base, color: 'white' }),
+    menu: (base) => ({ ...base, backgroundColor: '#242423', color: 'white' }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? 'rgba(255,255,255,0.2)' : '#242423',
+      color: 'white'
+    }),
+    placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
+  };
+  
   return (
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Formulario */}
@@ -163,7 +209,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
           </h2>
 
           <div className="space-y-5">
-            <div >
+            <div>
               <label className="block text-sm font-semibold text-gray-300 mb-2">
                 Tipo de Vehículo *
               </label>
@@ -171,7 +217,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                 name="tipoVehiculo"
                 value={form.tipoVehiculo}
                 onChange={handleInputChange}
-                className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-emerald-500 focus:outline-none transition-all`}
+                className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-emerald-500 focus:outline-none transition-all`}
               >
                 <option value="" className="text-gray-900">Seleccionar tipo de vehículo</option>
                 {tiposVehiculo.map(vehiculo => (
@@ -190,7 +236,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                 name="tipoCarga"
                 value={form.tipoCarga}
                 onChange={handleInputChange}
-                className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-emerald-500 focus:outline-none transition-all`}
               >
                 <option value="" className="text-gray-900">Seleccionar tipo de carga</option>
                 {tiposCarga.map(carga => (
@@ -209,7 +255,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                 name="zonaDeViaje"
                 value={form.zonaDeViaje}
                 onChange={handleInputChange}
-                className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-emerald-500 focus:outline-none transition-all`}
               >
                 <option value="" className="text-gray-900">Seleccionar zona de viaje</option>
                 {zonasDeViaje.map(zona => (
@@ -228,7 +274,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                 name="transportista"
                 value={form.transportista}
                 onChange={handleInputChange}
-                className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-emerald-500 focus:outline-none transition-all`}
               >
                 <option value="" className="text-gray-900">Seleccionar transportista</option>
                 {transportistas.map(transportista => (
@@ -239,21 +285,22 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
               </select>
             </div>
 
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <label className="block text-sm font-semibold text-blue-700 mb-2">
+            <div className="bg-blue-900/20 p-4 rounded-lg border border-blue-400">
+              <label className="block text-sm font-semibold text-blue-300 mb-2">
                 Valor Base
               </label>
               <input
                 type="number"
+                name="valorBase"
                 value={form.valorBase}
                 onChange={handleValorBaseChange}
                 min="0"
                 step="0.01"
-                className="w-full p-3 border-2 border-blue-300 rounded-lg focus:border-blue-400 focus:outline-none transition-all text-xl font-bold text-blue-600"
+                className="w-full p-3 bg-transparent border-2 border-blue-400 rounded-lg focus:border-blue-300 focus:outline-none transition-all text-xl font-bold text-blue-300"
               />
             </div>
 
-            <div className="flex gap-4 pt-6 border-t border-gray-200">
+            <div className="flex gap-4 pt-6 border-t border-gray-700">
               <button
                 type="button"
                 onClick={clearForm}
@@ -274,7 +321,7 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                 onClick={handleSubmit}
                 className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${
                   editingId
-                    ? `bg-${tabColor}-500 hover:bg-${tabColor}-600`
+                    ? `bg-emerald-500 hover:bg-emerald-600`
                     : 'bg-green-500 hover:bg-green-600'
                 }`}
               >
@@ -285,18 +332,42 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
         </div>
       </div>
 
-      {/* Tabla */}
+      {/* Tabla y Filtros */}
       <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
         <div className={`bg-gradient-to-r from-emerald-700 to-emerald-800 text-white p-6`}>
           <h2 className="text-2xl font-bold mb-4">Tarifas de Costo Registradas</h2>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300" size={20} />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar por vehículo o transportista..."
-              className="w-full max-w-xs pl-10 pr-4 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:bg-white/20"
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Select
+              options={vehiculoOptions}
+              placeholder="Filtrar por Vehículo"
+              isClearable
+              value={filters.tipoVehiculo}
+              onChange={selectedOption => setFilters({ ...filters, tipoVehiculo: selectedOption })}
+              styles={customSelectStyles}
+            />
+            <Select
+              options={transportistaOptions}
+              placeholder="Filtrar por Transportista"
+              isClearable
+              value={filters.transportista}
+              onChange={selectedOption => setFilters({ ...filters, transportista: selectedOption })}
+              styles={customSelectStyles}
+            />
+            <Select
+              options={zonaOptions}
+              placeholder="Filtrar por Zona"
+              isClearable
+              value={filters.zonaDeViaje}
+              onChange={selectedOption => setFilters({ ...filters, zonaDeViaje: selectedOption })}
+              styles={customSelectStyles}
+            />
+            <Select
+              options={cargaOptions}
+              placeholder="Filtrar por Carga"
+              isClearable
+              value={filters.tipoCarga}
+              onChange={selectedOption => setFilters({ ...filters, tipoCarga: selectedOption })}
+              styles={customSelectStyles}
             />
           </div>
         </div>
@@ -314,9 +385,9 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
               </tr>
             </thead>
             <tbody>
-              {filteredData.length > 0 ? (
-                filteredData.map(item => (
-                  <tr key={item.id} className={`border-b border-gray-100 hover:bg-${tabColor}-50/50 transition-colors`}>
+              {filteredTarifas.length > 0 ? (
+                filteredTarifas.map(item => (
+                  <tr key={item.id} className={`border-b border-gray-700 hover:bg-emerald-500/10 transition-colors`}>
                     <td className="px-4 py-3 text-sm font-medium text-neutral-200">
                       {item.tipoVehiculo?.descripcion || 'N/A'}
                     </td>
@@ -329,14 +400,14 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                     <td className="px-4 py-3 text-sm text-neutral-200">
                       {item.transportista?.nombre || 'N/A'}
                     </td>
-                    <td className="px-4 py-3 text-sm font-bold text-blue-600">
+                    <td className="px-4 py-3 text-sm font-bold text-blue-400">
                       ${Number(item.valor_base).toFixed(2)}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <button
                           onClick={() => editEntity(item.id)}
-                          className={`p-2 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors`}
+                          className={`p-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors`}
                         >
                           <Edit size={14} />
                         </button>
@@ -355,8 +426,8 @@ const TarifaCosto = ({ showNotification, tabColor }) => {
                   <td colSpan="6" className="px-4 py-12 text-center text-gray-500">
                     <div className="flex flex-col items-center">
                       <div className="text-6xl mb-4">💰</div>
-                      <h3 className="text-lg font-semibold mb-2">No hay tarifas de costo registradas</h3>
-                      <p>Comienza agregando una nueva tarifa usando el formulario</p>
+                      <h3 className="text-lg font-semibold mb-2">No se encontraron tarifas</h3>
+                      <p>Intenta ajustar los filtros o agrega una nueva tarifa.</p>
                     </div>
                   </td>
                 </tr>
