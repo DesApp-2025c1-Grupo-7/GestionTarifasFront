@@ -22,3 +22,9 @@ export const deleteTransportista = async (id) => {
   const res = await axios.patch(`${API_URL}/transportista/${id}/eliminar`);
   return res.data;
 };
+
+// nueva
+export const getTransportistaReport = async () => {
+  const res = await axios.get(`${API_URL}/transportista/reporte-tarifas`);
+  return res.data;
+};
