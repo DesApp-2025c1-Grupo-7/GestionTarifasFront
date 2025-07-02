@@ -2,36 +2,47 @@ import React, { useState, useEffect } from 'react';
 import { Search, Edit, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { getZonas, createZona, updateZona, deleteZona } from '../../../services/zona.service';
+import Select from 'react-select';
 
 const ZonasViaje = ({ showNotification, tabColor }) => {
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  // Modificado: Se quita costoPorKm del estado
-  const [form, setForm] = useState({ origen: '', destino: '', distanciaKm: '' });
-  console.log(tabColor)
+  const [form, setForm] = useState({ origen: '', destino: '', distanciaKm: '', costoPorKm: '' });
+
+  const [searchTerm, setSearchTerm] = useState({
+          origen: "",
+          destino: "",
+        });
+  const [filteredData, setFilteredData] = useState([]);
+  
 
   useEffect(() => {
     const fetchZonas = async () => {
       try {
         const zonas = await getZonas();
-        // Modificado: Se quita la adaptación de costoPorKm
+
         const zonasAdaptadas = zonas.map(zona => ({
           ...zona,
           distanciaKm: zona.distancia,
+          costoPorKm: zona.costoKilometro
         }));
+
         setData(zonasAdaptadas);
+        setFilteredData(zonasAdaptadas);
+
       } catch (error) {
         console.error('Error al obtener zonas de viaje:', error);
         showNotification('Error al cargar las zonas de viaje', 'error');
       }
     };
+
     fetchZonas();
   }, []);
 
+
+  
   const clearForm = () => {
-    // Modificado: Se quita costoPorKm al limpiar
-    setForm({ origen: '', destino: '', distanciaKm: '' });
+    setForm({ origen: '', destino: '', distanciaKm: '', costoPorKm: '' });
     setEditingId(null);
   };
 
@@ -40,13 +51,13 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
     setForm({ ...form, [name]: value });
   };
 
-  // Modificado: Se quita costoPorKm de la validación
   const validateForm = () => {
-    return form.origen && form.destino && form.distanciaKm;
+    return form.origen && form.destino && form.distanciaKm && form.costoPorKm;
   };
 
-  // Eliminado: La función para calcular el costo total ya no es necesaria
-  // const calculateTotalCost = ...
+  const calculateTotalCost = (distancia, costoPorKm) => {
+    return (distancia * costoPorKm);
+  };
 
   const handleSubmit = async () => {
     if (!validateForm()) {
@@ -54,11 +65,11 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
       return;
     }
 
-    // Modificado: Se quita costoKilometro de los datos a enviar
     const entityData = {
       origen: form.origen,
       destino: form.destino,
       distancia: parseFloat(form.distanciaKm),
+      costoKilometro: parseFloat(form.costoPorKm),
     };
 
     try {
@@ -69,6 +80,7 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
             ? {
                 ...updatedZona,
                 distanciaKm: updatedZona.distancia,
+                costoPorKm: updatedZona.costoKilometro
               }
             : item
         ));
@@ -78,6 +90,7 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
         setData([...data, {
           ...nuevaZona,
           distanciaKm: nuevaZona.distancia,
+          costoPorKm: nuevaZona.costoKilometro
         }]);
         showNotification('Zona de viaje agregada correctamente');
       }
@@ -92,11 +105,11 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
   const editEntity = (id) => {
     const entity = data.find(item => item.id === id);
     if (entity) {
-      // Modificado: Se quita costoPorKm al editar
       setForm({
         origen: entity.origen,
         destino: entity.destino,
         distanciaKm: entity.distanciaKm.toString(),
+        costoPorKm: entity.costoPorKm.toString()
       });
       setEditingId(id);
     }
@@ -126,20 +139,63 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
       }
     }
   };
+  
 
-  const filteredData = data.filter(item => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      item.origen.toLowerCase().includes(searchLower) ||
-      item.destino.toLowerCase().includes(searchLower)
-    );
-  });
+  //Funcion para filtrado de data
+  const filterData = (search) => {
+    const filtered = data.filter((item) => {
+      const matchOrigen = search.origen === "" || item.origen?.toLowerCase().includes(search.origen.toLowerCase());
+      const matchDestino = search.destino === "" || item.destino?.toLowerCase().includes(search.destino.toLowerCase());
+      return matchOrigen && matchDestino;
+    });
+
+    setFilteredData(filtered);
+  };
+
+
+
+  //Arrays auxiliares para select
+  const opcionesOrigen = [
+    ...[...new Set(data.map(z => z.origen))].map(origen => ({
+      value: origen,
+      label: origen
+    }))
+  ];
+
+  const opcionesDestino = [
+    ...[...new Set(data.map(z => z.destino))].map(destino => ({
+      value: destino,
+      label: destino
+    }))
+  ];
+
+  //Estilo para los selects
+  const selectEstilos = {
+    control: (base) => ({
+      ...base,
+      backgroundColor: 'rgba(255,255,255,0.1)',
+      borderColor: 'rgba(255,255,255,0.3)',
+      color: 'white',
+      width: '160px',
+      fontSize: '0.875rem',
+    }),
+    singleValue: (base) => ({ ...base, color: 'white' }),
+    menu: (base) => ({ ...base, backgroundColor: '#242423', color: 'white' }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isFocused ? 'rgba(255,255,255,0.2)' : '#242423',
+      color: 'white'
+    }),
+    placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
+  };
+
+
 
   return (
     <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
       {/* Form Section */}
       <div className="lg:col-span-1">
-        <div className="bg-[#444240] p-8 rounded-2xl shadow-xl border border-gray-900">
+        <div className="bg-[#444240] p-8 rounded-2xl shadow-xl   border border-gray-900">
           <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
             {editingId ? 'Editar Zona de Viaje' : 'Nueva Zona de Viaje'}
           </h2>
@@ -190,9 +246,32 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
                 />
               </div>
 
-              {/* Eliminado: Bloque del input para Costo por Km */}
-              
-              {/* Eliminado: Bloque que mostraba el Costo Total Estimado */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
+                  Costo por Km ($) *
+                </label>
+                <input
+                  type="number"
+                  name="costoPorKm"
+                  value={form.costoPorKm}
+                  onChange={handleInputChange}
+                  placeholder="Costo por kilómetro"
+                  min="0"
+                  step="0.01"
+                  className={`w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition-all`}
+                />
+              </div>
+
+              {form.distanciaKm && form.costoPorKm && (
+                <div className={`bg-${tabColor}-50 p-4 rounded-lg border border-${tabColor}-200`}>
+                  <label className={`block text-sm font-semibold text-${tabColor}-700 mb-1`}>
+                    Costo Total Estimado
+                  </label>
+                  <div className={`text-2xl font-bold text-${tabColor}-800`}>
+                    ${calculateTotalCost(parseFloat(form.distanciaKm), parseFloat(form.costoPorKm))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-4 pt-6 border-t border-gray-200">
@@ -234,33 +313,53 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
             Zonas de Viaje Registradas
           </h2>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300" size={20} />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar por origen o destino..."
-              className="w-full max-w-xs pl-10 pr-4 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:bg-white/20"
-            />
+            <div className="flex gap-4 mt-4">
+              <Select
+                options={opcionesOrigen}
+                placeholder="Origen"
+                // Solo asignar valor si searchTerm.origen existe y corresponde a alguna opción
+                value={opcionesOrigen.filter(opt => form.origen.includes(opt.label))}
+                onChange={(selected) => {
+                  const newSearch = { ...searchTerm, origen: selected?.value || "" };
+                  setSearchTerm(newSearch);
+                  filterData(newSearch);
+                }}
+                styles={selectEstilos}
+              />
+
+              <Select
+                options={opcionesDestino}
+                placeholder="Destino"
+                value={opcionesDestino.filter(opt => form.destino.includes(opt.label))}
+                onChange={(selected) => {
+                  const newSearch = { ...searchTerm, destino: selected?.value || "" };
+                  setSearchTerm(newSearch);
+                  filterData(newSearch);
+                }}
+                styles={selectEstilos}
+              />
+
+            </div>
+
           </div>
         </div>
 
-        <div className="max-h-96 overflow-y-auto bg-[#444240]">
+        <div className="max-h-96 overflow-y-auto bg-[#444240] ">
           <table className="w-full">
-            <thead className="bg-[#242423] sticky top-0">
+            <thead className=" bg-[#242423] sticky top-0">
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Origen</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Destino</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Distancia (Km)</th>
-                {/* Eliminado: Cabeceras de la tabla para Costo/Km y Costo Total */}
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Costo/Km ($)</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Costo Total</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.length === 0 ? (
                 <tr>
-                  {/* Modificado: colSpan cambia de 6 a 4 */}
-                  <td colSpan="4" className="px-4 py-12 text-center text-gray-300">
+                  <td colSpan="6" className="px-4 py-12 text-center text-gray-300">
                     <div className="flex flex-col items-center">
                       <div className="text-6xl mb-4">🗺️</div>
                       <h3 className="text-lg font-semibold mb-2">No hay zonas de viaje registradas</h3>
@@ -274,7 +373,10 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
                     <td className="px-4 py-3 text-sm font-medium text-neutral-200">{item.origen}</td>
                     <td className="px-4 py-3 text-sm font-medium text-neutral-200">{item.destino}</td>
                     <td className="px-4 py-3 text-sm text-neutral-200">{item.distanciaKm} km</td>
-                    {/* Eliminado: Celdas de la tabla para Costo/Km y Costo Total */}
+                    <td className="px-4 py-3 text-sm text-neutral-200">${item.costoPorKm}</td>
+                    <td className="px-4 py-3 text-sm font-semibold text-green-600">
+                      ${calculateTotalCost(item.distanciaKm, item.costoPorKm)}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <button

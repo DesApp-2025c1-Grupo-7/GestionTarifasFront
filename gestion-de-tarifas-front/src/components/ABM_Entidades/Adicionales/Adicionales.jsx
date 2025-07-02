@@ -3,6 +3,7 @@ import { Search, Edit, Trash2, BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { getAdicionales, createAdicional, updateAdicional, deleteAdicional } from '../../../services/adicional.service';
+import Select from 'react-select';
 
 const Adicionales = ({ showNotification, tabColor }) => {
   const navigate = useNavigate();
@@ -16,7 +17,6 @@ const Adicionales = ({ showNotification, tabColor }) => {
       try {
         const adicionales = await getAdicionales();
         const mapped = adicionales.map(a => ({ ...a, id: a.idAdicional }));
-        console.log('Datos recibidos:', mapped);
         setData(mapped);
       } catch (error) {
         showNotification('Error al cargar los adicionales', 'error');
@@ -84,8 +84,6 @@ const Adicionales = ({ showNotification, tabColor }) => {
 
   const deleteEntity = async (id) => {
     const idNumber = Number(id);
-    console.log('ID a eliminar:', id, 'Como número:', idNumber);
-
     if (!idNumber || isNaN(idNumber)) {
       showNotification('ID inválido para eliminar', 'error');
       return;
@@ -126,7 +124,7 @@ const Adicionales = ({ showNotification, tabColor }) => {
 
   return (
     <div className="grid lg:grid-cols-3 gap-8">
-      {/* Form Section */}
+      {/* Formulario */}
       <div className="lg:col-span-1">
         <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
           <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-indigo-500`}>
@@ -208,12 +206,11 @@ const Adicionales = ({ showNotification, tabColor }) => {
         </div>
       </div>
 
+      {/* Tabla de registros */}
       <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
         <div className="bg-gradient-to-r from-indigo-700 to-indigo-800 text-white p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Adicionales Registrados</h2>
-
-            {/* BOTÓN PARA VER REPORTES */}
             <button
               onClick={handleViewReport}
               className="flex items-center space-x-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors backdrop-blur-sm border border-white/30"
@@ -239,9 +236,11 @@ const Adicionales = ({ showNotification, tabColor }) => {
         <div className="max-h-96 overflow-y-auto">
           <table className="w-full">
             <thead className="bg-[#242423] sticky top-0">
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Descripción</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo ($)</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Descripción</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo ($)</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
+              </tr>
             </thead>
             <tbody>
               {filteredData.length === 0 ? (

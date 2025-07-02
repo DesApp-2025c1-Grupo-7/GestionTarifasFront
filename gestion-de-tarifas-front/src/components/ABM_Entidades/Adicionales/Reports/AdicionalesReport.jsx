@@ -95,15 +95,6 @@ const AdicionalesReport = ({ showNotification }) => {
 
   const adicionalesAgrupados = useMemo(() => agruparYSumar(filteredData), [filteredData]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="animate-spin text-blue-500" size={24} />
-        <span className="text-gray-300 ml-2">Cargando reporte de adicionales...</span>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#242423] p-8">
       <div className="max-w-7xl mx-auto">

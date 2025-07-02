@@ -2,25 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { Search, Edit, Trash2, AlertTriangle } from 'lucide-react';
 import { createCarga, deleteCarga, getCargas, updateCarga } from '../../../services/tipoCarga.service';
 import Swal from 'sweetalert2';
+import Select from 'react-select';
 
 const TiposCarga = ({ showNotification, tabColor }) => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState([ {categoria: '', 
+      pesoTotal: '', 
+      volumenTotal: '', 
+      valorBase: '', 
+      esEspecial: false,
+      requisitoEspecial: ''},]);
   const [editingId, setEditingId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  // Modificado: Se quita valorBase del estado
+  const [searchTerm, setSearchTerm] = useState({
+    categoria: "",
+    esEspecial:false,
+    pesoTotal:"",
+    volumenTotal:"",
+    requisitoEspecial:"",
+  });
   const [form, setForm] = useState({ 
     categoria: '',
     pesoTotal: '', 
     volumenTotal: '', 
+    valorBase: '', 
     esEspecial: false,
     requisitoEspecial: ''
   });
-
   useEffect(() => {
     const fetchData = async () => {
       try {
         const cargas = await getCargas();
         setData(cargas);
+        setDataFiltrada(cargas); 
       } catch (error) {
         showNotification('Error al cargar los tipos de carga', 'error');
       }
@@ -29,11 +41,11 @@ const TiposCarga = ({ showNotification, tabColor }) => {
   }, []);
 
   const clearForm = () => {
-    // Modificado: Se quita valorBase al limpiar el formulario
     setForm({ 
       categoria: '', 
       pesoTotal: '', 
       volumenTotal: '', 
+      valorBase: '', 
       esEspecial: false,
       requisitoEspecial: ''
     });
@@ -53,15 +65,16 @@ const TiposCarga = ({ showNotification, tabColor }) => {
     }
   };
 
-  // Modificado: Se quita la validación de valorBase
   const validateForm = () => {
     const peso = parseFloat(form.pesoTotal);
     const volumen = parseFloat(form.volumenTotal);
+    const valor = parseFloat(form.valorBase);
 
     if (
       !form.categoria.trim() ||
       isNaN(peso) || peso < 0 ||
-      isNaN(volumen) || volumen < 0
+      isNaN(volumen) || volumen < 0 ||
+      isNaN(valor) || valor < 0
     ) {
       return false;
     }
@@ -76,11 +89,11 @@ const TiposCarga = ({ showNotification, tabColor }) => {
   const editEntity = (id) => {
     const carga = data.find(item => item.id === id);
     if (carga) {
-      // Modificado: Se quita valorBase al popular el formulario para edición
       setForm({
         categoria: carga.categoria || '',
         pesoTotal: carga.pesoTotal.toString(),
         volumenTotal: carga.volumenTotal.toString(),
+        valorBase: carga.valorBase.toString(),
         esEspecial: carga.esEspecial,
         requisitoEspecial: carga.requisitoEspecial || '',
       });
@@ -98,12 +111,12 @@ const TiposCarga = ({ showNotification, tabColor }) => {
       return;
     }
 
-    // Modificado: Se quita valorBase de los datos a enviar
     const entityData = {
       categoria: form.categoria.trim(),
       requisitoEspecial: form.esEspecial ? form.requisitoEspecial.trim() : '',
       pesoTotal: parseFloat(form.pesoTotal),
       volumenTotal: parseFloat(form.volumenTotal),
+      valorBase: parseFloat(form.valorBase),
       esEspecial: form.esEspecial,
     };
 
@@ -119,6 +132,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
         setData([...data, nuevaCarga]);
         showNotification('Tipo de carga agregada correctamente');
       }
+
       clearForm();
     } catch (error) {
       console.error('Error al guardar tipo de carga:', error);
@@ -151,20 +165,67 @@ const TiposCarga = ({ showNotification, tabColor }) => {
       }
     }
   };
+  const [filteredData, setFilteredData] = useState([]);
 
-  // Modificado: Se quita valorBase de los criterios de búsqueda
-  const filteredData = data.filter(item => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      item.categoria.toLowerCase().includes(searchLower) ||
-      (item.requisitoEspecial && item.requisitoEspecial.toLowerCase().includes(searchLower)) ||
-      item.pesoTotal.toString().includes(searchTerm) ||
-      item.volumenTotal.toString().includes(searchTerm)
-    );
-  });
 
-  // Eliminado: La función formatCurrency ya no es necesaria
-  
+  //Funcion para filtrar data
+  const filterData = (search) => {
+    const filtered = data.filter(item => {
+      const matchCategoria = search.categoria === "" || item.categoria?.toLowerCase().includes(search.categoria.toLowerCase());
+      const matchPesoTotal = search.pesoTotal === "" || item.pesoTotal?.toString() === search.pesoTotal;
+      const matchVolumenTotal = search.volumenTotal === "" || item.volumenTotal?.toString() === search.volumenTotal;
+      const matchValorBase = search.valorBase === "" || item.valorBase?.toString() === search.valorBase;
+      const matchEsEspecial = search.esEspecial === "" || item.esEspecial?.toString() === search.esEspecial;
+      const matchRequisitoEspecial = search.requisitoEspecial === "" || item.requisitoEspecial?.toLowerCase().includes(search.requisitoEspecial.toLowerCase());
+
+      return (
+        matchCategoria &&
+        matchPesoTotal &&
+        matchVolumenTotal &&
+        matchValorBase &&
+        matchEsEspecial &&
+        matchRequisitoEspecial
+      );
+    });
+
+    setFilteredData(filtered);
+  };
+
+
+  //Funcion de mapeo de atributos para el select encargado del filtrado de cargas
+  // Opciones para el campo "categoria" (antes tipo de carga)
+  const opcionCategoriaDefault = { value: "", label: "Todas las categorías" };
+    const opcionesCategoria = [
+        opcionCategoriaDefault,
+        ...(
+          Array.isArray(data) && data.length > 0
+            ? [...new Set(data.map(carga => carga.categoria))].map(categoria => ({
+                value: categoria,
+                label: categoria
+              }))
+            : []
+        )
+      ];
+
+
+
+
+    //Auxiliar para requisitos especiales
+    const opcionesEspecial = [
+      { value: "true", label: "Sí" },
+      { value: "false", label: "No" },
+    ];
+
+ 
+
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS'
+    }).format(amount);
+  };
+
   const formatWeight = (weight) => {
     return `${weight} kg`;
   };
@@ -230,7 +291,21 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 />
               </div>
               
-              {/* Eliminado: Bloque del input para Valor Base */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-300 mb-2">
+                  Valor Base ($) *
+                </label>
+                <input
+                  type="number"
+                  name="valorBase"
+                  value={form.valorBase}
+                  onChange={handleInputChange}
+                  placeholder="Valor base del servicio"
+                  min="0"
+                  step="0.01"
+                  className="w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-blue-500 focus:outline-none transition-all"
+                />
+              </div>
 
               <div className="flex items-center space-x-3 p-4 rounded-lg">
                 <input
@@ -269,7 +344,16 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 </div>
               )}
               
-              {/* Eliminado: Bloque que mostraba el valor base formateado */}
+              {form.valorBase && (
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <label className="block text-sm font-semibold text-green-700 mb-1">
+                    Valor Base Formateado
+                  </label>
+                  <div className="text-2xl font-bold text-green-800">
+                    {formatCurrency(parseFloat(form.valorBase))}
+                  </div>
+                </div>
+              )}
 
               {(form.pesoTotal || form.volumenTotal) && (
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
@@ -283,7 +367,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                     {form.volumenTotal && (
                       <p><strong>Volumen:</strong> {formatVolume(parseFloat(form.volumenTotal))}</p>
                     )}
-                    {form.pesoTotal && form.volumenTotal && parseFloat(form.volumenTotal) > 0 && (
+                    {form.pesoTotal && form.volumenTotal && (
                       <p><strong>Densidad:</strong> {(parseFloat(form.pesoTotal) / parseFloat(form.volumenTotal)).toFixed(2)} kg/m³</p>
                     )}
                   </div>
@@ -329,17 +413,88 @@ const TiposCarga = ({ showNotification, tabColor }) => {
           <h2 className="text-2xl font-bold mb-4">
             Tipos de Carga Registrados
           </h2>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300" size={20} />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              // Modificado: Placeholder del buscador
-              placeholder="Buscar por categoría, peso, volumen o requisito..."
-              className="w-full max-w-md pl-10 pr-4 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:bg-white/20"
+          <div className='flex gap-5 '>
+           <Select
+              options={opcionesCategoria}
+              value={opcionesCategoria.find(opt => opt.value === searchTerm.categoria) || opcionCategoriaDefault}
+              onChange={(selectedOption) => {
+                const selectedId = selectedOption ? selectedOption.value : "";
+                const newSearch = { ...searchTerm, categoria: selectedId };
+                setSearchTerm(newSearch);
+                filterData(newSearch);
+              }}
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  borderColor: 'rgba(255,255,255,0.3)',
+                  color: 'white',
+                  width: '160px',
+                  fontSize: '0.875rem',
+                }),
+                singleValue: (base) => ({
+                  ...base,
+                  color: 'white',
+                }),
+                menu: (base) => ({
+                  ...base,
+                  backgroundColor: '#242423',
+                  color: 'white'
+                }),
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isFocused ? 'rgba(255,255,255,0.2)' : '#242423',
+                  color: 'white'
+                }),
+                placeholder: (base) => ({
+                  ...base,
+                  color: 'rgba(255,255,255,0.7)'
+                }),
+              }}
+            />
+            <Select
+              options={opcionesEspecial}
+              placeholder="Especial"
+              isClearable
+              value={opcionesEspecial.find(opt => opt.value === searchTerm.requisitoEspecial)}
+              onChange={(selectedOption) => {
+                const selectedId = selectedOption ? selectedOption.value : "";
+                const newSearch = { ...searchTerm, requisitoEspecial: selectedId };
+                setSearchTerm(newSearch);
+                filterData(newSearch);
+              }}
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                  borderColor: 'rgba(255,255,255,0.3)',
+                  color: 'white',
+                  width: '160px',
+                  fontSize: '0.875rem',
+                }),
+                singleValue: (base) => ({
+                  ...base,
+                  color: 'white',
+                }),
+                menu: (base) => ({
+                  ...base,
+                  backgroundColor: '#242423',
+                  color: 'white'
+                }),
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isFocused ? 'rgba(255,255,255,0.2)' : '#242423',
+                  color: 'white'
+                }),
+                placeholder: (base) => ({
+                  ...base,
+                  color: 'rgba(255,255,255,0.7)'
+                }),
+              }}
             />
           </div>
+
+
         </div>
 
         <div className="max-h-96 overflow-y-auto">
@@ -348,7 +503,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
               <tr className="text-gray-300">
                 <th className="px-4 py-3 text-left text-sm text-gray-300 font-semibold">Categoría</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Especificaciones</th>
-                {/* Eliminado: Cabecera de la tabla para Valor Base */}
+                <th className="px-4 py-3 text-left text-sm font-semibold">Valor Base</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Tipo</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Acciones</th>
               </tr>
@@ -356,8 +511,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
             <tbody>
               {filteredData.length === 0 ? (
                 <tr>
-                  {/* Modificado: colSpan cambia de 5 a 4 */}
-                  <td colSpan="4" className="px-4 py-12 text-center text-gray-300">
+                  <td colSpan="5" className="px-4 py-12 text-center text-gray-300">
                     <div className="flex flex-col items-center">
                       <div className="text-6xl mb-4">📦</div>
                       <h3 className="text-lg font-semibold mb-2">No hay tipos de carga registrados</h3>
@@ -384,14 +538,14 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                       <div className="space-y-1 text-neutral-300">
                         <div><strong>Peso:</strong> {formatWeight(item.pesoTotal)}</div>
                         <div><strong>Volumen:</strong> {formatVolume(item.volumenTotal)}</div>
-                        {item.volumenTotal > 0 && (
-                          <div className="text-xs text-neutral-400">
-                            Densidad: {(item.pesoTotal / item.volumenTotal).toFixed(2)} kg/m³
-                          </div>
-                        )}
+                        <div className="text-xs text-neutral-400">
+                          Densidad: {(item.pesoTotal / item.volumenTotal).toFixed(2)} kg/m³
+                        </div>
                       </div>
                     </td>
-                    {/* Eliminado: Celda de la tabla para mostrar el valorBase */}
+                    <td className="px-4 py-3 text-sm font-semibold text-green-500">
+                      {formatCurrency(item.valorBase)}
+                    </td>
                     <td className="px-4 py-3">
                       <span
                         title={item.esEspecial ? item.requisitoEspecial : ''}
