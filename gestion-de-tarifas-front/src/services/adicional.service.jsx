@@ -39,3 +39,18 @@ export const getAdicionalesReport = async () => {
   // Axios devuelve los datos directamente en la propiedad 'data' de la respuesta.
   return res.data; // <-- ESTA ES LA FORMA CORRECTA CON AXIOS
 };
+
+// --- AÑADIR ESTA NUEVA FUNCIÓN ---
+/**
+ * Obtiene la lista de tarifas que usan un adicional específico.
+ * @param {number} idAdicional - El ID del adicional.
+ */
+export const getTarifasForAdicional = async (idAdicional) => {
+  try {
+    const response = await axios.get(`${API_URL}/adicional/${idAdicional}/tarifas`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error al obtener las tarifas para el adicional ${idAdicional}:`, error);
+    return [];
+  }
+};
