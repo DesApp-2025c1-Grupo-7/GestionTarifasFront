@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Edit, Trash2, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, X, ChevronDown, ChevronUp,  Eye } from 'lucide-react';
 import Select from 'react-select';
+import Swal from 'sweetalert2';
+
 import { getVehiculos } from '../../../services/tipoVehiculo.service';
 import { getCargas } from '../../../services/tipoCarga.service';
 import { getZonas } from '../../../services/zona.service';
 import { getTransportista } from '../../../services/transportista.service';
 import { getTarifas, deleteTarifa, updateTarifaCosto, createTarifa } from '../../../services/tarifaCosto.service';
 import { getAdicionales, createAdicional as createAdicionalService } from '../../../services/adicional.service';
-import Swal from 'sweetalert2';
 
 const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
@@ -16,17 +17,14 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
   const [transportistas, setTransportistas] = useState([]);
   const [tarifas, setTarifasCosto] = useState([]);
   const [filteredTarifas, setFilteredTarifas] = useState([]);
-  
+  const [adicionales, setAdicionales] = useState([]);
   const [editingId, setEditingId] = useState(null);
 
-  // Estados para adicionales
-  const [adicionales, setAdicionales] = useState([]);
   const [showAdicionalesForm, setShowAdicionalesForm] = useState(false);
   const [showAdicionalesSelector, setShowAdicionalesSelector] = useState(false);
   const [adicionalSearch, setAdicionalSearch] = useState('');
   const [nuevoAdicional, setNuevoAdicional] = useState({ descripcion: '', costo: '' });
 
-  // Estado para los filtros avanzados
   const [filters, setFilters] = useState({
     tipoVehiculo: null,
     tipoCarga: null,
@@ -43,7 +41,10 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
     adicionalesSeleccionados: [],
   });
 
-  // Carga inicial de datos
+  // MODAL detalle
+  const [showDetalleModal, setShowDetalleModal] = useState(false);
+  const [selectedTarifa, setSelectedTarifa] = useState(null);
+
   useEffect(() => {
     const fetchAll = async () => {
       try {
@@ -55,7 +56,6 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
           getTarifas(),
           getAdicionales()
         ]);
-        
         setTiposVehiculo(vehiculoData || []);
         setTiposCargas(cargaData || []);
         setZonasDeViaje(zonasData || []);
@@ -63,16 +63,14 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
         setTarifasCosto(tarifasData || []);
         setFilteredTarifas(tarifasData || []);
         setAdicionales(adicionalesData || []);
-
       } catch (error) {
         showNotification('Error al cargar datos iniciales', 'error');
-        console.error("Error fetching initial data:", error);
+        console.error(error);
       }
     };
     fetchAll();
   }, []);
 
-  // Lógica de filtrado
   useEffect(() => {
     let dataToFilter = [...(tarifas || [])];
     if (filters.tipoVehiculo) dataToFilter = dataToFilter.filter(item => item.tipoVehiculo?.id === filters.tipoVehiculo.value);
@@ -121,7 +119,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
       setShowAdicionalesForm(false);
       showNotification('Adicional agregado correctamente');
     } catch (error) {
-      console.error("Error al crear adicional:", error);
+      console.error(error);
       showNotification('Error al guardar el nuevo adicional', 'error');
     }
   };
@@ -188,7 +186,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
       setFilteredTarifas(tarifasActualizadas);
       clearForm();
     } catch (error) {
-      console.error('Error al guardar tarifa:', error);
+      console.error(error);
       showNotification('Error al guardar la tarifa', 'error');
     }
   };
@@ -210,7 +208,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
       setEditingId(id);
     }
   };
-  
+
   const deleteEntity = async (id) => {
     const result = await Swal.fire({
       title: '¿Estás seguro?',
@@ -229,16 +227,21 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
         setTarifasCosto(tarifasActualizadas);
         showNotification('Tarifa de costo eliminada correctamente');
       } catch (error) {
-        console.error('Error al eliminar tarifa:', error);
+        console.error(error);
         showNotification('Error al eliminar tarifa', 'error');
       }
     }
   };
 
-  const vehiculoOptions = (tiposVehiculo || []).map(v => ({ value: v.id, label: v.descripcion }));
-  const transportistaOptions = (transportistas || []).map(t => ({ value: t.id, label: t.nombre }));
-  const zonaOptions = (zonasDeViaje || []).map(z => ({ value: z.id, label: `${z.origen} - ${z.destino}` }));
-  const cargaOptions = (tiposCarga || []).map(c => ({ value: c.id, label: c.categoria }));
+  const verDetalleTarifa = (tarifa) => {
+    setSelectedTarifa(tarifa);
+    setShowDetalleModal(true);
+  };
+
+  const vehiculoOptions = tiposVehiculo.map(v => ({ value: v.id, label: v.descripcion }));
+  const transportistaOptions = transportistas.map(t => ({ value: t.id, label: t.nombre }));
+  const zonaOptions = zonasDeViaje.map(z => ({ value: z.id, label: `${z.origen} - ${z.destino}` }));
+  const cargaOptions = tiposCarga.map(c => ({ value: c.id, label: c.categoria }));
   const customSelectStyles = {
     control: (base) => ({ ...base, backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.3)', color: 'white', minWidth: '160px', fontSize: '0.875rem' }),
     singleValue: (base) => ({ ...base, color: 'white' }),
@@ -260,28 +263,28 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
               <label className="block text-sm font-semibold text-gray-300 mb-2">Tipo de Vehículo *</label>
               <select name="tipoVehiculo" value={form.tipoVehiculo} onChange={handleInputChange} className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}>
                 <option value="">Seleccionar tipo de vehículo</option>
-                {(tiposVehiculo || []).map(vehiculo => (<option key={vehiculo.id} value={vehiculo.id}>{vehiculo.descripcion} (${vehiculo.precioBase}/km)</option>))}
+                {(tiposVehiculo || []).map(vehiculo => (<option key={vehiculo.id} value={vehiculo.id}>{vehiculo.descripcion} {vehiculo.precioBase}</option>))}
               </select>
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-300 mb-2">Tipo de Carga *</label>
               <select name="tipoCarga" value={form.tipoCarga} onChange={handleInputChange} className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}>
                 <option value="">Seleccionar tipo de carga</option>
-                {(tiposCarga || []).map(carga => (<option key={carga.id} value={carga.id}>{carga.categoria} (${carga.valorBase})</option>))}
+                {(tiposCarga || []).map(carga => (<option key={carga.id} value={carga.id}>{carga.categoria} {carga.valorBase}</option>))}
               </select>
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-300 mb-2">Zona de Viaje *</label>
               <select name="zonaDeViaje" value={form.zonaDeViaje} onChange={handleInputChange} className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}>
                 <option value="">Seleccionar zona de viaje</option>
-                {(zonasDeViaje || []).map(zona => (<option key={zona.id} value={zona.id}>{zona.origen} - {zona.destino} | {zona.distancia} km (${zona.distancia * zona.costoKilometro})</option>))}
+                {(zonasDeViaje || []).map(zona => (<option key={zona.id} value={zona.id}>{zona.origen} - {zona.destino} | {zona.distancia} km</option>))}
               </select>
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-300 mb-2">Transportista *</label>
               <select name="transportista" value={form.transportista} onChange={handleInputChange} className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}>
                 <option value="">Seleccionar transportista</option>
-                {(transportistas || []).map(transportista => (<option key={transportista.id} value={transportista.id}>{transportista.nombre} (Base: ${transportista.costoServicio})</option>))}
+                {(transportistas || []).map(transportista => (<option key={transportista.id} value={transportista.id}>{transportista.nombre} {transportista.costoServicio}</option>))}
               </select>
             </div>
             
@@ -291,55 +294,28 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
             </div>
 
             <div className="bg-green-900/20 p-4 rounded-lg border border-green-400">
-              <div className="flex justify-between items-center mb-3">
-                <label className="block text-sm font-semibold text-green-300">Servicios Adicionales</label>
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => setShowAdicionalesForm(true)} className="p-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors" title="Crear nuevo adicional"><Plus size={16} /></button>
-                  <button type="button" onClick={() => setShowAdicionalesSelector(!showAdicionalesSelector)} className="p-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors" title="Seleccionar adicionales">{showAdicionalesSelector ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</button>
-                </div>
-              </div>
+              <label className="block text-sm font-semibold text-green-300 mb-2">Servicios Adicionales</label>
+              <button
+                type="button"
+                onClick={() => setShowAdicionalesSelector(true)}
+                className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors text-center font-semibold"
+              >
+                Agregar Adicional
+              </button>
               {form.adicionalesSeleccionados.length > 0 && (
-                <div className="mb-3"><div className="flex flex-wrap gap-1">
+                <div className="mt-3 flex flex-wrap gap-1">
                   {form.adicionalesSeleccionados.map(adicional => (
                     <span key={adicional.idAdicional} className="inline-flex items-center px-2 py-1 bg-green-200 text-green-800 text-xs rounded-full">
                       {adicional.descripcion} (${parseFloat(adicional.costo).toFixed(2)})
-                      <button type="button" onClick={() => removerAdicionalSeleccionado(adicional.idAdicional)} className="ml-1 text-green-600 hover:text-green-800"><X size={12} /></button>
+                      <button
+                        type="button"
+                        onClick={() => removerAdicionalSeleccionado(adicional.idAdicional)}
+                        className="ml-1 text-green-600 hover:text-green-800"
+                      >
+                        <X size={12} />
+                      </button>
                     </span>
                   ))}
-                </div></div>
-              )}
-              {showAdicionalesSelector && (
-                <div className="border border-green-500 rounded-lg p-3 bg-[#242423] max-h-40 overflow-y-auto">
-                  <div className="relative mb-2">
-                    <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                    <input type="text" value={adicionalSearch} onChange={(e) => setAdicionalSearch(e.target.value)} placeholder="Buscar adicionales..." className="w-full pl-8 pr-3 py-2 border border-gray-600 rounded bg-[#444240] text-gray-300 text-sm focus:outline-none focus:border-green-400"/>
-                  </div>
-                  <div className="space-y-1">
-                    {adicionalesFiltrados.map(adicional => {
-                      const isSelected = form.adicionalesSeleccionados.find(a => a.idAdicional === adicional.idAdicional);
-                      return (
-                        <div key={adicional.idAdicional} onClick={() => seleccionarAdicional(adicional)} className={`p-2 rounded cursor-pointer text-sm transition-colors ${isSelected ? 'bg-green-500/30 border border-green-400' : 'hover:bg-gray-500/20'}`}>
-                          <div className="flex justify-between items-center">
-                            <span className={isSelected ? 'font-medium text-green-200' : 'text-gray-300'}>{adicional.descripcion}</span>
-                            <span className={`font-bold ${isSelected ? 'text-green-300' : 'text-gray-400'}`}>${parseFloat(adicional.costo).toFixed(2)}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-              {showAdicionalesForm && (
-                <div className="border border-green-500 rounded-lg p-3 bg-[#242423] mt-2">
-                  <h4 className="font-semibold text-green-300 mb-2">Nuevo Adicional</h4>
-                  <div className="space-y-2">
-                    <input type="text" value={nuevoAdicional.descripcion} onChange={(e) => setNuevoAdicional({...nuevoAdicional, descripcion: e.target.value})} placeholder="Descripción del adicional" className="w-full p-2 border border-gray-600 rounded bg-[#444240] text-gray-300 text-sm focus:outline-none focus:border-green-400"/>
-                    <input type="number" value={nuevoAdicional.costo} onChange={(e) => setNuevoAdicional({...nuevoAdicional, costo: e.target.value})} placeholder="Costo" min="0" step="0.01" className="w-full p-2 border border-gray-600 rounded bg-[#444240] text-gray-300 text-sm focus:outline-none focus:border-green-400"/>
-                    <div className="flex gap-2">
-                      <button type="button" onClick={agregarAdicional} className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors">Agregar</button>
-                      <button type="button" onClick={() => {setShowAdicionalesForm(false); setNuevoAdicional({ descripcion: '', costo: '' });}} className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors">Cancelar</button>
-                    </div>
-                  </div>
                 </div>
               )}
             </div>
@@ -373,7 +349,6 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
             <Select options={cargaOptions} placeholder="Filtrar por Carga" isClearable value={filters.tipoCarga} onChange={selectedOption => setFilters({ ...filters, tipoCarga: selectedOption })} styles={customSelectStyles} />
           </div>
         </div>
-
         <div className="max-h-96 overflow-y-auto">
           <table className="w-full">
             <thead className="bg-[#242423] sticky top-0">
@@ -382,44 +357,27 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Zona</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Transportista</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Valor Base</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Adicionales</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Total</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {(filteredTarifas || []).length > 0 ? (
-                (filteredTarifas || []).map(item => (
+              {filteredTarifas.length > 0 ? (
+                filteredTarifas.map(item => (
                   <tr key={item.id} className={`border-b border-gray-700 hover:bg-${tabColor}-500/10 transition-colors`}>
-                    
-                    <td className="px-4 py-3 text-sm font-medium text-neutral-200">
-                      {item.tipoVehiculo?.descripcion || 'N/A'}
-                    </td>
-
-                    <td className="px-4 py-3 text-sm text-neutral-200">
-                      {item.zonaDeViaje ? `${item.zonaDeViaje.origen} - ${item.zonaDeViaje.destino}` : 'N/A'}
-                    </td>
-                    
-                    <td className="px-4 py-3 text-sm text-neutral-200">
-                      {item.transportista?.nombre || 'N/A'}
-                    </td>
-                    
-                    <td className="px-4 py-3 text-sm font-bold text-blue-400">
-                      ${Number(item.valor_base).toFixed(2)}
-                    </td>
-                    
-                    <td className="px-4 py-3 text-sm text-neutral-200">
-                      {(item.tarifaAdicionales || []).length > 0 
-                        ? (item.tarifaAdicionales || []).map(ta => ta.adicional?.descripcion).join(', ') 
+                    <td className="px-4 py-3 text-sm font-medium text-neutral-200">{item.tipoVehiculo?.descripcion || 'N/A'}</td>
+                    <td className="px-4 py-3 text-sm text-neutral-200">{item.zonaDeViaje ? `${item.zonaDeViaje.origen} - ${item.zonaDeViaje.destino}` : 'N/A'}</td>
+                    <td className="px-4 py-3 text-sm text-neutral-200">{item.transportista?.nombre || 'N/A'}</td>
+                    <td className="px-4 py-3 text-sm font-bold text-blue-400">${Number(item.valor_base).toFixed(2)}</td>
+                    {/* <td className="px-4 py-3 text-sm text-neutral-200">
+                      {item.tarifaAdicionales?.length > 0
+                        ? item.tarifaAdicionales.map(ta => ta.adicional?.descripcion).join(', ')
                         : 'Ninguno'}
-                    </td>
-
-                    <td className="px-4 py-3 text-sm font-bold text-yellow-400">
-                      ${Number(item.costo_total).toFixed(2)}
-                    </td>
-
+                    </td> */}
+                    <td className="px-4 py-3 text-sm font-bold text-yellow-400">${Number(item.costo_total).toFixed(2)}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
+                        <button onClick={() => verDetalleTarifa(item)} className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" title="Ver detalle"><Eye size={14} /></button>
                         <button onClick={() => editEntity(item.id)} className={`p-2 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors`}><Edit size={14} /></button>
                         <button onClick={() => deleteEntity(item.id)} className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"><Trash2 size={14} /></button>
                       </div>
@@ -428,19 +386,156 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="px-4 py-12 text-center text-gray-500">
-                    <div className="flex flex-col items-center">
-                      <div className="text-6xl mb-4">💰</div>
-                      <h3 className="text-lg font-semibold mb-2">No se encontraron tarifas</h3>
-                      <p>Intenta ajustar los filtros o agrega una nueva tarifa.</p>
-                    </div>
-                  </td>
+                  <td colSpan="7" className="px-4 py-12 text-center text-gray-500">No se encontraron tarifas</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* modal adicional  */}
+      {showAdicionalesSelector && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex justify-center items-center">
+          <div className="bg-[#444240] p-6 rounded-xl shadow-xl border border-gray-700 max-w-md w-full relative">
+            <button
+              className="absolute top-2 right-2 text-gray-300 hover:text-white"
+              onClick={() => {
+                setShowAdicionalesSelector(false);
+                setShowAdicionalesForm(false);
+                setAdicionalSearch('');
+              }}
+            >
+              <X size={20} />
+            </button>
+            <h2 className="text-xl font-bold text-green-300 mb-4">Gestionar Adicionales</h2>
+
+            <div className="flex justify-end mb-3">
+              <button
+                onClick={() => setShowAdicionalesForm(true)}
+                className="p-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors text-sm"
+              >
+                Crear nuevo adicional
+              </button>
+            </div>
+
+            {showAdicionalesForm && (
+              <div className="border border-green-500 rounded-lg p-3 bg-[#242423] mb-4">
+                <h4 className="font-semibold text-green-300 mb-2">Nuevo Adicional</h4>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={nuevoAdicional.descripcion}
+                    onChange={(e) => setNuevoAdicional({ ...nuevoAdicional, descripcion: e.target.value })}
+                    placeholder="Descripción del adicional"
+                    className="w-full p-2 border border-gray-600 rounded bg-[#444240] text-gray-300 text-sm focus:outline-none focus:border-green-400"
+                  />
+                  <input
+                    type="number"
+                    value={nuevoAdicional.costo}
+                    onChange={(e) => setNuevoAdicional({ ...nuevoAdicional, costo: e.target.value })}
+                    placeholder="Costo"
+                    min="0"
+                    step="0.01"
+                    className="w-full p-2 border border-gray-600 rounded bg-[#444240] text-gray-300 text-sm focus:outline-none focus:border-green-400"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={agregarAdicional}
+                      className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
+                    >
+                      Agregar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowAdicionalesForm(false)}
+                      className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="relative mb-2">
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+              <input
+                type="text"
+                value={adicionalSearch}
+                onChange={(e) => setAdicionalSearch(e.target.value)}
+                placeholder="Buscar adicionales..."
+                className="w-full pl-8 pr-3 py-2 border border-gray-600 rounded bg-[#444240] text-gray-300 text-sm focus:outline-none focus:border-green-400"
+              />
+            </div>
+            <div className="space-y-1 max-h-60 overflow-y-auto">
+              {adicionalesFiltrados.map(adicional => {
+                const isSelected = form.adicionalesSeleccionados.find(a => a.idAdicional === adicional.idAdicional);
+                return (
+                  <div
+                    key={adicional.idAdicional}
+                    onClick={() => seleccionarAdicional(adicional)}
+                    className={`p-2 rounded cursor-pointer text-sm transition-colors ${
+                      isSelected ? 'bg-green-500/30 border border-green-400' : 'hover:bg-gray-500/20'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className={isSelected ? 'font-medium text-green-200' : 'text-gray-300'}>
+                        {adicional.descripcion}
+                      </span>
+                      <span className={`font-bold ${isSelected ? 'text-green-300' : 'text-gray-400'}`}>
+                        ${parseFloat(adicional.costo).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => {
+                  setShowAdicionalesSelector(false);
+                  setShowAdicionalesForm(false);
+                  setAdicionalSearch('');
+                }}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  setShowAdicionalesSelector(false);
+                  setShowAdicionalesForm(false);
+                  setAdicionalSearch('');
+                }}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* MODAL detalle */}
+      {showDetalleModal && selectedTarifa && (
+        <div className="fixed inset-0 z-50 backdrop-blur-sm bg-black/20 flex justify-center items-center">
+          <div className="bg-[#444240] p-6 rounded-xl shadow-xl border border-gray-700 max-w-md w-full relative">
+            <button className="absolute top-2 right-2 text-gray-300 hover:text-white" onClick={() => setShowDetalleModal(false)}><X size={20} /></button>
+            <h2 className="text-xl font-bold text-gray-200 mb-4">Detalle de Tarifa</h2>
+            <div className="space-y-2 text-sm text-gray-300">
+              <div><strong>Vehículo:</strong> {selectedTarifa.tipoVehiculo?.descripcion || 'N/A'}</div>
+              <div><strong>Zona:</strong> {selectedTarifa.zonaDeViaje ? `${selectedTarifa.zonaDeViaje.origen} - ${selectedTarifa.zonaDeViaje.destino}` : 'N/A'}</div>
+              <div><strong>Transportista:</strong> {selectedTarifa.transportista?.nombre || 'N/A'}</div>
+              <div><strong>Tipo de Carga:</strong> {selectedTarifa.tipoCarga?.categoria || 'N/A'}</div>
+              <div><strong>Valor Base:</strong> ${Number(selectedTarifa.valor_base).toFixed(2)}</div>
+              <div><strong>Adicionales:</strong> {selectedTarifa.tarifaAdicionales?.length > 0 ? selectedTarifa.tarifaAdicionales.map(ta => ta.adicional?.descripcion).join(', ') : 'Ninguno'}</div>
+              <div><strong>Costo Total:</strong> ${Number(selectedTarifa.costo_total).toFixed(2)}</div>
+            </div>
+            <button  onClick={() => setShowDetalleModal(false)} className="mt-6 w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">Cerrar</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
