@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Star, TrendingDown, ArrowLeft, RefreshCw, ListTree, Loader2, X } from 'lucide-react';
-// Importamos ambas funciones del servicio
 import { getAdicionalesReport, getTarifasForAdicional } from '../../../../services/adicional.service';
 import { useNavigate } from 'react-router-dom';
 
-// Tu función de categorización se mantiene igual
 const categorizarAdicional = (descripcion) => {
   const descLower = descripcion.toLowerCase();
   if (descLower.includes('seguro')) return 'Seguros';
@@ -21,8 +19,6 @@ const AdicionalesReport = ({ showNotification }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('uso');
   const navigate = useNavigate();
-
-  // --- Estados para el Modal (Añadido) ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState({ adicional: null, tarifas: [] });
   const [isLoadingModal, setIsLoadingModal] = useState(false);
@@ -35,9 +31,8 @@ const AdicionalesReport = ({ showNotification }) => {
     try {
       setLoading(true);
       const data = await getAdicionalesReport();
-      // Mapeamos los datos para añadir el ID y la categoría.
       const mappedData = data.map(item => ({
-        ...item, // Esto incluye: idAdicional, descripcion, costo, frecuenciaDeUso
+        ...item, 
         id: item.idAdicional,
         frecuenciaDeUso: parseInt(item.frecuenciaDeUso, 10),
         categoria: categorizarAdicional(item.descripcion)
@@ -51,7 +46,6 @@ const AdicionalesReport = ({ showNotification }) => {
     }
   };
 
-  // --- Lógica para manejar el Modal (Añadido) ---
   const handleRowClick = async (adicional) => {
     if (adicional.frecuenciaDeUso === 0) return;
 
@@ -101,7 +95,6 @@ const AdicionalesReport = ({ showNotification }) => {
     <>
       <div className="min-h-screen bg-[#242423] p-8">
         <div className="max-w-7xl mx-auto">
-          {/* --- TU CABECERA Y BOTONES --- */}
           <div className="mb-8 flex items-center justify-between">
               <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate(-1)}>
                 <ArrowLeft size={24} className="text-gray-300 hover:text-gray-200" />
@@ -113,7 +106,6 @@ const AdicionalesReport = ({ showNotification }) => {
               </button>
           </div>
 
-          {/* --- TUS TARJETAS DE ESTADÍSTICAS --- */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-[#444240] p-5 rounded-xl shadow-sm border border-gray-700">
               <p className="text-sm font-medium text-gray-400">Total Adicionales</p>
@@ -133,7 +125,6 @@ const AdicionalesReport = ({ showNotification }) => {
             </div>
           </div>
 
-          {/* --- TU BARRA DE BÚSQUEDA Y FILTROS --- */}
           <div className="bg-[#444240] p-6 rounded-xl shadow-sm border border-gray-700 mb-8">
             <div className="flex flex-col lg:flex-row gap-4 items-center">
               <div className="flex-1 w-full">
@@ -149,7 +140,6 @@ const AdicionalesReport = ({ showNotification }) => {
             </div>
           </div>
 
-          {/* --- TU TABLA PRINCIPAL (AHORA INTERACTIVA) --- */}
           <div className="bg-[#444240] rounded-xl shadow-sm border border-gray-700 overflow-hidden">
             <div className="p-6 border-b border-gray-700"><h2 className="text-xl font-bold text-gray-200">Catálogo Detallado ({filteredData.length} adicionales)</h2></div>
             <div className="overflow-x-auto">
@@ -179,8 +169,7 @@ const AdicionalesReport = ({ showNotification }) => {
               </table>
             </div>
           </div>
-          
-          {/* --- TUS TARJETAS DE RESUMEN --- */}
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
               <div className="bg-[#444240] p-6 rounded-xl shadow-sm border border-gray-700">
                   <h3 className="text-lg font-bold text-gray-200 mb-4 flex items-center"><Star className="text-yellow-400 mr-2" size={20} /> Más Utilizados</h3>
@@ -208,7 +197,6 @@ const AdicionalesReport = ({ showNotification }) => {
         </div>
       </div>
 
-      {/* --- EL MODAL INTERACTIVO --- */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">
           <div className="bg-[#2d2d2b] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-indigo-500">
