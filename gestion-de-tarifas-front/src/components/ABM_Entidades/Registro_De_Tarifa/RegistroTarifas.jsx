@@ -96,10 +96,22 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
   };
-
+  
+  // --- FUNCIÓN CORREGIDA ---
   const handleValorBaseChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
     setForm({ ...form, valorBase: value });
+  };
+  
+  const handleAdicionalCostoChange = (idAdicional, nuevoCosto) => {
+    const costoNumerico = parseFloat(nuevoCosto) || 0;
+    const adicionalesActualizados = form.adicionalesSeleccionados.map(ad => {
+      if (ad.idAdicional === idAdicional) {
+        return { ...ad, costo: costoNumerico };
+      }
+      return ad;
+    });
+    setForm(prevForm => ({ ...prevForm, adicionalesSeleccionados: adicionalesActualizados }));
   };
 
   const agregarAdicional = async () => {
@@ -157,7 +169,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
   };
 
   const validateForm = () => {
-    return form.tipoVehiculo && form.tipoCarga && form.zonaDeViaje && form.transportista && form.valorBase;
+    return form.tipoVehiculo && form.tipoCarga && form.zonaDeViaje && form.transportista && form.valorBase !== '';
   };
 
   const handleSubmit = async () => {
@@ -171,7 +183,10 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
       zonaDeViaje: Number(form.zonaDeViaje),
       transportista: Number(form.transportista),
       tipoCarga: Number(form.tipoCarga),
-      adicionales: form.adicionalesSeleccionados.map(a => a.idAdicional),
+      adicionales: form.adicionalesSeleccionados.map(a => ({
+          idAdicional: a.idAdicional,
+          costo: parseFloat(a.costo)
+      })),
     };
     try {
       if (editingId) {
@@ -195,8 +210,12 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
     const tarifa = tarifas.find(item => item.id === id);
     if (tarifa) {
       const adicionalesParaForm = tarifa.tarifaAdicionales 
-        ? tarifa.tarifaAdicionales.map(ta => ta.adicional).filter(Boolean)
+        ? tarifa.tarifaAdicionales.map(ta => ({
+            ...(ta.adicional || {}),
+            costo: ta.costo
+          })).filter(ad => ad && ad.idAdicional)
         : [];
+
       setForm({
         tipoVehiculo: tarifa.tipoVehiculo?.id?.toString() || '',
         tipoCarga: tarifa.tipoCarga?.id?.toString() || '',
@@ -238,10 +257,10 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
     setShowDetalleModal(true);
   };
 
-  const vehiculoOptions = tiposVehiculo.map(v => ({ value: v.id, label: v.descripcion }));
-  const transportistaOptions = transportistas.map(t => ({ value: t.id, label: t.nombre }));
-  const zonaOptions = zonasDeViaje.map(z => ({ value: z.id, label: `${z.origen} - ${z.destino}` }));
-  const cargaOptions = tiposCarga.map(c => ({ value: c.id, label: c.categoria }));
+  const vehiculoOptions = (tiposVehiculo || []).map(v => ({ value: v.id, label: v.descripcion }));
+  const transportistaOptions = (transportistas || []).map(t => ({ value: t.id, label: t.nombre }));
+  const zonaOptions = (zonasDeViaje || []).map(z => ({ value: z.id, label: `${z.origen} - ${z.destino}` }));
+  const cargaOptions = (tiposCarga || []).map(c => ({ value: c.id, label: c.categoria }));
   const customSelectStyles = {
     control: (base) => ({ ...base, backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.3)', color: 'white', minWidth: '160px', fontSize: '0.875rem' }),
     singleValue: (base) => ({ ...base, color: 'white' }),
@@ -303,18 +322,29 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
                 Agregar Adicional
               </button>
               {form.adicionalesSeleccionados.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1">
+                <div className="mt-4 space-y-2">
                   {form.adicionalesSeleccionados.map(adicional => (
-                    <span key={adicional.idAdicional} className="inline-flex items-center px-2 py-1 bg-green-200 text-green-800 text-xs rounded-full">
-                      {adicional.descripcion} (${parseFloat(adicional.costo).toFixed(2)})
-                      <button
-                        type="button"
-                        onClick={() => removerAdicionalSeleccionado(adicional.idAdicional)}
-                        className="ml-1 text-green-600 hover:text-green-800"
-                      >
-                        <X size={12} />
-                      </button>
-                    </span>
+                    <div key={adicional.idAdicional} className="flex items-center justify-between p-2 bg-black/20 rounded-lg">
+                      <span className="text-sm text-gray-200 flex-grow pr-2">{adicional.descripcion}</span>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="text-sm text-green-300">$</span>
+                          <input
+                              type="number"
+                              value={adicional.costo}
+                              onChange={(e) => handleAdicionalCostoChange(adicional.idAdicional, e.target.value)}
+                              className="w-24 p-1 rounded bg-[#242423] text-white text-right border border-gray-600 focus:outline-none focus:border-green-400"
+                              min="0"
+                              step="0.01"
+                          />
+                          <button
+                              type="button"
+                              onClick={() => removerAdicionalSeleccionado(adicional.idAdicional)}
+                              className="text-red-400 hover:text-red-500"
+                          >
+                              <X size={16} />
+                          </button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
@@ -369,11 +399,6 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
                     <td className="px-4 py-3 text-sm text-neutral-200">{item.zonaDeViaje ? `${item.zonaDeViaje.origen} - ${item.zonaDeViaje.destino}` : 'N/A'}</td>
                     <td className="px-4 py-3 text-sm text-neutral-200">{item.transportista?.nombre || 'N/A'}</td>
                     <td className="px-4 py-3 text-sm font-bold text-blue-400">${Number(item.valor_base).toFixed(2)}</td>
-                    {/* <td className="px-4 py-3 text-sm text-neutral-200">
-                      {item.tarifaAdicionales?.length > 0
-                        ? item.tarifaAdicionales.map(ta => ta.adicional?.descripcion).join(', ')
-                        : 'Ninguno'}
-                    </td> */}
                     <td className="px-4 py-3 text-sm font-bold text-yellow-400">${Number(item.costo_total).toFixed(2)}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
@@ -394,7 +419,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
         </div>
       </div>
 
-      {/* modal adicional  */}
+      {/* modal adicional */}
       {showAdicionalesSelector && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex justify-center items-center">
           <div className="bg-[#444240] p-6 rounded-xl shadow-xl border border-gray-700 max-w-md w-full relative">
@@ -501,22 +526,13 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
                 }}
                 className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded"
               >
-                Cancelar
-              </button>
-              <button
-                onClick={() => {
-                  setShowAdicionalesSelector(false);
-                  setShowAdicionalesForm(false);
-                  setAdicionalSearch('');
-                }}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded"
-              >
-                Guardar
+                Cerrar
               </button>
             </div>
           </div>
         </div>
       )}
+      
       {/* MODAL detalle */}
       {showDetalleModal && selectedTarifa && (
         <div className="fixed inset-0 z-50 backdrop-blur-sm bg-black/20 flex justify-center items-center">
@@ -529,8 +545,21 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
               <div><strong>Transportista:</strong> {selectedTarifa.transportista?.nombre || 'N/A'}</div>
               <div><strong>Tipo de Carga:</strong> {selectedTarifa.tipoCarga?.categoria || 'N/A'}</div>
               <div><strong>Valor Base:</strong> ${Number(selectedTarifa.valor_base).toFixed(2)}</div>
-              <div><strong>Adicionales:</strong> {selectedTarifa.tarifaAdicionales?.length > 0 ? selectedTarifa.tarifaAdicionales.map(ta => ta.adicional?.descripcion).join(', ') : 'Ninguno'}</div>
-              <div><strong>Costo Total:</strong> ${Number(selectedTarifa.costo_total).toFixed(2)}</div>
+              <div>
+                  <strong>Adicionales:</strong>
+                  {selectedTarifa.tarifaAdicionales?.length > 0 ? (
+                      <ul className="list-disc list-inside pl-2">
+                          {selectedTarifa.tarifaAdicionales.map(ta => (
+                              <li key={ta.adicional.idAdicional}>
+                                  {ta.adicional.descripcion}: ${Number(ta.costo).toFixed(2)}
+                              </li>
+                          ))}
+                      </ul>
+                  ) : 'Ninguno'}
+              </div>
+              <div className="pt-2 mt-2 border-t border-gray-600">
+                <strong>Costo Total:</strong> ${Number(selectedTarifa.costo_total).toFixed(2)}
+              </div>
             </div>
             <button  onClick={() => setShowDetalleModal(false)} className="mt-6 w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">Cerrar</button>
           </div>
