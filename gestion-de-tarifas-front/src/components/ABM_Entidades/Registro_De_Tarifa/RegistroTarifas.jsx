@@ -97,7 +97,6 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
     setForm({ ...form, [name]: value });
   };
   
-  // --- FUNCIÓN CORREGIDA ---
   const handleValorBaseChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
     setForm({ ...form, valorBase: value });
@@ -212,7 +211,8 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
       const adicionalesParaForm = tarifa.tarifaAdicionales 
         ? tarifa.tarifaAdicionales.map(ta => ({
             ...(ta.adicional || {}),
-            costo: ta.costo
+            // --- CORRECCIÓN #1 ---
+            costo: ta.costoPersonalizado // Se usa la propiedad correcta que viene del backend
           })).filter(ad => ad && ad.idAdicional)
         : [];
 
@@ -551,7 +551,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
                       <ul className="list-disc list-inside pl-2">
                           {selectedTarifa.tarifaAdicionales.map(ta => (
                               <li key={ta.adicional.idAdicional}>
-                                  {ta.adicional.descripcion}: ${Number(ta.costo).toFixed(2)}
+                                  {ta.adicional.descripcion}: ${Number(ta.costoPersonalizado).toFixed(2)}
                               </li>
                           ))}
                       </ul>
