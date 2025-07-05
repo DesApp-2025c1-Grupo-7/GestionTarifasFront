@@ -7,22 +7,27 @@ import Swal from 'sweetalert2';
 import Select from 'react-select';
 
 // Estilos para los componentes Select
-const customSelectStyles = {
-    control: (base) => ({
-      ...base,
-      backgroundColor: 'rgba(255,255,255,0.1)',
-      borderColor: 'rgba(255,255,255,0.3)',
-      color: 'white',
-      width: '100%',
-      minWidth: '200px',
-      fontSize: '0.875rem',
-    }),
-    multiValue: (base) => ({ ...base, backgroundColor: '#555', color: 'white' }),
-    multiValueLabel: (base) => ({ ...base, color: 'white' }),
-    menu: (base) => ({ ...base, backgroundColor: '#242423', color: 'white' }),
-    option: (base, state) => ({ ...base, backgroundColor: state.isFocused ? 'rgba(255,255,255,0.2)' : '#242423', color: 'white' }),
-    placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
-};
+const customSelectStyles = (isMulti = false) => ({
+  control: (base) => ({
+    ...base,
+    backgroundColor: isMulti ? '#444240' : 'rgba(255,255,255,0.1)',
+    borderColor: isMulti ? 'rgb(107 114 128)' : 'rgba(255,255,255,0.3)',
+    color: 'white',
+    width: '100%',
+    minWidth: '200px',
+    fontSize: '0.875rem',
+  }),
+  singleValue: (base) => ({ ...base, color: 'white' }),
+  multiValue: (base) => ({ ...base, backgroundColor: 'rgba(255,255,255,0.2)' }),
+  multiValueLabel: (base) => ({ ...base, color: 'white' }),
+  menu: (base) => ({ ...base, backgroundColor: '#242423', color: 'white' }),
+  option: (base, state) => ({ 
+    ...base, 
+    backgroundColor: state.isFocused ? 'rgba(255,255,255,0.2)' : '#242423', 
+    color: 'white' 
+  }),
+  placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
+});
 
 const Transportistas = ({ showNotification, tabColor }) => {
   // --- ESTADOS ---
@@ -141,7 +146,28 @@ const Transportistas = ({ showNotification, tabColor }) => {
   };
 
   const deleteEntity = async (id) => {
-    // ... tu lógica de delete ...
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará el transportista definitivamente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+    
+    if (result.isConfirmed) {
+      try {
+        await deleteTransportista(id);
+        const newData = data.filter(item => item.id !== id);
+        setData(newData);
+        showNotification('Transportista eliminado correctamente');
+      } catch (error) {
+        const mensaje = error?.response?.data?.message || 'Error al eliminar el transportista';
+        showNotification(mensaje, 'error');
+      }
+    }
   };
   
   // Opciones para los Select
@@ -149,24 +175,94 @@ const Transportistas = ({ showNotification, tabColor }) => {
   const opcionesZonas = useMemo(() => zonasViaje.map(z => ({ value: z.id.toString(), label: `${z.origen} - ${z.destino}` })), [zonasViaje]);
 
   return (
-    <div className="grid lg:grid-cols-3 gap-8">
+    <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
       {/* Form Section */}
       <div className="lg:col-span-1">
-        <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
+        <div className="bg-[#444240] p-8 rounded-2xl shadow-xl border border-gray-900">
           <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
             {editingId ? 'Editar Transportista' : 'Nuevo Transportista'}
           </h2>
           <div className="space-y-5">
-            {/* Inputs del formulario */}
-            <input name="nombre" value={form.nombre} onChange={handleInputChange} placeholder="Nombre" className="w-full p-3 bg-transparent border-2 border-gray-600 rounded-lg text-gray-200" />
-            <input name="contacto" value={form.contacto} onChange={handleInputChange} placeholder="Contacto" className="w-full p-3 bg-transparent border-2 border-gray-600 rounded-lg text-gray-200" />
-            <input type="number" name="telefono" value={form.telefono} onChange={handleInputChange} placeholder="Teléfono" className="w-full p-3 bg-transparent border-2 border-gray-600 rounded-lg text-gray-200" />
-            <Select isMulti options={opcionesVehiculo} placeholder="Tipos de Vehículo..." styles={customSelectStyles} value={opcionesVehiculo.filter(opt => form.tipoVehiculos.includes(opt.value))} onChange={(selected) => handleFormSelectChange('tipoVehiculos', selected)} />
-            <Select isMulti options={opcionesZonas} placeholder="Zonas de Viaje..." styles={customSelectStyles} value={opcionesZonas.filter(opt => form.zonasDeViaje.includes(opt.value))} onChange={(selected) => handleFormSelectChange('zonasDeViaje', selected)} />
+            <div>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">Nombre *</label>
+              <input 
+                name="nombre" 
+                value={form.nombre} 
+                onChange={handleInputChange} 
+                placeholder="Nombre del transportista" 
+                className="w-full p-3 border-2 text-gray-300 bg-transparent border-gray-600 rounded-lg focus:border-orange-500 focus:outline-none transition-all" 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">Contacto *</label>
+              <input 
+                name="contacto" 
+                value={form.contacto} 
+                onChange={handleInputChange} 
+                placeholder="Persona de contacto" 
+                className="w-full p-3 border-2 text-gray-300 bg-transparent border-gray-600 rounded-lg focus:border-orange-500 focus:outline-none transition-all" 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">Teléfono *</label>
+              <input 
+                type="number" 
+                name="telefono" 
+                value={form.telefono} 
+                onChange={handleInputChange} 
+                placeholder="Número de teléfono" 
+                className="w-full p-3 border-2 text-gray-300 bg-transparent border-gray-600 rounded-lg focus:border-orange-500 focus:outline-none transition-all" 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">Tipos de Vehículo *</label>
+              <Select 
+                isMulti 
+                options={opcionesVehiculo} 
+                placeholder="Seleccionar tipos de vehículo..." 
+                styles={customSelectStyles(true)} 
+                value={opcionesVehiculo.filter(opt => form.tipoVehiculos.includes(opt.value))} 
+                onChange={(selected) => handleFormSelectChange('tipoVehiculos', selected)} 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">Zonas de Viaje *</label>
+              <Select 
+                isMulti 
+                options={opcionesZonas} 
+                placeholder="Seleccionar zonas de viaje..." 
+                styles={customSelectStyles(true)} 
+                value={opcionesZonas.filter(opt => form.zonasDeViaje.includes(opt.value))} 
+                onChange={(selected) => handleFormSelectChange('zonasDeViaje', selected)} 
+              />
+            </div>
             {/* Botones del formulario */}
-            <div className="flex gap-4 pt-6 border-t border-gray-700">
-                <button onClick={clearForm} className="px-6 py-3 bg-[#444240] text-yellow-500 border border-yellow-500 hover:text-white rounded-lg hover:bg-yellow-500 font-semibold">Limpiar</button>
-                <button onClick={handleSubmit} disabled={!validateForm()} className={`px-6 py-3 text-white rounded-lg font-semibold ${!validateForm() ? 'bg-gray-600 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'}`}>{editingId ? 'Actualizar' : 'Guardar'}</button>
+            <div className="flex gap-4 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={clearForm}
+                className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-semibold"
+              >
+                Limpiar
+              </button>
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={clearForm}
+                  className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
+                >
+                  Cancelar
+                </button>
+              )}
+              <button
+                onClick={handleSubmit}
+                className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${editingId
+                  ? `bg-indigo-500 hover:bg-indigo-600`
+                  : 'bg-green-500 hover:bg-green-600'
+                  }`}
+              >
+                {editingId ? 'Actualizar' : 'Guardar'}
+              </button>
             </div>
           </div>
         </div>
@@ -179,8 +275,8 @@ const Transportistas = ({ showNotification, tabColor }) => {
           {/* --- SECCIÓN DE FILTROS --- */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input type="text" placeholder="Buscar por nombre o contacto..." value={filters.nombreContacto} onChange={(e) => setFilters(prev => ({ ...prev, nombreContacto: e.target.value }))} className="w-full p-2 bg-white/10 border border-white/30 rounded-lg placeholder-gray-300 text-white" />
-            <Select isMulti options={opcionesVehiculo} placeholder="Filtrar por Vehículo..." styles={customSelectStyles} onChange={(selected) => setFilters(prev => ({ ...prev, tipoVehiculos: selected.map(opt => opt.value) }))} />
-            <Select isMulti options={opcionesZonas} placeholder="Filtrar por Zona..." styles={customSelectStyles} onChange={(selected) => setFilters(prev => ({ ...prev, zonasDeViaje: selected.map(opt => opt.value) }))} />
+            <Select isMulti options={opcionesVehiculo} placeholder="Filtrar por Vehículo..." styles={customSelectStyles()} onChange={(selected) => setFilters(prev => ({ ...prev, tipoVehiculos: selected.map(opt => opt.value) }))} />
+            <Select isMulti options={opcionesZonas} placeholder="Filtrar por Zona..." styles={customSelectStyles()} onChange={(selected) => setFilters(prev => ({ ...prev, zonasDeViaje: selected.map(opt => opt.value) }))} />
           </div>
         </div>
         <div className="max-h-96 overflow-y-auto">
@@ -190,7 +286,7 @@ const Transportistas = ({ showNotification, tabColor }) => {
                 <th className="px-4 py-3 text-left text-sm font-semibold">Nombre</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Contacto</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Teléfono</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Acciones</th>
+                <th className="px-4 py-3 text-center text-sm font-semibold">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -199,8 +295,8 @@ const Transportistas = ({ showNotification, tabColor }) => {
                   <td className="px-4 py-3 text-sm font-medium text-neutral-200">{item.nombre}</td>
                   <td className="px-4 py-3 text-sm text-neutral-200">{item.contacto}</td>
                   <td className="px-4 py-3 text-sm text-neutral-200">{item.telefono}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex gap-2 justify-center">
                       <button onClick={() => editEntity(item.id)} className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><Edit size={14} /></button>
                       <button onClick={() => deleteEntity(item.id)} className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700"><Trash2 size={14} /></button>
                       <button onClick={() => viewEntity(item)} className="p-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"><Eye size={14} /></button>

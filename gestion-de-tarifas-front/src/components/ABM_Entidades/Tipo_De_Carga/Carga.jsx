@@ -13,8 +13,14 @@ const customSelectStyles = {
     placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
 };
 
+// Estilos para remover las flechas de los inputs number
+const numberInputStyles = {
+    WebkitAppearance: 'none',
+    MozAppearance: 'textfield',
+};
+
 const TiposCarga = ({ showNotification, tabColor }) => {
-  // --- ESTADOS ---
+  
   const [data, setData] = useState([]); // Lista original de cargas del backend
   const [filteredData, setFilteredData] = useState([]); // Lista que se muestra en la tabla
   const [editingId, setEditingId] = useState(null);
@@ -31,7 +37,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
       try {
         const cargas = await getCargas();
         setData(cargas);
-        setFilteredData(cargas); // Inicialmente, la tabla muestra todos los datos
+        setFilteredData(cargas); 
       } catch (error) {
         showNotification('Error al cargar los tipos de carga', 'error');
       }
@@ -39,7 +45,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
     fetchData();
   }, []);
 
-  // --- LÓGICA DE FILTRADO CENTRALIZADA ---
+ 
   useEffect(() => {
     let dataToFilter = [...data];
 
@@ -53,27 +59,26 @@ const TiposCarga = ({ showNotification, tabColor }) => {
     setFilteredData(dataToFilter);
   }, [data, filters]);
 
-  // --- MANEJADORES DE FORMULARIO ---
+  
   const clearForm = () => {
     setForm({ categoria: '', pesoTotal: '', volumenTotal: '', esEspecial: false, requisitoEspecial: '' });
     setEditingId(null);
   };
 
-  // --- CORRECCIÓN AQUÍ ---
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    // Si el input que cambia es el checkbox 'esEspecial'
+    
     if (name === 'esEspecial') {
       const isChecked = checked;
       setForm(prev => ({
         ...prev,
         esEspecial: isChecked,
-        // Si se desmarca la casilla, se borra el requisito especial.
+       
         requisitoEspecial: !isChecked ? '' : prev.requisitoEspecial
       }));
     } else {
-      // Para todos los demás inputs (incluyendo el textarea), actualiza el valor normalmente.
       setForm(prev => ({
         ...prev,
         [name]: value
@@ -81,7 +86,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
     }
   };
 
-  // --- LÓGICA DE SUBMIT (CRUD) ---
+
   const validateForm = () => {
     const { categoria, pesoTotal, volumenTotal, esEspecial, requisitoEspecial } = form;
     if (!categoria.trim() || !pesoTotal || !volumenTotal) return false;
@@ -176,28 +181,75 @@ const TiposCarga = ({ showNotification, tabColor }) => {
 
   return (
     <div className="grid lg:grid-cols-3 gap-8">
+      {/* Estilos CSS para remover las flechas */}
+      <style jsx>{`
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        
+        input[type=number] {
+          -moz-appearance: textfield;
+        }
+      `}</style>
+
       {/* Form Section */}
       <div className="lg:col-span-1">
         <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
-          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
+          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-blue-500`}>
             {editingId ? 'Editar Tipo de Carga' : 'Nuevo Tipo de Carga'}
           </h2>
           <div className="space-y-5">
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">Categoría *</label>
-                <input type="text" name="categoria" value={form.categoria} onChange={handleInputChange} placeholder="Ej: Electrodomésticos, Productos químicos..." className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all" />
+                <input 
+                  type="text" 
+                  name="categoria" 
+                  value={form.categoria} 
+                  onChange={handleInputChange} 
+                  placeholder="Ej: Electrodomésticos, Productos químicos..." 
+                  className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all" 
+                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">Peso Total Estimado (kg) *</label>
-                <input type="number" name="pesoTotal" value={form.pesoTotal} onChange={handleInputChange} placeholder="Peso estimado en kilogramos" min="0" step="0.1" className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all" />
+                <input 
+                  type="number" 
+                  name="pesoTotal" 
+                  value={form.pesoTotal} 
+                  onChange={handleInputChange} 
+                  placeholder="Peso estimado en kilogramos" 
+                  min="0" 
+                  step="0.1" 
+                  style={numberInputStyles}
+                  className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all" 
+                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">Volumen Total Estimado (m³) *</label>
-                <input type="number" name="volumenTotal" value={form.volumenTotal} onChange={handleInputChange} placeholder="Volumen estimado en metros cúbicos" min="0" step="0.1" className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all" />
+                <input 
+                  type="number" 
+                  name="volumenTotal" 
+                  value={form.volumenTotal} 
+                  onChange={handleInputChange} 
+                  placeholder="Volumen estimado en metros cúbicos" 
+                  min="0" 
+                  step="0.1" 
+                  style={numberInputStyles}
+                  className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all" 
+                />
               </div>
               <div className="flex items-center space-x-3 p-4 rounded-lg">
-                <input type="checkbox" id="esEspecial" name="esEspecial" checked={form.esEspecial} onChange={handleInputChange} className={`w-5 h-5 text-${tabColor}-600 border-gray-300 rounded focus:ring-${tabColor}-500`} />
+                <input 
+                  type="checkbox" 
+                  id="esEspecial" 
+                  name="esEspecial" 
+                  checked={form.esEspecial} 
+                  onChange={handleInputChange} 
+                  className={`w-5 h-5 text-${tabColor}-600 border-gray-300 rounded focus:ring-${tabColor}-500`} 
+                />
                 <div>
                   <label htmlFor="esEspecial" className="text-sm font-semibold text-gray-300 cursor-pointer">¿Es carga especial?</label>
                   <p className="text-xs text-gray-300">Marca si requiere manejo o transporte especial</p>
@@ -206,14 +258,41 @@ const TiposCarga = ({ showNotification, tabColor }) => {
               {form.esEspecial && (
                 <div className="animate-fadeIn">
                   <label className="block text-sm font-semibold text-gray-300 mb-2">Requisito Especial *</label>
-                  <textarea name="requisitoEspecial" value={form.requisitoEspecial} onChange={handleInputChange} placeholder="Describe los requisitos especiales..." rows="3" className="w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-all resize-none" />
+                  <textarea 
+                    name="requisitoEspecial" 
+                    value={form.requisitoEspecial} 
+                    onChange={handleInputChange} 
+                    placeholder="Describe los requisitos especiales..." 
+                    rows="3" 
+                    className="w-full p-3 border-2 text-gray-300 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-all resize-none" 
+                  />
                 </div>
               )}
             </div>
             <div className="flex gap-4 pt-6 border-t border-gray-200">
-              <button type="button" onClick={clearForm} className="px-6 py-3 bg-[#444240] text-yellow-500 border border-yellow-500 hover:text-white rounded-lg hover:bg-yellow-500 transition-colors font-semibold">Limpiar</button>
-              {editingId && <button type="button" onClick={clearForm} className="px-6 py-3 bg-[#444240] text-red-600 hover:text-white rounded-lg border border-red-600 hover:bg-red-600 transition-colors font-semibold">Cancelar</button>}
-              <button onClick={handleSubmit} disabled={!validateForm()} className={`px-6 py-3 rounded-lg transition-colors font-semibold ${editingId ? `bg-[#444240] border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white` : 'bg-[#444240] border border-green-500 text-green-500 hover:text-white hover:bg-green-500'}`}>
+              <button
+                type="button"
+                onClick={clearForm}
+                className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-semibold"
+              >
+                Limpiar
+              </button>
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={clearForm}
+                  className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
+                >
+                  Cancelar
+                </button>
+              )}
+              <button
+                onClick={handleSubmit}
+                className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${editingId
+                  ? `bg-indigo-500 hover:bg-indigo-600`
+                  : 'bg-green-500 hover:bg-green-600'
+                  }`}
+              >
                 {editingId ? 'Actualizar' : 'Guardar'}
               </button>
             </div>
@@ -250,7 +329,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 <th className="px-4 py-3 text-left text-sm font-semibold">Categoría</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Especificaciones</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Tipo</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Acciones</th>
+                <th className="px-4 py-3 text-center text-sm font-semibold">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -275,7 +354,7 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 justify-center">
                         <button onClick={() => editEntity(item.id)} className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><Edit size={14} /></button>
                         <button onClick={() => deleteEntity(item.id)} className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700"><Trash2 size={14} /></button>
                       </div>

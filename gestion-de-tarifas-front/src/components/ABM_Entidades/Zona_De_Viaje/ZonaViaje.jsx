@@ -167,7 +167,7 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
       {/* Form Section */}
       <div className="lg:col-span-1">
         <div className="bg-[#444240] p-8 rounded-2xl shadow-xl border border-gray-900">
-          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
+          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-purple-500`}>
             {editingId ? 'Editar Zona de Viaje' : 'Nueva Zona de Viaje'}
           </h2>
           <div className="space-y-5">
@@ -185,10 +185,30 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
                 <input type="number" name="distanciaKm" value={form.distanciaKm} onChange={handleInputChange} placeholder="Distancia en kilómetros" min="0" step="0.1" className="w-full p-3 border-2 text-gray-300 bg-transparent border-gray-600 rounded-lg focus:border-purple-500 focus:outline-none transition-all" />
               </div>
             </div>
-            <div className="flex gap-4 pt-6 border-t border-gray-700">
-              <button type="button" onClick={clearForm} className="px-6 py-3 bg-[#444240] border border-yellow-500 text-yellow-500 hover:text-white rounded-lg hover:bg-yellow-500 transition-colors font-semibold">Limpiar</button>
-              {editingId && <button type="button" onClick={clearForm} className="px-6 py-3 bg-[#444240] border border-red-500 text-red-500 hover:text-white rounded-lg hover:bg-red-500 transition-colors font-semibold">Cancelar</button>}
-              <button onClick={handleSubmit} disabled={!validateForm()} className={`px-6 py-3 rounded-lg transition-colors font-semibold text-white ${!validateForm() ? 'bg-gray-600 cursor-not-allowed' : editingId ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-500 hover:bg-green-600'}`}>
+            <div className="flex gap-4 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={clearForm}
+                className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-semibold"
+              >
+                Limpiar
+              </button>
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={clearForm}
+                  className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
+                >
+                  Cancelar
+                </button>
+              )}
+              <button
+                onClick={handleSubmit}
+                className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${editingId
+                  ? `bg-indigo-500 hover:bg-indigo-600`
+                  : 'bg-green-500 hover:bg-green-600'
+                  }`}
+              >
                 {editingId ? 'Actualizar' : 'Guardar'}
               </button>
             </div>
@@ -212,7 +232,7 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Origen</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Destino</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Distancia (Km)</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Acciones</th>
+                <th className="px-4 py-3 text-center text-sm font-semibold text-gray-300">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -223,7 +243,7 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
                     <td className="px-4 py-3 text-sm font-medium text-neutral-200">{item.destino}</td>
                     <td className="px-4 py-3 text-sm text-neutral-200">{item.distanciaKm} km</td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 justify-center">
                         <button onClick={() => editEntity(item.id)} className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><Edit size={14} /></button>
                         <button onClick={() => deleteEntity(item.id)} className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700"><Trash2 size={14} /></button>
                       </div>

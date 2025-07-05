@@ -274,7 +274,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
       {/* Formulario */}
       <div className="lg:col-span-1">
         <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
-          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
+          <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-emerald-500`}>
             {editingId ? 'Editar Tarifa de Costo' : 'Nueva Tarifa de Costo'}
           </h2>
           <div className="space-y-5">
@@ -370,7 +370,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
 
       {/* Tabla y Filtros */}
       <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
-        <div className={`bg-gradient-to-r from-${tabColor}-700 to-${tabColor}-800 text-white p-6`}>
+        <div className={`bg-gradient-to-r from-emerald-700 to-emerald-800 text-white p-6`}>
           <h2 className="text-2xl font-bold mb-4">Tarifas de Costo Registradas</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Select options={vehiculoOptions} placeholder="Filtrar por Vehículo" isClearable value={filters.tipoVehiculo} onChange={selectedOption => setFilters({ ...filters, tipoVehiculo: selectedOption })} styles={customSelectStyles} />
@@ -388,7 +388,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Transportista</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Valor Base</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Total</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Acciones</th>
+                <th className="px-4 py-3 text-center text-sm font-semibold text-gray-300">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -401,7 +401,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
                     <td className="px-4 py-3 text-sm font-bold text-blue-400">${Number(item.valor_base).toFixed(2)}</td>
                     <td className="px-4 py-3 text-sm font-bold text-yellow-400">${Number(item.costo_total).toFixed(2)}</td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 justify-center">
                         <button onClick={() => verDetalleTarifa(item)} className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" title="Ver detalle"><Eye size={14} /></button>
                         <button onClick={() => editEntity(item.id)} className={`p-2 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors`}><Edit size={14} /></button>
                         <button onClick={() => deleteEntity(item.id)} className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"><Trash2 size={14} /></button>

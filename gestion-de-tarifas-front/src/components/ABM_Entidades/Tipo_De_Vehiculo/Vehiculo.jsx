@@ -196,7 +196,7 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-300 mb-2">Tipos de Carga Compatibles *</label>
+              <label className="block text-sm font-semibold text-gray-300 mb-2">Tipos de Carga *</label>
               <Select
                 isMulti
                 options={tiposCarga}
@@ -208,10 +208,32 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
                 styles={customSelectStyles(true)}
               />
             </div>
-            <div className="flex gap-4 pt-6 border-t border-gray-700">
-              <button onClick={clearForm} className="px-6 py-3 bg-[#444240] text-yellow-500 border border-yellow-500 hover:text-white rounded-lg hover:bg-yellow-500 transition-colors font-semibold">Limpiar</button>
-              {editingId && <button onClick={clearForm} className="px-6 py-3 bg-[#444240] text-red-500 rounded-lg border border-red-500 hover:text-white hover:bg-red-500 transition-colors font-semibold">Cancelar</button>}
-              <button onClick={handleSubmit} disabled={!validateForm()} className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${!validateForm() ? 'bg-gray-600 cursor-not-allowed' : editingId ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-500 hover:bg-green-600'}`}>{editingId ? 'Actualizar' : 'Guardar'}</button>
+            <div className="flex gap-4 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={clearForm}
+                className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-semibold"
+              >
+                Limpiar
+              </button>
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={clearForm}
+                  className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
+                >
+                  Cancelar
+                </button>
+              )}
+              <button
+                onClick={handleSubmit}
+                className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${editingId
+                  ? `bg-indigo-500 hover:bg-indigo-600`
+                  : 'bg-green-500 hover:bg-green-600'
+                  }`}
+              >
+                {editingId ? 'Actualizar' : 'Guardar'}
+              </button>
             </div>
           </div>
         </div>
@@ -244,7 +266,7 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
               <tr className='text-gray-300'>
                 <th className="px-4 py-3 text-left text-sm font-semibold ">Descripción</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold ">Tipos de Carga Compatibles</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold ">Acciones</th>
+                <th className="px-4 py-3 text-center text-sm font-semibold ">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -254,7 +276,7 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
                     <td className="px-4 py-3 text-sm text-neutral-200">{item.descripcion}</td>
                     <td className="px-4 py-3 text-sm text-neutral-200">{getTipoCargaNombre(item.tipoCargas)}</td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 justify-center">
                         <button onClick={() => editEntity(item.id)} className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><Edit size={14} /></button>
                         <button onClick={() => deleteEntity(item.id)} className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700"><Trash2 size={14} /></button>
                       </div>

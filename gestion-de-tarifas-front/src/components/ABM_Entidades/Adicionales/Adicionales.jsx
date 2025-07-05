@@ -237,9 +237,9 @@ const Adicionales = ({ showNotification, tabColor }) => {
           <table className="w-full">
             <thead className="bg-[#242423] sticky top-0">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Descripción</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Costo ($)</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Descripción</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Costo ($)</th>
+                <th className="px-4 py-3 text-center text-sm font-semibold text-gray-300">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -265,7 +265,7 @@ const Adicionales = ({ showNotification, tabColor }) => {
                       ${Number(item.costo).toFixed(2)}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 justify-center">
                         <button
                           onClick={() => editEntity(item.id)}
                           className="p-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors"
