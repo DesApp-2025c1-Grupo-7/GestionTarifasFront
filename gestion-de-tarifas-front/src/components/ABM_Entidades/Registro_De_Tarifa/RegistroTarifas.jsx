@@ -211,8 +211,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
       const adicionalesParaForm = tarifa.tarifaAdicionales 
         ? tarifa.tarifaAdicionales.map(ta => ({
             ...(ta.adicional || {}),
-            // --- CORRECCIÓN #1 ---
-            costo: ta.costoPersonalizado // Se usa la propiedad correcta que viene del backend
+            costo: ta.costoPersonalizado
           })).filter(ad => ad && ad.idAdicional)
         : [];
 
@@ -549,8 +548,10 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
                   <strong>Adicionales:</strong>
                   {selectedTarifa.tarifaAdicionales?.length > 0 ? (
                       <ul className="list-disc list-inside pl-2">
-                          {selectedTarifa.tarifaAdicionales.map(ta => (
-                              <li key={ta.adicional.idAdicional}>
+                          {selectedTarifa.tarifaAdicionales
+                            .filter(ta => ta.adicional) // <-- FILTRO DE SEGURIDAD
+                            .map(ta => (
+                              <li key={ta.id}> {/* Usar ta.id que es el ID único del vínculo */}
                                   {ta.adicional.descripcion}: ${Number(ta.costoPersonalizado).toFixed(2)}
                               </li>
                           ))}
