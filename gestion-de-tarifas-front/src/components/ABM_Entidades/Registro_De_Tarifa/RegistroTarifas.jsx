@@ -10,6 +10,16 @@ import { getTransportista } from '../../../services/transportista.service';
 import { getTarifas, deleteTarifa, updateTarifaCosto, createTarifa } from '../../../services/tarifaCosto.service';
 import { getAdicionales, createAdicional as createAdicionalService } from '../../../services/adicional.service';
 
+// Helper para obtener la fecha de hoy en formato YYYY-MM-DD
+const getTodayString = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+
 const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [tiposCarga, setTiposCargas] = useState([]);
@@ -32,6 +42,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
     transportista: null,
   });
 
+  // --- CAMBIO: Se añaden las fechas de vigencia al estado inicial ---
   const [form, setForm] = useState({
     tipoVehiculo: '',
     tipoCarga: '',
@@ -39,6 +50,8 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
     transportista: '',
     valorBase: '',
     adicionalesSeleccionados: [],
+    vigenciaDesde: getTodayString(), // Fecha de inicio por defecto
+    vigenciaHasta: '',            // Fecha de fin opcional
   });
 
   // MODAL detalle
@@ -79,7 +92,8 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
     if (filters.tipoCarga) dataToFilter = dataToFilter.filter(item => item.tipoCarga?.id === filters.tipoCarga.value);
     setFilteredTarifas(dataToFilter);
   }, [filters, tarifas]);
-
+  
+  // --- CAMBIO: La función de limpiar también resetea las fechas ---
   const clearForm = () => {
     setForm({
       tipoVehiculo: '',
@@ -88,6 +102,8 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
       transportista: '',
       valorBase: '',
       adicionalesSeleccionados: [],
+      vigenciaDesde: getTodayString(),
+      vigenciaHasta: '',
     });
     setEditingId(null);
   };
@@ -168,9 +184,10 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
   };
 
   const validateForm = () => {
-    return form.tipoVehiculo && form.tipoCarga && form.zonaDeViaje && form.transportista && form.valorBase !== '';
+    return form.tipoVehiculo && form.tipoCarga && form.zonaDeViaje && form.transportista && form.valorBase !== '' && form.vigenciaDesde;
   };
-
+  
+  // --- CAMBIO: Se envían las fechas en el payload ---
   const handleSubmit = async () => {
     if (!validateForm()) {
       showNotification('Por favor completa todos los campos obligatorios', 'error');
@@ -186,6 +203,8 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
           idAdicional: a.idAdicional,
           costo: parseFloat(a.costo)
       })),
+      vigenciaDesde: form.vigenciaDesde,
+      vigenciaHasta: form.vigenciaHasta || null, // Se envía null si la fecha de fin está vacía
     };
     try {
       if (editingId) {
@@ -201,10 +220,12 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
       clearForm();
     } catch (error) {
       console.error(error);
-      showNotification('Error al guardar la tarifa', 'error');
+      const errorMessage = error.response?.data?.message || 'Error al guardar la tarifa';
+      showNotification(errorMessage, 'error');
     }
   };
-
+  
+  // --- CAMBIO: Se leen las fechas al editar una tarifa ---
   const editEntity = (id) => {
     const tarifa = tarifas.find(item => item.id === id);
     if (tarifa) {
@@ -215,6 +236,10 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
           })).filter(ad => ad && ad.idAdicional)
         : [];
 
+      // Formatear las fechas que vienen del backend para el input
+      const vigenciaDesdeFormato = tarifa.vigenciaDesde ? new Date(tarifa.vigenciaDesde).toISOString().split('T')[0] : '';
+      const vigenciaHastaFormato = tarifa.vigenciaHasta ? new Date(tarifa.vigenciaHasta).toISOString().split('T')[0] : '';
+
       setForm({
         tipoVehiculo: tarifa.tipoVehiculo?.id?.toString() || '',
         tipoCarga: tarifa.tipoCarga?.id?.toString() || '',
@@ -222,6 +247,8 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
         transportista: tarifa.transportista?.id?.toString() || '',
         valorBase: tarifa.valor_base?.toString() || '',
         adicionalesSeleccionados: adicionalesParaForm,
+        vigenciaDesde: vigenciaDesdeFormato,
+        vigenciaHasta: vigenciaHastaFormato,
       });
       setEditingId(id);
     }
@@ -306,6 +333,30 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
               </select>
             </div>
             
+            {/* --- CAMBIO: Se añaden los campos de fecha al formulario --- */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Vigencia Desde *</label>
+                    <input 
+                        type="date" 
+                        name="vigenciaDesde"
+                        value={form.vigenciaDesde} 
+                        onChange={handleInputChange} 
+                        className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Vigencia Hasta</label>
+                    <input 
+                        type="date" 
+                        name="vigenciaHasta"
+                        value={form.vigenciaHasta} 
+                        onChange={handleInputChange} 
+                        className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
+                    />
+                </div>
+            </div>
+
             <div className="bg-blue-900/20 p-4 rounded-lg border border-blue-400">
               <label className="block text-sm font-semibold text-blue-300 mb-2">Valor Base *</label>
               <input type="number" value={form.valorBase} onChange={handleValorBaseChange} min="0" step="0.01" className="w-full p-3 bg-transparent border-2 border-blue-400 rounded-lg focus:border-blue-300 focus:outline-none transition-all text-xl font-bold text-blue-300" placeholder="0.00"/>
@@ -544,14 +595,24 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
               <div><strong>Transportista:</strong> {selectedTarifa.transportista?.nombre || 'N/A'}</div>
               <div><strong>Tipo de Carga:</strong> {selectedTarifa.tipoCarga?.categoria || 'N/A'}</div>
               <div><strong>Valor Base:</strong> ${Number(selectedTarifa.valor_base).toFixed(2)}</div>
+              {/* --- CAMBIO: Se muestran las fechas de vigencia --- */}
+              <div className="border-t border-gray-600 pt-2 mt-2">
+                <strong>Período de Vigencia:</strong>
+                <div className='pl-2'>
+                  <span>Desde: {selectedTarifa.vigenciaDesde ? new Date(selectedTarifa.vigenciaDesde).toLocaleDateString('es-AR') : 'No definida'}</span>
+                  <span className="mx-2">|</span>
+                  <span>Hasta: {selectedTarifa.vigenciaHasta ? new Date(selectedTarifa.vigenciaHasta).toLocaleDateString('es-AR') : 'Indefinida'}</span>
+                </div>
+              </div>
+              {/* adicionales */}
               <div>
                   <strong>Adicionales:</strong>
                   {selectedTarifa.tarifaAdicionales?.length > 0 ? (
                       <ul className="list-disc list-inside pl-2">
                           {selectedTarifa.tarifaAdicionales
-                            .filter(ta => ta.adicional) // <-- FILTRO DE SEGURIDAD
+                            .filter(ta => ta.adicional) 
                             .map(ta => (
-                              <li key={ta.id}> {/* Usar ta.id que es el ID único del vínculo */}
+                              <li key={ta.id}>
                                   {ta.adicional.descripcion}: ${Number(ta.costoPersonalizado).toFixed(2)}
                               </li>
                           ))}
