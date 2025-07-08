@@ -4,6 +4,7 @@ import { createVehiculo, deleteVehiculo, getVehiculos, updateVehiculo } from '..
 import Swal from 'sweetalert2';
 import { getCargas } from '../../../services/tipoCarga.service';
 import Select from 'react-select';
+import { useOutletContext } from 'react-router-dom';
 
 // Estilos para los componentes Select, puedes reutilizarlos
 const customSelectStyles = (isMulti = false) => ({
@@ -27,7 +28,8 @@ const customSelectStyles = (isMulti = false) => ({
   placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
 });
 
-const TiposVehiculo = ({ showNotification, tabColor }) => {
+const TiposVehiculo = () => {
+  const { showNotification, tabColor } = useOutletContext();
   // --- ESTADOS ---
   const [data, setData] = useState([]); // Lista original de vehículos del backend
   const [filteredData, setFilteredData] = useState([]); // Lista que se muestra en la tabla
@@ -208,7 +210,7 @@ const TiposVehiculo = ({ showNotification, tabColor }) => {
                 styles={customSelectStyles(true)}
               />
             </div>
-            <div className="flex gap-4 pt-6 border-t border-gray-200">
+            <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-200 w-full">
               <button
                 type="button"
                 onClick={clearForm}

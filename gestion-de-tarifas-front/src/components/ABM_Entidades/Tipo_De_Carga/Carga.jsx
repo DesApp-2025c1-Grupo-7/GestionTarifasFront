@@ -3,6 +3,7 @@ import { Edit, Trash2, AlertTriangle } from 'lucide-react';
 import { createCarga, deleteCarga, getCargas, updateCarga } from '../../../services/tipoCarga.service';
 import Swal from 'sweetalert2';
 import Select from 'react-select';
+import { useOutletContext } from 'react-router-dom';
 
 // Estilos para los componentes Select de los filtros
 const customSelectStyles = {
@@ -19,8 +20,10 @@ const numberInputStyles = {
     MozAppearance: 'textfield',
 };
 
-const TiposCarga = ({ showNotification, tabColor }) => {
-  
+const TiposCarga = () => { // <-- 1. Los paréntesis quedan vacíos
+  // 2. Obtienes todo lo que necesitas del context
+  const { showNotification, tabColor } = useOutletContext(); 
+
   const [data, setData] = useState([]); // Lista original de cargas del backend
   const [filteredData, setFilteredData] = useState([]); // Lista que se muestra en la tabla
   const [editingId, setEditingId] = useState(null);
@@ -269,7 +272,10 @@ const TiposCarga = ({ showNotification, tabColor }) => {
                 </div>
               )}
             </div>
-            <div className="flex gap-4 pt-6 border-t border-gray-200">
+            {/*  ---- Como estaba escrito antes ----
+            <!div className="flex gap-4 pt-6 border-t border-gray-200">
+            */}
+            <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-200 w-full">  
               <button
                 type="button"
                 onClick={clearForm}

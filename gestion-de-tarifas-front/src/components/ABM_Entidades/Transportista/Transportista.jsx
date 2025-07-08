@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useLayoutEffect } from 'react';
 import { Search, Edit, Trash2, Phone, Eye } from 'lucide-react';
 import { createTransportista, deleteTransportista, getTransportista, updateTransportista } from '../../../services/transportista.service';
 import { getVehiculos } from '../../../services/tipoVehiculo.service';
 import { getZonas } from '../../../services/zona.service';
 import Swal from 'sweetalert2';
 import Select from 'react-select';
+import { useOutletContext } from 'react-router-dom';
 
 // Estilos para los componentes Select
 const customSelectStyles = (isMulti = false) => ({
@@ -29,7 +30,8 @@ const customSelectStyles = (isMulti = false) => ({
   placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
 });
 
-const Transportistas = ({ showNotification, tabColor }) => {
+const Transportistas = () => {
+  const { showNotification, tabColor } = useOutletContext();
   // --- ESTADOS ---
   const [data, setData] = useState([]); // Datos originales del backend
   const [editingId, setEditingId] = useState(null);
@@ -43,6 +45,10 @@ const Transportistas = ({ showNotification, tabColor }) => {
 
   // Estado separado para los filtros de la tabla
   const [filters, setFilters] = useState({ nombreContacto: '', tipoVehiculos: [], zonasDeViaje: [] });
+
+  const formRef = useRef(null);
+  const tableHeaderRef = useRef(null);
+  const [tableBodyHeight, setTableBodyHeight] = useState('auto');
 
   // Carga inicial de datos
   useEffect(() => {
@@ -62,6 +68,8 @@ const Transportistas = ({ showNotification, tabColor }) => {
     };
     fetchAll();
   }, []);
+
+  
 
   // --- LÓGICA DE FILTRADO CENTRALIZADA ---
   const filteredData = useMemo(() => {
@@ -174,11 +182,34 @@ const Transportistas = ({ showNotification, tabColor }) => {
   const opcionesVehiculo = useMemo(() => tiposVehiculo.map(tv => ({ value: tv.id.toString(), label: tv.descripcion })), [tiposVehiculo]);
   const opcionesZonas = useMemo(() => zonasViaje.map(z => ({ value: z.id.toString(), label: `${z.origen} - ${z.destino}` })), [zonasViaje]);
 
+  useLayoutEffect(() => {
+    const updateHeight = () => {
+      if (formRef.current && tableHeaderRef.current) {
+        // 1. Medimos la altura total del contenedor del formulario
+        const formHeight = formRef.current.offsetHeight;
+        // 2. Medimos la altura de la sección de filtros de la tabla
+        const headerHeight = tableHeaderRef.current.offsetHeight;
+        
+        // 3. La altura del cuerpo de la tabla será la del formulario menos la de los filtros
+        const calculatedHeight = formHeight - headerHeight;
+
+        if (calculatedHeight > 0) {
+          setTableBodyHeight(`${calculatedHeight}px`);
+        }
+      }
+    };
+
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+
+    return () => window.removeEventListener('resize', updateHeight);
+  }, [editingId, filteredData]); // Recalcula si cambia el modo de edición o los datos
+
   return (
     <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
       {/* Form Section */}
       <div className="lg:col-span-1">
-        <div className="bg-[#444240] p-8 rounded-2xl shadow-xl border border-gray-900">
+        <div ref={formRef} className="bg-[#444240] p-8 rounded-2xl shadow-xl border border-gray-900">
           <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-${tabColor}-500`}>
             {editingId ? 'Editar Transportista' : 'Nuevo Transportista'}
           </h2>
@@ -237,7 +268,7 @@ const Transportistas = ({ showNotification, tabColor }) => {
               />
             </div>
             {/* Botones del formulario */}
-            <div className="flex gap-4 pt-6 border-t border-gray-200">
+            <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-200 w-full">
               <button
                 type="button"
                 onClick={clearForm}
@@ -270,7 +301,7 @@ const Transportistas = ({ showNotification, tabColor }) => {
 
       {/* Table Section */}
       <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
-        <div className={`bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6`}>
+        <div ref={tableHeaderRef} className={`bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6`}>
           <h2 className="text-2xl font-bold mb-4">Transportistas Registrados</h2>
           {/* --- SECCIÓN DE FILTROS --- */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -279,7 +310,7 @@ const Transportistas = ({ showNotification, tabColor }) => {
             <Select isMulti options={opcionesZonas} placeholder="Filtrar por Zona..." styles={customSelectStyles()} onChange={(selected) => setFilters(prev => ({ ...prev, zonasDeViaje: selected.map(opt => opt.value) }))} />
           </div>
         </div>
-        <div className="max-h-96 overflow-y-auto">
+        <div className="overflow-y-auto" style={{ height: tableBodyHeight }}>
           <table className="w-full">
             <thead className="bg-[#242423] text-gray-300 sticky top-0">
               <tr>
