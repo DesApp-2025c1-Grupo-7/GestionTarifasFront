@@ -85,7 +85,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
   }, []);
 
   useEffect(() => {
-    let dataToFilter = [...(tarifas || [])];
+    let dataToFilter = [...(tarifas || [])].filter(item => item.deletedAt === null);
     if (filters.tipoVehiculo) dataToFilter = dataToFilter.filter(item => item.tipoVehiculo?.id === filters.tipoVehiculo.value);
     if (filters.transportista) dataToFilter = dataToFilter.filter(item => item.transportista?.id === filters.transportista.value);
     if (filters.zonaDeViaje) dataToFilter = dataToFilter.filter(item => item.zonaDeViaje?.id === filters.zonaDeViaje.value);
@@ -445,9 +445,32 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
               {filteredTarifas.length > 0 ? (
                 filteredTarifas.map(item => (
                   <tr key={item.id} className={`border-b border-gray-700 hover:bg-${tabColor}-500/10 transition-colors`}>
-                    <td className="px-4 py-3 text-sm font-medium text-neutral-200">{item.tipoVehiculo?.descripcion || 'N/A'}</td>
-                    <td className="px-4 py-3 text-sm text-neutral-200">{item.zonaDeViaje ? `${item.zonaDeViaje.origen} - ${item.zonaDeViaje.destino}` : 'N/A'}</td>
-                    <td className="px-4 py-3 text-sm text-neutral-200">{item.transportista?.nombre || 'N/A'}</td>
+                    <td className="px-4 py-3 text-sm text-neutral-200">
+                      {item.tipoVehiculo ? (
+                        !item.tipoVehiculo.deletedAt
+                          ? item.tipoVehiculo.descripcion
+                          : <span className="italic text-red-400">{item.tipoVehiculo.descripcion} (Eliminado)</span>
+                      ) : (
+                        'N/A'
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-neutral-200">
+                          {item.zonaDeViaje ? (
+                            !item.zonaDeViaje.deletedAt
+                              ? `${item.zonaDeViaje.origen} - ${item.zonaDeViaje.destino}`
+                              : <span className="italic text-red-400">{item.zonaDeViaje.origen} - {item.zonaDeViaje.destino} (Zona eliminada)</span>
+                          ) : (
+                            'N/A'
+                          )}
+                     </td>
+
+                      <td className="px-4 py-3 text-sm text-neutral-200">
+                          {item.transportista ? (
+                            !item.transportista.deletedAt
+                              ? item.transportista.nombre
+                              : <span className="italic text-red-400">{item.transportista.nombre} (Eliminado)</span>
+                          ) : ('N/A')}
+                      </td>
                     <td className="px-4 py-3 text-sm font-bold text-blue-400">${Number(item.valor_base).toFixed(2)}</td>
                     <td className="px-4 py-3 text-sm font-bold text-yellow-400">${Number(item.costo_total).toFixed(2)}</td>
                     <td className="px-4 py-3">
@@ -583,16 +606,44 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
         </div>
       )}
       
-      {/* MODAL detalle */}
       {showDetalleModal && selectedTarifa && (
         <div className="fixed inset-0 z-50 backdrop-blur-sm bg-black/20 flex justify-center items-center">
           <div className="bg-[#444240] p-6 rounded-xl shadow-xl border border-gray-700 max-w-md w-full relative">
-            <button className="absolute top-2 right-2 text-gray-300 hover:text-white" onClick={() => setShowDetalleModal(false)}><X size={20} /></button>
+            <button className="absolute top-2 right-2 text-gray-300 hover:text-white" onClick={() => setShowDetalleModal(false)}>
+              <X size={20} />
+            </button>
             <h2 className="text-xl font-bold text-gray-200 mb-4">Detalle de Tarifa</h2>
             <div className="space-y-2 text-sm text-gray-300">
-              <div><strong>Vehículo:</strong> {selectedTarifa.tipoVehiculo?.descripcion || 'N/A'}</div>
-              <div><strong>Zona:</strong> {selectedTarifa.zonaDeViaje ? `${selectedTarifa.zonaDeViaje.origen} - ${selectedTarifa.zonaDeViaje.destino}` : 'N/A'}</div>
-              <div><strong>Transportista:</strong> {selectedTarifa.transportista?.nombre || 'N/A'}</div>
+              <div>
+                <strong>Vehículo:</strong>{' '}
+                {selectedTarifa.tipoVehiculo ? (
+                  !selectedTarifa.tipoVehiculo.deletedAt
+                    ? selectedTarifa.tipoVehiculo.descripcion
+                    : <span className="italic text-red-400">{selectedTarifa.tipoVehiculo.descripcion} (Eliminado)</span>
+                ) : (
+                  'N/A'
+                )}
+              </div>
+              <div>
+                <strong>Zona:</strong>{' '}
+                {selectedTarifa.zonaDeViaje ? (
+                  !selectedTarifa.zonaDeViaje.deletedAt
+                    ? `${selectedTarifa.zonaDeViaje.origen} - ${selectedTarifa.zonaDeViaje.destino}`
+                    : <span className="italic text-red-400">{`${selectedTarifa.zonaDeViaje.origen} - ${selectedTarifa.zonaDeViaje.destino}`} (Eliminada)</span>
+                ) : (
+                  'N/A'
+                )}
+              </div>
+              <div>
+                <strong>Transportista:</strong>{' '}
+                {selectedTarifa.transportista ? (
+                  !selectedTarifa.transportista.deletedAt
+                    ? selectedTarifa.transportista.nombre
+                    : <span className="italic text-red-400">{selectedTarifa.transportista.nombre} (Eliminado)</span>
+                ) : (
+                  <span className="text-red-400 italic">Transportista inactivo</span>
+                )}
+              </div>
               <div><strong>Tipo de Carga:</strong> {selectedTarifa.tipoCarga?.categoria || 'N/A'}</div>
               <div><strong>Valor Base:</strong> ${Number(selectedTarifa.valor_base).toFixed(2)}</div>
               {/* --- CAMBIO: Se muestran las fechas de vigencia --- */}
@@ -606,24 +657,26 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
               </div>
               {/* adicionales */}
               <div>
-                  <strong>Adicionales:</strong>
-                  {selectedTarifa.tarifaAdicionales?.length > 0 ? (
-                      <ul className="list-disc list-inside pl-2">
-                          {selectedTarifa.tarifaAdicionales
-                            .filter(ta => ta.adicional) 
-                            .map(ta => (
-                              <li key={ta.id}>
-                                  {ta.adicional.descripcion}: ${Number(ta.costoPersonalizado).toFixed(2)}
-                              </li>
-                          ))}
-                      </ul>
-                  ) : 'Ninguno'}
+                <strong>Adicionales:</strong>
+                {selectedTarifa.tarifaAdicionales?.length > 0 ? (
+                  <ul className="list-disc list-inside pl-2">
+                    {selectedTarifa.tarifaAdicionales
+                      .filter(ta => ta.adicional)
+                      .map(ta => (
+                        <li key={ta.id}>
+                          {ta.adicional.descripcion}: ${Number(ta.costoPersonalizado).toFixed(2)}
+                        </li>
+                      ))}
+                  </ul>
+                ) : 'Ninguno'}
               </div>
               <div className="pt-2 mt-2 border-t border-gray-600">
                 <strong>Costo Total:</strong> ${Number(selectedTarifa.costo_total).toFixed(2)}
               </div>
             </div>
-            <button  onClick={() => setShowDetalleModal(false)} className="mt-6 w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">Cerrar</button>
+            <button onClick={() => setShowDetalleModal(false)} className="mt-6 w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">
+              Cerrar
+            </button>
           </div>
         </div>
       )}
