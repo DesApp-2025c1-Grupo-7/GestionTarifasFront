@@ -1,18 +1,40 @@
 import React from 'react';
-import Entidades from './components/ABM_Entidades/ABM_Entidades';
-import ReportesAdicionales from './components/ABM_Entidades/Adicionales/Reports/AdicionalesReport';
-import Adicionales from './components/ABM_Entidades/Adicionales/Adicionales'
 import { Routes, Route } from 'react-router-dom';
+
+// Importamos el Layout principal
+import Entidades from './components/ABM_Entidades/ABM_Entidades';
+
+// Importamos TODOS los componentes para las rutas anidadas
+import Adicionales from './components/ABM_Entidades/Adicionales/Adicionales';
+import TiposCarga from './components/ABM_Entidades/Tipo_De_Carga/Carga';
+import TiposVehiculo from './components/ABM_Entidades/Tipo_De_Vehiculo/Vehiculo';
+import ZonasViaje from './components/ABM_Entidades/Zona_De_Viaje/ZonaViaje';
+import Transportistas from './components/ABM_Entidades/Transportista/Transportista';
+import RegistroTarifas from './components/ABM_Entidades/Registro_De_Tarifa/RegistroTarifas';
+import ReportesAdicionales from './components/ABM_Entidades/Adicionales/Reports/AdicionalesReport';
+
 
 const App = () => {
   return (
     <Routes>
-      <Route path="/" element={<Entidades />} />
-      <Route
-        path="/adicionales"
-        element={<Adicionales key={window.location.pathname} />}
-      />
-      <Route path="/reports/adicionales" element={<ReportesAdicionales />} />
+      {/* La ruta padre renderiza el Layout (ABMEntidades) */}
+      <Route path="/" element={<Entidades />}>
+        
+        {/* Ruta por defecto: al entrar a la web, se mostrará Tipos de Carga */}
+        <Route index element={<TiposCarga />} />
+
+        {/* Definimos una ruta para cada entidad */}
+        <Route path="tipos-de-carga" element={<TiposCarga />} />
+        <Route path="tipos-de-vehiculo" element={<TiposVehiculo />} />
+        <Route path="zonas" element={<ZonasViaje />} />
+        <Route path="transportistas" element={<Transportistas />} />
+        <Route path="adicionales" element={<Adicionales />} />
+        <Route path="tarifas" element={<RegistroTarifas />} />
+        </Route>
+        {/* Ruta para el reporte, anidada para mantener la consistencia */}
+        <Route path="reports/adicionales" element={<ReportesAdicionales />} />
+        
+      
     </Routes>
   );
 };

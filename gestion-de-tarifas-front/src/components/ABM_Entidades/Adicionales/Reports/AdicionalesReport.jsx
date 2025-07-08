@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Star, TrendingDown, ArrowLeft, RefreshCw, ListTree, Loader2, X } from 'lucide-react';
 import { getAdicionalesReport, getTarifasForAdicional } from '../../../../services/adicional.service';
 import { useNavigate } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 
 const categorizarAdicional = (descripcion) => {
   const descLower = descripcion.toLowerCase();
@@ -13,7 +14,8 @@ const categorizarAdicional = (descripcion) => {
   return 'Otros';
 };
 
-const AdicionalesReport = ({ showNotification }) => {
+const AdicionalesReport = () => {
+  
   const [adicionales, setAdicionales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +25,15 @@ const AdicionalesReport = ({ showNotification }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState({ adicional: null, tarifas: [] });
   const [isLoadingModal, setIsLoadingModal] = useState(false);
+
+  // --- 1. LÓGICA DE NOTIFICACIÓN AÑADIDA ---
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ show: true, message, type });
+    setTimeout(() => setNotification({ show: false, message: '', type: 'success' }), 3000);
+  };
+  // --- FIN DE LA LÓGICA AÑADIDA ---
 
   useEffect(() => {
     fetchAdicionales();
@@ -41,7 +52,7 @@ const AdicionalesReport = ({ showNotification }) => {
       setAdicionales(mappedData);
     } catch (error) {
       console.error('Error al cargar el reporte de adicionales:', error);
-      showNotification?.('Error al cargar el reporte', 'error');
+      showNotification('Error al cargar el reporte', 'error');
     } finally {
       setLoading(false);
     }
@@ -133,7 +144,7 @@ const AdicionalesReport = ({ showNotification }) => {
       <div className="min-h-screen bg-[#242423] p-8">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8 flex items-center justify-between">
-            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate(-1)}>
+            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/adicionales')}>
               <ArrowLeft size={24} className="text-gray-300 hover:text-gray-200" />
               <h1 className="text-3xl font-bold text-gray-200">Reporte de Adicionales</h1>
             </div>
@@ -230,6 +241,15 @@ const AdicionalesReport = ({ showNotification }) => {
           </div>
         </div>
       </div>
+
+      {/* --- 2. RENDERIZADO DE LA NOTIFICACIÓN AÑADIDO --- */}
+      {notification.show && (
+        <div className={`fixed top-5 right-5 px-6 py-4 rounded-lg text-white font-semibold shadow-lg z-50 transition-all ${
+            notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+          }`}>
+          {notification.message}
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 p-4">

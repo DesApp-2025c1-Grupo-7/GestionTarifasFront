@@ -4,8 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { getAdicionales, createAdicional, updateAdicional, deleteAdicional } from '../../../services/adicional.service';
 import Select from 'react-select';
+import { useOutletContext } from 'react-router-dom';
 
-const Adicionales = ({ showNotification, tabColor }) => {
+const Adicionales = () => {
+  const { showNotification, tabColor } = useOutletContext();
+  
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -175,7 +178,7 @@ const Adicionales = ({ showNotification, tabColor }) => {
               )}
             </div>
 
-            <div className="flex gap-4 pt-6 border-t border-gray-200">
+            <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-200 w-full">
               <button
                 type="button"
                 onClick={clearForm}

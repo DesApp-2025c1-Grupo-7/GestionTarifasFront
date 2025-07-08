@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react';
 import { Search, Edit, Trash2, Plus, X, ChevronDown, ChevronUp,  Eye } from 'lucide-react';
 import Select from 'react-select';
 import Swal from 'sweetalert2';
@@ -10,6 +10,8 @@ import { getTransportista } from '../../../services/transportista.service';
 import { getTarifas, deleteTarifa, updateTarifaCosto, createTarifa } from '../../../services/tarifaCosto.service';
 import { getAdicionales, createAdicional as createAdicionalService } from '../../../services/adicional.service';
 
+import { useOutletContext } from 'react-router-dom';
+
 // Helper para obtener la fecha de hoy en formato YYYY-MM-DD
 const getTodayString = () => {
   const today = new Date();
@@ -20,7 +22,9 @@ const getTodayString = () => {
 };
 
 
-const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
+const TarifaCosto = () => {
+  const { showNotification, tabColor = 'emerald' } = useOutletContext();
+
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [tiposCarga, setTiposCargas] = useState([]);
   const [zonasDeViaje, setZonasDeViaje] = useState([]);
@@ -42,6 +46,10 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
     transportista: null,
   });
 
+  const formRef = useRef(null); // Referencia para medir el div del formulario
+  const tableHeaderRef = useRef(null); // Referencia para medir la cabecera de la tabla
+  const [tableBodyHeight, setTableBodyHeight] = useState('auto'); // Estado para guardar la altura calculada
+
   // --- CAMBIO: Se añaden las fechas de vigencia al estado inicial ---
   const [form, setForm] = useState({
     tipoVehiculo: '',
@@ -50,8 +58,8 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
     transportista: '',
     valorBase: '',
     adicionalesSeleccionados: [],
-    vigenciaDesde: getTodayString(), // Fecha de inicio por defecto
-    vigenciaHasta: '',            // Fecha de fin opcional
+  //  vigenciaDesde: getTodayString(), // Fecha de inicio por defecto
+  //  vigenciaHasta: '',            // Fecha de fin opcional
   });
 
   // MODAL detalle
@@ -85,13 +93,40 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
   }, []);
 
   useEffect(() => {
-    let dataToFilter = [...(tarifas || [])];
+    let dataToFilter = [...(tarifas || [])].filter(item => item.deletedAt === null);
     if (filters.tipoVehiculo) dataToFilter = dataToFilter.filter(item => item.tipoVehiculo?.id === filters.tipoVehiculo.value);
     if (filters.transportista) dataToFilter = dataToFilter.filter(item => item.transportista?.id === filters.transportista.value);
     if (filters.zonaDeViaje) dataToFilter = dataToFilter.filter(item => item.zonaDeViaje?.id === filters.zonaDeViaje.value);
     if (filters.tipoCarga) dataToFilter = dataToFilter.filter(item => item.tipoCarga?.id === filters.tipoCarga.value);
     setFilteredTarifas(dataToFilter);
   }, [filters, tarifas]);
+
+  useLayoutEffect(() => {
+    const updateHeight = () => {
+      if (formRef.current && tableHeaderRef.current) {
+        // Medimos la altura total del contenedor del formulario
+        const formHeight = formRef.current.offsetHeight;
+        // Medimos la altura de la sección de filtros de la tabla
+        const headerHeight = tableHeaderRef.current.offsetHeight;
+        
+        // La altura del cuerpo de la tabla será la del formulario menos la de los filtros
+        const calculatedHeight = formHeight - headerHeight;
+
+        // Nos aseguramos de que sea un valor positivo antes de aplicarlo
+        if (calculatedHeight > 0) {
+          setTableBodyHeight(`${calculatedHeight}px`);
+        }
+      }
+    };
+
+    // Calculamos la altura al inicio
+    updateHeight();
+    // Y volvemos a calcularla si cambia el tamaño de la ventana
+    window.addEventListener('resize', updateHeight);
+
+    // Limpiamos el listener cuando el componente se desmonte
+    return () => window.removeEventListener('resize', updateHeight);
+  }, [tarifas]); // Recalculamos si las tarifas cambian (por si afecta la altura del formulario o tabla)
   
   // --- CAMBIO: La función de limpiar también resetea las fechas ---
   const clearForm = () => {
@@ -102,8 +137,8 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
       transportista: '',
       valorBase: '',
       adicionalesSeleccionados: [],
-      vigenciaDesde: getTodayString(),
-      vigenciaHasta: '',
+    //  vigenciaDesde: getTodayString(),
+    //  vigenciaHasta: '',
     });
     setEditingId(null);
   };
@@ -184,10 +219,10 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
   };
 
   const validateForm = () => {
-    return form.tipoVehiculo && form.tipoCarga && form.zonaDeViaje && form.transportista && form.valorBase !== '' && form.vigenciaDesde;
+    return form.tipoVehiculo && form.tipoCarga && form.zonaDeViaje && form.transportista && form.valorBase !== '';// && form.vigenciaDesde;
   };
   
-  // --- CAMBIO: Se envían las fechas en el payload ---
+ 
   const handleSubmit = async () => {
     if (!validateForm()) {
       showNotification('Por favor completa todos los campos obligatorios', 'error');
@@ -203,7 +238,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
           idAdicional: a.idAdicional,
           costo: parseFloat(a.costo)
       })),
-      vigenciaDesde: form.vigenciaDesde,
+      vigenciaDesde: form.vigenciaDesde || null, // Se envía null si la fecha de inicio está vacía
       vigenciaHasta: form.vigenciaHasta || null, // Se envía null si la fecha de fin está vacía
     };
     try {
@@ -299,7 +334,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
     <div className="grid lg:grid-cols-3 gap-8">
       {/* Formulario */}
       <div className="lg:col-span-1">
-        <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
+        <div ref={formRef} className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
           <h2 className={`text-2xl font-bold text-gray-300 mb-6 pb-3 border-b-4 border-emerald-500`}>
             {editingId ? 'Editar Tarifa de Costo' : 'Nueva Tarifa de Costo'}
           </h2>
@@ -333,7 +368,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
               </select>
             </div>
             
-            {/* --- CAMBIO: Se añaden los campos de fecha al formulario --- */}
+            {/* --- CAMBIO: Se añaden los campos de fecha al formulario --- 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-semibold text-gray-300 mb-2">Vigencia Desde *</label>
@@ -355,7 +390,8 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
                         className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
                     />
                 </div>
-            </div>
+            </div> 
+            */}
 
             <div className="bg-blue-900/20 p-4 rounded-lg border border-blue-400">
               <label className="block text-sm font-semibold text-blue-300 mb-2">Valor Base *</label>
@@ -409,7 +445,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
               </div>
             </div>
 
-            <div className="flex gap-4 pt-6 border-t border-gray-700">
+            <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-700 w-full">
               <button type="button" onClick={clearForm} className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-semibold">Limpiar</button>
               {editingId && (<button type="button" onClick={clearForm} className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold">Cancelar</button>)}
               <button onClick={handleSubmit} className={`px-6 py-3 text-white rounded-lg transition-colors font-semibold ${editingId ? `bg-${tabColor}-500 hover:bg-${tabColor}-600` : 'bg-green-500 hover:bg-green-600'}`}>{editingId ? 'Actualizar' : 'Guardar'}</button>
@@ -420,7 +456,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
 
       {/* Tabla y Filtros */}
       <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
-        <div className={`bg-gradient-to-r from-emerald-700 to-emerald-800 text-white p-6`}>
+        <div ref={tableHeaderRef} className={`bg-gradient-to-r from-emerald-700 to-emerald-800 text-white p-6`}>
           <h2 className="text-2xl font-bold mb-4">Tarifas de Costo Registradas</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Select options={vehiculoOptions} placeholder="Filtrar por Vehículo" isClearable value={filters.tipoVehiculo} onChange={selectedOption => setFilters({ ...filters, tipoVehiculo: selectedOption })} styles={customSelectStyles} />
@@ -429,7 +465,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
             <Select options={cargaOptions} placeholder="Filtrar por Carga" isClearable value={filters.tipoCarga} onChange={selectedOption => setFilters({ ...filters, tipoCarga: selectedOption })} styles={customSelectStyles} />
           </div>
         </div>
-        <div className="max-h-96 overflow-y-auto">
+        <div className="overflow-y-auto" style={{ height: tableBodyHeight }}>
           <table className="w-full">
             <thead className="bg-[#242423] sticky top-0">
               <tr>
@@ -445,9 +481,32 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
               {filteredTarifas.length > 0 ? (
                 filteredTarifas.map(item => (
                   <tr key={item.id} className={`border-b border-gray-700 hover:bg-${tabColor}-500/10 transition-colors`}>
-                    <td className="px-4 py-3 text-sm font-medium text-neutral-200">{item.tipoVehiculo?.descripcion || 'N/A'}</td>
-                    <td className="px-4 py-3 text-sm text-neutral-200">{item.zonaDeViaje ? `${item.zonaDeViaje.origen} - ${item.zonaDeViaje.destino}` : 'N/A'}</td>
-                    <td className="px-4 py-3 text-sm text-neutral-200">{item.transportista?.nombre || 'N/A'}</td>
+                    <td className="px-4 py-3 text-sm text-neutral-200">
+                      {item.tipoVehiculo ? (
+                        !item.tipoVehiculo.deletedAt
+                          ? item.tipoVehiculo.descripcion
+                          : <span className="italic text-red-400">{item.tipoVehiculo.descripcion} (Eliminado)</span>
+                      ) : (
+                        'N/A'
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-neutral-200">
+                          {item.zonaDeViaje ? (
+                            !item.zonaDeViaje.deletedAt
+                              ? `${item.zonaDeViaje.origen} - ${item.zonaDeViaje.destino}`
+                              : <span className="italic text-red-400">{item.zonaDeViaje.origen} - {item.zonaDeViaje.destino} (Zona eliminada)</span>
+                          ) : (
+                            'N/A'
+                          )}
+                     </td>
+
+                      <td className="px-4 py-3 text-sm text-neutral-200">
+                          {item.transportista ? (
+                            !item.transportista.deletedAt
+                              ? item.transportista.nombre
+                              : <span className="italic text-red-400">{item.transportista.nombre} (Eliminado)</span>
+                          ) : ('N/A')}
+                      </td>
                     <td className="px-4 py-3 text-sm font-bold text-blue-400">${Number(item.valor_base).toFixed(2)}</td>
                     <td className="px-4 py-3 text-sm font-bold text-yellow-400">${Number(item.costo_total).toFixed(2)}</td>
                     <td className="px-4 py-3">
@@ -472,7 +531,7 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
       {/* modal adicional */}
       {showAdicionalesSelector && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex justify-center items-center">
-          <div className="bg-[#444240] p-6 rounded-xl shadow-xl border border-gray-700 max-w-md w-full relative">
+          <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900 h-full">
             <button
               className="absolute top-2 right-2 text-gray-300 hover:text-white"
               onClick={() => {
@@ -583,19 +642,47 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
         </div>
       )}
       
-      {/* MODAL detalle */}
       {showDetalleModal && selectedTarifa && (
         <div className="fixed inset-0 z-50 backdrop-blur-sm bg-black/20 flex justify-center items-center">
           <div className="bg-[#444240] p-6 rounded-xl shadow-xl border border-gray-700 max-w-md w-full relative">
-            <button className="absolute top-2 right-2 text-gray-300 hover:text-white" onClick={() => setShowDetalleModal(false)}><X size={20} /></button>
+            <button className="absolute top-2 right-2 text-gray-300 hover:text-white" onClick={() => setShowDetalleModal(false)}>
+              <X size={20} />
+            </button>
             <h2 className="text-xl font-bold text-gray-200 mb-4">Detalle de Tarifa</h2>
             <div className="space-y-2 text-sm text-gray-300">
-              <div><strong>Vehículo:</strong> {selectedTarifa.tipoVehiculo?.descripcion || 'N/A'}</div>
-              <div><strong>Zona:</strong> {selectedTarifa.zonaDeViaje ? `${selectedTarifa.zonaDeViaje.origen} - ${selectedTarifa.zonaDeViaje.destino}` : 'N/A'}</div>
-              <div><strong>Transportista:</strong> {selectedTarifa.transportista?.nombre || 'N/A'}</div>
+              <div>
+                <strong>Vehículo:</strong>{' '}
+                {selectedTarifa.tipoVehiculo ? (
+                  !selectedTarifa.tipoVehiculo.deletedAt
+                    ? selectedTarifa.tipoVehiculo.descripcion
+                    : <span className="italic text-red-400">{selectedTarifa.tipoVehiculo.descripcion} (Eliminado)</span>
+                ) : (
+                  'N/A'
+                )}
+              </div>
+              <div>
+                <strong>Zona:</strong>{' '}
+                {selectedTarifa.zonaDeViaje ? (
+                  !selectedTarifa.zonaDeViaje.deletedAt
+                    ? `${selectedTarifa.zonaDeViaje.origen} - ${selectedTarifa.zonaDeViaje.destino}`
+                    : <span className="italic text-red-400">{`${selectedTarifa.zonaDeViaje.origen} - ${selectedTarifa.zonaDeViaje.destino}`} (Eliminada)</span>
+                ) : (
+                  'N/A'
+                )}
+              </div>
+              <div>
+                <strong>Transportista:</strong>{' '}
+                {selectedTarifa.transportista ? (
+                  !selectedTarifa.transportista.deletedAt
+                    ? selectedTarifa.transportista.nombre
+                    : <span className="italic text-red-400">{selectedTarifa.transportista.nombre} (Eliminado)</span>
+                ) : (
+                  <span className="text-red-400 italic">Transportista inactivo</span>
+                )}
+              </div>
               <div><strong>Tipo de Carga:</strong> {selectedTarifa.tipoCarga?.categoria || 'N/A'}</div>
               <div><strong>Valor Base:</strong> ${Number(selectedTarifa.valor_base).toFixed(2)}</div>
-              {/* --- CAMBIO: Se muestran las fechas de vigencia --- */}
+              {/* --- CAMBIO: Se muestran las fechas de vigencia --- 
               <div className="border-t border-gray-600 pt-2 mt-2">
                 <strong>Período de Vigencia:</strong>
                 <div className='pl-2'>
@@ -604,26 +691,34 @@ const TarifaCosto = ({ showNotification, tabColor = 'emerald' }) => {
                   <span>Hasta: {selectedTarifa.vigenciaHasta ? new Date(selectedTarifa.vigenciaHasta).toLocaleDateString('es-AR') : 'Indefinida'}</span>
                 </div>
               </div>
+              */}
+              {/* --- CAMBIO: Se muestra solo la fecha de creación --- */}
+              <div className="border-t border-gray-600 pt-2 mt-2">
+                <strong>Fecha de Creación:</strong>
+                <span className='pl-2'>{selectedTarifa.createdAt ? new Date(selectedTarifa.createdAt).toLocaleDateString('es-AR') : 'No definida'}</span>
+              </div>
               {/* adicionales */}
               <div>
-                  <strong>Adicionales:</strong>
-                  {selectedTarifa.tarifaAdicionales?.length > 0 ? (
-                      <ul className="list-disc list-inside pl-2">
-                          {selectedTarifa.tarifaAdicionales
-                            .filter(ta => ta.adicional) 
-                            .map(ta => (
-                              <li key={ta.id}>
-                                  {ta.adicional.descripcion}: ${Number(ta.costoPersonalizado).toFixed(2)}
-                              </li>
-                          ))}
-                      </ul>
-                  ) : 'Ninguno'}
+                <strong>Adicionales:</strong>
+                {selectedTarifa.tarifaAdicionales?.length > 0 ? (
+                  <ul className="list-disc list-inside pl-2">
+                    {selectedTarifa.tarifaAdicionales
+                      .filter(ta => ta.adicional)
+                      .map(ta => (
+                        <li key={ta.id}>
+                          {ta.adicional.descripcion}: ${Number(ta.costoPersonalizado).toFixed(2)}
+                        </li>
+                      ))}
+                  </ul>
+                ) : 'Ninguno'}
               </div>
               <div className="pt-2 mt-2 border-t border-gray-600">
                 <strong>Costo Total:</strong> ${Number(selectedTarifa.costo_total).toFixed(2)}
               </div>
             </div>
-            <button  onClick={() => setShowDetalleModal(false)} className="mt-6 w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">Cerrar</button>
+            <button onClick={() => setShowDetalleModal(false)} className="mt-6 w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">
+              Cerrar
+            </button>
           </div>
         </div>
       )}

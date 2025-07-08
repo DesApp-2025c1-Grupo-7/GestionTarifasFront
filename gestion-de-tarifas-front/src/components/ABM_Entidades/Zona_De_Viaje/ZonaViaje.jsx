@@ -3,6 +3,7 @@ import { Search, Edit, Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { getZonas, createZona, updateZona, deleteZona } from '../../../services/zona.service';
 import Select from 'react-select';
+import { useOutletContext } from 'react-router-dom';
 
 // Estilos para los componentes Select, para mantener la consistencia
 const customSelectStyles = {
@@ -21,7 +22,8 @@ const customSelectStyles = {
     placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
 };
 
-const ZonasViaje = ({ showNotification, tabColor }) => {
+const ZonasViaje = () => {
+  const { showNotification, tabColor } = useOutletContext();
   // --- ESTADOS ---
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -185,7 +187,7 @@ const ZonasViaje = ({ showNotification, tabColor }) => {
                 <input type="number" name="distanciaKm" value={form.distanciaKm} onChange={handleInputChange} placeholder="Distancia en kilómetros" min="0" step="0.1" className="w-full p-3 border-2 text-gray-300 bg-transparent border-gray-600 rounded-lg focus:border-purple-500 focus:outline-none transition-all" />
               </div>
             </div>
-            <div className="flex gap-4 pt-6 border-t border-gray-200">
+            <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-200 w-full">
               <button
                 type="button"
                 onClick={clearForm}
