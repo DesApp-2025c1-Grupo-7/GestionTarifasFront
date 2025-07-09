@@ -13,8 +13,9 @@ const customSelectStyles = (isMulti = false) => ({
     backgroundColor: isMulti ? '#444240' : 'rgba(255,255,255,0.1)',
     borderColor: isMulti ? 'rgb(107 114 128)' : 'rgba(255,255,255,0.3)',
     color: 'white',
-    width: '200px',
-    fontSize: '0.875rem',
+    width: '100%',           
+    minWidth: '200px',  
+    fontSize: '0.875rem'
   }),
   singleValue: (base) => ({ ...base, color: 'white' }),
   multiValue: (base) => ({ ...base, backgroundColor: 'rgba(255,255,255,0.2)' }),
@@ -210,6 +211,7 @@ const TiposVehiculo = () => {
                 styles={customSelectStyles(true)}
               />
             </div>
+            
             <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-200 w-full">
               <button
                 type="button"

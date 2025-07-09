@@ -465,7 +465,7 @@ const TarifaCosto = () => {
             <Select options={cargaOptions} placeholder="Filtrar por Carga" isClearable value={filters.tipoCarga} onChange={selectedOption => setFilters({ ...filters, tipoCarga: selectedOption })} styles={customSelectStyles} />
           </div>
         </div>
-        <div className="overflow-y-auto" style={{ height: tableBodyHeight }}>
+        <div className="overflow-y-auto">
           <table className="w-full">
             <thead className="bg-[#242423] sticky top-0">
               <tr>
@@ -531,7 +531,7 @@ const TarifaCosto = () => {
       {/* modal adicional */}
       {showAdicionalesSelector && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex justify-center items-center">
-          <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900 h-full">
+          <div className="bg-[#444240] p-6 rounded-xl shadow-xl border border-gray-700 max-w-md w-full relative">
             <button
               className="absolute top-2 right-2 text-gray-300 hover:text-white"
               onClick={() => {

@@ -258,7 +258,7 @@ const Adicionales = () => {
                 </tr>
               ) : (
                 filteredData.map((item) => (
-                  <tr key={item.id} className="border-b border-gray-100 hover:bg-indigo-50/50 transition-colors">
+                  <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-800">
                     <td className="px-4 py-3 text-sm font-medium max-w-xs">
                       <div className="truncate text-neutral-200" title={item.descripcion}>
                         {item.descripcion}
