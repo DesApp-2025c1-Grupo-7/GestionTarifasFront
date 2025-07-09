@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001';
+const API_URL = '/api';
 
 /**
  * Obtiene todos los vínculos Tarifa-Adicional.

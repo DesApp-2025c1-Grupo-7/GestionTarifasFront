@@ -13,6 +13,9 @@ import Transportistas from './components/ABM_Entidades/Transportista/Transportis
 import RegistroTarifas from './components/ABM_Entidades/Registro_De_Tarifa/RegistroTarifas';
 import ReportesAdicionales from './components/ABM_Entidades/Adicionales/Reports/AdicionalesReport';
 
+import TarifasReport from './components/ABM_Entidades/Registro_De_Tarifa/reports/TarifasReport';
+
+import HistorialTarifaReport from './components/ABM_Entidades/Registro_De_Tarifa/reports/HistorialTarifaReport';
 
 const App = () => {
   return (
@@ -33,8 +36,8 @@ const App = () => {
         </Route>
         {/* Ruta para el reporte, anidada para mantener la consistencia */}
         <Route path="reports/adicionales" element={<ReportesAdicionales />} />
-        
-      
+        <Route path="/reports/tarifas" element={<TarifasReport />} />
+        <Route path="/tarifas/historial/:id" element={<HistorialTarifaReport />} />
     </Routes>
   );
 };

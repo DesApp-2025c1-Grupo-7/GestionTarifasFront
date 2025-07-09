@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react';
-import { Search, Edit, Trash2, Plus, X, ChevronDown, ChevronUp,  Eye } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, X, ChevronDown, ChevronUp,  Eye, BarChart3, History as HistoryIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 import Select from 'react-select';
 import Swal from 'sweetalert2';
 
@@ -24,6 +26,7 @@ const getTodayString = () => {
 
 const TarifaCosto = () => {
   const { showNotification, tabColor = 'emerald' } = useOutletContext();
+  const navigate = useNavigate(); // <-- AÑADE ESTA LÍNEA
 
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [tiposCarga, setTiposCargas] = useState([]);
@@ -456,8 +459,20 @@ const TarifaCosto = () => {
 
       {/* Tabla y Filtros */}
       <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
-        <div ref={tableHeaderRef} className={`bg-gradient-to-r from-emerald-700 to-emerald-800 text-white p-6`}>
-          <h2 className="text-2xl font-bold mb-4">Tarifas de Costo Registradas</h2>
+        <div ref={tableHeaderRef} className={`bg-gradient-to-r from-${tabColor}-700 to-${tabColor}-800 text-white p-6`}>
+          {/* Contenedor para alinear título y botón */}
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Tarifas de Costo Registradas</h2>
+            <button
+              onClick={() => navigate('/reports/tarifas')}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
+              title="Ver reporte de tarifas"
+            >
+              <BarChart3 size={18} />
+              <span>Reportes</span>
+            </button>
+            
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Select options={vehiculoOptions} placeholder="Filtrar por Vehículo" isClearable value={filters.tipoVehiculo} onChange={selectedOption => setFilters({ ...filters, tipoVehiculo: selectedOption })} styles={customSelectStyles} />
             <Select options={transportistaOptions} placeholder="Filtrar por Transportista" isClearable value={filters.transportista} onChange={selectedOption => setFilters({ ...filters, transportista: selectedOption })} styles={customSelectStyles} />
@@ -514,6 +529,13 @@ const TarifaCosto = () => {
                         <button onClick={() => verDetalleTarifa(item)} className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" title="Ver detalle"><Eye size={14} /></button>
                         <button onClick={() => editEntity(item.id)} className={`p-2 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors`}><Edit size={14} /></button>
                         <button onClick={() => deleteEntity(item.id)} className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"><Trash2 size={14} /></button>
+                        <button 
+                            onClick={() => navigate(`/tarifas/historial/${item.id}`)}
+                            className="p-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors" 
+                            title="Ver historial de cambios">
+                          <HistoryIcon size={14} />
+                        </button>
+
                       </div>
                     </td>
                   </tr>
