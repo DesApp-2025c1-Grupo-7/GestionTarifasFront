@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-// 1. Se importa LineChart y se quitan los componentes de BarChart que no se usarán
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ArrowLeft, RefreshCw, Loader2, DollarSign, ArrowDownUp, TrendingUp, TrendingDown, BarChart3, X as CloseIcon } from 'lucide-react';
 import Select from 'react-select';
@@ -17,15 +16,11 @@ const TarifaEvolucionModal = ({ tarifa, onClose }) => {
             setLoading(true);
             try {
                 const historial = await getHistorialDeTarifa(tarifa.id_tarifa);
-                
-                // Añadir la versión actual a los datos del historial para una línea de tiempo completa
                 const versionActual = {
                     version: (historial[0]?.version || 0) + 1,
                     costo_total: tarifa.costo_final,
-                    fecha_modificacion: new Date().toISOString(), // Usar una fecha actual o la de la tarifa si está disponible
+                    fecha_modificacion: new Date().toISOString(),
                 };
-
-                // Combinar, ordenar cronológicamente y formatear para el gráfico
                 const datosCompletos = [...historial, versionActual]
                     .sort((a, b) => a.version - b.version)
                     .map(v => ({
@@ -33,7 +28,6 @@ const TarifaEvolucionModal = ({ tarifa, onClose }) => {
                         Costo: Number(v.costo_total).toFixed(2),
                         fecha: new Date(v.fecha_modificacion).toLocaleDateString('es-AR'),
                     }));
-                
                 setHistorialData(datosCompletos);
             } catch (error) {
                 console.error("Error al cargar el historial para el gráfico", error);
@@ -41,7 +35,6 @@ const TarifaEvolucionModal = ({ tarifa, onClose }) => {
                 setLoading(false);
             }
         };
-
         fetchHistorialCompleto();
     }, [tarifa]);
 
@@ -88,8 +81,6 @@ const TarifasReport = () => {
   const [analisisData, setAnalisisData] = useState([]);
   const [loadingAnalisis, setLoadingAnalisis] = useState(false);
   const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
-  
-  // --- NUEVO ESTADO PARA EL MODAL DEL GRÁFICO ---
   const [selectedTarifaForChart, setSelectedTarifaForChart] = useState(null);
 
   const showNotification = (message, type = 'error') => {
@@ -98,7 +89,16 @@ const TarifasReport = () => {
   };
 
   const fetchTarifas = async () => {
-    // ... (tu lógica de fetchTarifas)
+    try {
+        setLoading(true);
+        const data = await getTarifas();
+        setTarifas(data || []);
+    } catch (error) {
+        console.error('Error al cargar el reporte de tarifas:', error);
+        showNotification('Error al cargar el reporte', 'error');
+    } finally {
+        setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -133,7 +133,17 @@ const TarifasReport = () => {
     <>
       <div className="min-h-screen bg-[#242423] p-8">
         <div className="max-w-7xl mx-auto">
-            {/* ... (Tu cabecera y sección de estadísticas existentes se mantienen igual) ... */}
+            {/* --- CORRECCIÓN: Se restaura la cabecera con el botón de volver --- */}
+            <div className="mb-8 flex items-center justify-between">
+                <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/tarifas')}>
+                    <ArrowLeft size={24} className="text-gray-300 hover:text-gray-200" />
+                    <h1 className="text-3xl font-bold text-gray-200">Reporte de Tarifas</h1>
+                </div>
+                <button onClick={fetchTarifas} disabled={loading} className="flex items-center space-x-2 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:bg-emerald-800">
+                    {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                    <span>Actualizar Datos</span>
+                </button>
+            </div>
 
             <div className="bg-[#444240] p-6 rounded-xl border border-gray-700 mb-8">
                 <div className="flex items-center gap-3 mb-4">
@@ -170,32 +180,35 @@ const TarifasReport = () => {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Tarifa</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Costo Inicial</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Costo Final</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Aumento ($)</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Aumento (%)</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Variación ($)</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Variación (%)</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-[#444240] divide-y divide-gray-700">
-                                {analisisData.map(item => (
-                                    // --- CAMBIO: La fila ahora es clickeable ---
-                                    <tr key={item.id_tarifa} onClick={() => setSelectedTarifaForChart(item)} className="cursor-pointer hover:bg-gray-700/50 transition-colors">
-                                        <td className="px-6 py-4 text-sm text-gray-300">{item.descripcion}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-400">${item.costo_inicial.toFixed(2)}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-200 font-semibold">${item.costo_final.toFixed(2)}</td>
-                                        <td className="px-6 py-4 text-sm text-green-400 font-bold">+${item.variacion_absoluta.toFixed(2)}</td>
-                                        <td className="px-6 py-4 text-sm text-green-400 font-bold">{item.variacion_porcentual.toFixed(2)}%</td>
-                                    </tr>
-                                ))}
+                                {analisisData.map(item => {
+                                    const esPositivo = item.variacion_absoluta >= 0;
+                                    return (
+                                        <tr key={item.id_tarifa} onClick={() => setSelectedTarifaForChart(item)} className="cursor-pointer hover:bg-gray-700/50 transition-colors">
+                                            <td className="px-6 py-4 text-sm text-gray-300">{item.descripcion}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-400">${item.costo_inicial.toFixed(2)}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-200 font-semibold">${item.costo_final.toFixed(2)}</td>
+                                            <td className={`px-6 py-4 text-sm font-bold ${esPositivo ? 'text-green-400' : 'text-red-400'}`}>
+                                                {esPositivo ? '+' : ''}${item.variacion_absoluta.toFixed(2)}
+                                            </td>
+                                            <td className={`px-6 py-4 text-sm font-bold ${esPositivo ? 'text-green-400' : 'text-red-400'}`}>
+                                                {item.variacion_porcentual.toFixed(2)}%
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
                 </div>
             )}
-            
-            {/* --- SE ELIMINA EL GRÁFICO GENERAL DE AQUÍ --- */}
         </div>
       </div>
       
-      {/* --- SE RENDERIZA EL MODAL DEL GRÁFICO INDIVIDUAL --- */}
       {selectedTarifaForChart && (
         <TarifaEvolucionModal 
             tarifa={selectedTarifaForChart}
