@@ -465,72 +465,81 @@ const TarifaCosto = () => {
             <Select options={cargaOptions} placeholder="Filtrar por Carga" isClearable value={filters.tipoCarga} onChange={selectedOption => setFilters({ ...filters, tipoCarga: selectedOption })} styles={customSelectStyles} />
           </div>
         </div>
-        <div className="overflow-y-auto">
-          <table className="w-full">
-            <thead className="bg-[#242423] sticky top-0">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Vehículo</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Zona</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Transportista</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Valor Base</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Total</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-gray-300">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTarifas.length > 0 ? (
-                filteredTarifas.map(item => (
-                  <tr key={item.id} className={`border-b border-gray-700 hover:bg-${tabColor}-500/10 transition-colors`}>
-                    <td className="px-4 py-3 text-sm text-neutral-200">
-                      {item.tipoVehiculo ? (
-                        !item.tipoVehiculo.deletedAt
-                          ? item.tipoVehiculo.descripcion
-                          : <span className="italic text-red-400">{item.tipoVehiculo.descripcion} (Eliminado)</span>
-                      ) : (
-                        'N/A'
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-neutral-200">
-                          {item.zonaDeViaje ? (
-                            !item.zonaDeViaje.deletedAt
-                              ? `${item.zonaDeViaje.origen} - ${item.zonaDeViaje.destino}`
-                              : <span className="italic text-red-400">{item.zonaDeViaje.origen} - {item.zonaDeViaje.destino} (Zona eliminada)</span>
-                          ) : (
-                            'N/A'
-                          )}
-                     </td>
-
+        <div className='relative'>
+          <div className="overflow-y-auto ">
+            <table className="w-full">
+              <thead className="bg-[#242423] sticky top-0">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Vehículo</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Zona</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Transportista</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Valor Base</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Total</th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-300">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredTarifas.length > 0 ? (
+                  filteredTarifas.map(item => (
+                    <tr key={item.id} className={`border-b border-gray-700 hover:bg-gray-800 transition-colors`}>
                       <td className="px-4 py-3 text-sm text-neutral-200">
-                          {item.transportista ? (
-                            !item.transportista.deletedAt
-                              ? item.transportista.nombre
-                              : <span className="italic text-red-400">{item.transportista.nombre} (Eliminado)</span>
-                          ) : ('N/A')}
+                        {item.tipoVehiculo ? (
+                          !item.tipoVehiculo.deletedAt
+                            ? item.tipoVehiculo.descripcion
+                            : <span className="italic text-red-400">{item.tipoVehiculo.descripcion} (Eliminado)</span>
+                        ) : (
+                          'N/A'
+                        )}
                       </td>
-                    <td className="px-4 py-3 text-sm font-bold text-blue-400">${Number(item.valor_base).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm font-bold text-yellow-400">${Number(item.costo_total).toFixed(2)}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2 justify-center">
-                        <button onClick={() => verDetalleTarifa(item)} className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" title="Ver detalle"><Eye size={14} /></button>
-                        <button onClick={() => editEntity(item.id)} className={`p-2 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors`}><Edit size={14} /></button>
-                        <button onClick={() => deleteEntity(item.id)} className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"><Trash2 size={14} /></button>
+                      <td className="px-4 py-3 text-sm text-neutral-200">
+                            {item.zonaDeViaje ? (
+                              !item.zonaDeViaje.deletedAt
+                                ? `${item.zonaDeViaje.origen} - ${item.zonaDeViaje.destino}`
+                                : <span className="italic text-red-400">{item.zonaDeViaje.origen} - {item.zonaDeViaje.destino} (Zona eliminada)</span>
+                            ) : (
+                              'N/A'
+                            )}
+                      </td>
+
+                        <td className="px-4 py-3 text-sm text-neutral-200">
+                            {item.transportista ? (
+                              !item.transportista.deletedAt
+                                ? item.transportista.nombre
+                                : <span className="italic text-red-400">{item.transportista.nombre} (Eliminado)</span>
+                            ) : ('N/A')}
+                        </td>
+                      <td className="px-4 py-3 text-sm font-bold text-blue-400">${Number(item.valor_base).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-sm font-bold text-yellow-400">${Number(item.costo_total).toFixed(2)}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2 justify-center">
+                          <button onClick={() => verDetalleTarifa(item)} className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" title="Ver detalle"><Eye size={14} /></button>
+                          <button onClick={() => editEntity(item.id)} className={`p-2 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors`}><Edit size={14} /></button>
+                          <button onClick={() => deleteEntity(item.id)} className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"><Trash2 size={14} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="px-4 py-12 text-center text-gray-400">
+                      <div className="flex flex-col items-center">
+                        <div className="text-6xl mb-4">📋</div>
+                        <h3 className="text-lg font-semibold mb-2 text-gray-300">No hay tarifas de costos registradas</h3>
+                        <p>Comienza agregando una nueva tarifa de costo usando el formulario</p>
                       </div>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="px-4 py-12 text-center text-gray-400">
-                    <div className="flex flex-col items-center">
-                      <div className="text-6xl mb-4">📋</div>
-                      <h3 className="text-lg font-semibold mb-2 text-gray-300">No hay tarifas de costos registradas</h3>
-                      <p>Comienza agregando una nueva tarifa de costo usando el formulario</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+            {/* Indicador de scroll si hay muchos elementos */}
+          {filteredTarifas.length > 8 && (
+            <div className="absolute bottom-2 right-2 bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs flex items-center gap-1">
+              <span>↕</span>
+              <span>{filteredTarifas.length} registros</span>
+            </div>
+          )}
+          </div>
         </div>
       </div>
 

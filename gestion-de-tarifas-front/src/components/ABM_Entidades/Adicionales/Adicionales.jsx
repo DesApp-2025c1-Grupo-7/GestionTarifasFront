@@ -279,59 +279,66 @@ const Adicionales = () => {
             />
           </div>
         </div>
-
-        <div className="max-h-96 overflow-y-auto bg-[#444240] custom-scrollbar">
-          <table className="w-full">
-            <thead className="bg-[#242423] sticky top-0">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Descripción</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Costo ($)</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-gray-300">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.length === 0 ? (
+        <div className='relative'>
+          <div className="max-h-96 overflow-y-auto bg-[#444240] custom-scrollbar ">
+            <table className="w-full">
+              <thead className="bg-[#242423] sticky top-0">
                 <tr>
-                  <td colSpan="3" className="px-4 py-12 text-center text-gray-300">
-                    <div className="flex flex-col items-center">
-                      <div className="text-6xl mb-4">🛎️</div>
-                      <h3 className="text-lg font-semibold mb-2">No hay servicios adicionales registrados</h3>
-                      <p>Comienza agregando un nuevo servicio adicional usando el formulario</p>
-                    </div>
-                  </td>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Descripción</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Costo ($)</th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-300">Acciones</th>
                 </tr>
-              ) : (
-                filteredData.map((item) => (
-                  <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-800">
-                    <td className="px-4 py-3 text-sm font-medium max-w-xs">
-                      <div className="truncate text-neutral-200" title={item.descripcion}>
-                        {item.descripcion}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-green-600">
-                      ${Number(item.costo).toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2 justify-center">
-                        <button
-                          onClick={() => editEntity(item.id)}
-                          className="p-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors"
-                        >
-                          <Edit size={14} />
-                        </button>
-                        <button
-                          onClick={() => deleteEntity(item.idAdicional)}
-                          className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+              </thead>
+              <tbody>
+                {filteredData.length === 0 ? (
+                  <tr>
+                    <td colSpan="3" className="px-4 py-12 text-center text-gray-300">
+                      <div className="flex flex-col items-center">
+                        <div className="text-6xl mb-4">🛎️</div>
+                        <h3 className="text-lg font-semibold mb-2">No hay servicios adicionales registrados</h3>
+                        <p>Comienza agregando un nuevo servicio adicional usando el formulario</p>
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  filteredData.map((item) => (
+                    <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-800">
+                      <td className="px-4 py-3 text-sm font-medium max-w-xs">
+                        <div className="truncate text-neutral-200" title={item.descripcion}>
+                          {item.descripcion}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-sm font-semibold text-green-600">
+                        ${Number(item.costo).toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2 justify-center">
+                          <button
+                            onClick={() => editEntity(item.id)}
+                            className="p-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-colors"
+                          >
+                            <Edit size={14} />
+                          </button>
+                          <button
+                            onClick={() => deleteEntity(item.idAdicional)}
+                            className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+            {filteredData.length > 8 && (
+              <div className="absolute bottom-2 right-2 bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs flex items-center gap-1">
+                <span>↕</span>
+                <span>{filteredData.length} registros</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

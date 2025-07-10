@@ -449,7 +449,7 @@ const Transportistas = () => {
           </div>
           
           {/* Indicador de scroll si hay muchos elementos */}
-          {filteredData.length > 8 && (
+          {filteredData.length > 10 && (
             <div className="absolute bottom-2 right-2 bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs flex items-center gap-1">
               <span>↕</span>
               <span>{filteredData.length} registros</span>

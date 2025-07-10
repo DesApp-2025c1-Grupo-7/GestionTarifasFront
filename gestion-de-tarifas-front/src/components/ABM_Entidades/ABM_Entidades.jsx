@@ -48,7 +48,7 @@ const ABMEntidades = () => {
 
   return (
     <div className="min-h-screen bg-[#242423]">
-      <div className="max-w-screen mx-auto shadow-2xl overflow-hidden">
+      <div className="max-w-screen mx-auto overflow-hidden">
         {/* Header */}
         <div className="flex justify-center bg-[#444240] p-2">
           <img src={logo} alt="Logo" className="h-20 object-contain" />
