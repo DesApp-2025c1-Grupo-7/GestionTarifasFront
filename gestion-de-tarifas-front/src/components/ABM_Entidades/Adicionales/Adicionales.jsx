@@ -170,7 +170,7 @@ const Adicionales = () => {
           -moz-appearance: textfield;
         }
       `}</style>
-      
+
       {/* Formulario */}
       <div className="lg:col-span-1">
         <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
@@ -207,6 +207,7 @@ const Adicionales = () => {
                   min="0"
                   step="0.01"
                   className={`w-full p-3 border-2 border-gray-600 rounded-lg text-gray-300 focus:border-indigo-500 focus:outline-none transition-all no-arrows`}
+
                 />
               </div>
 
@@ -279,6 +280,7 @@ const Adicionales = () => {
             />
           </div>
         </div>
+
         <div className='relative'>
           <div className="max-h-96 overflow-y-auto bg-[#444240] custom-scrollbar ">
             <table className="w-full">
@@ -297,6 +299,7 @@ const Adicionales = () => {
                         <div className="text-6xl mb-4">🛎️</div>
                         <h3 className="text-lg font-semibold mb-2">No hay servicios adicionales registrados</h3>
                         <p>Comienza agregando un nuevo servicio adicional usando el formulario</p>
+
                       </div>
                     </td>
                   </tr>

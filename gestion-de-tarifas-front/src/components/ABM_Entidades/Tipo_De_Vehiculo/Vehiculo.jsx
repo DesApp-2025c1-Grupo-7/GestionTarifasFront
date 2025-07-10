@@ -323,7 +323,6 @@ const TiposVehiculo = () => {
             />
           </div>
         </div>
-
         {/* Contenedor de la tabla con scroll mejorado */}
         <div className="relative">
           <div className="max-h-96 overflow-y-auto custom-scrollbar">

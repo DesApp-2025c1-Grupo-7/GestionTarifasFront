@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef, useLayoutEffect } from 'react';
-import { Search, Edit, Trash2, Phone, Eye } from 'lucide-react';
+import { Search, Edit, Trash2, Phone, Eye, MoreVertical } from 'lucide-react';
 import { createTransportista, deleteTransportista, getTransportista, updateTransportista } from '../../../services/transportista.service';
 import { getVehiculos } from '../../../services/tipoVehiculo.service';
 import { getZonas } from '../../../services/zona.service';
@@ -449,6 +449,7 @@ const Transportistas = () => {
           </div>
           
           {/* Indicador de scroll si hay muchos elementos */}
+
           {filteredData.length > 10 && (
             <div className="absolute bottom-2 right-2 bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs flex items-center gap-1">
               <span>↕</span>

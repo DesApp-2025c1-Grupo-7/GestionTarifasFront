@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react';
-import { Search, Edit, Trash2, Plus, X, ChevronDown, ChevronUp,  Eye } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, X, ChevronDown, ChevronUp,  Eye, BarChart3, MoreVertical, History as HistoryIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 import Select from 'react-select';
 import Swal from 'sweetalert2';
 
@@ -24,6 +26,7 @@ const getTodayString = () => {
 
 const TarifaCosto = () => {
   const { showNotification, tabColor = 'emerald' } = useOutletContext();
+  const navigate = useNavigate(); // <-- AÑADE ESTA LÍNEA
 
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [tiposCarga, setTiposCargas] = useState([]);
@@ -38,6 +41,10 @@ const TarifaCosto = () => {
   const [showAdicionalesSelector, setShowAdicionalesSelector] = useState(false);
   const [adicionalSearch, setAdicionalSearch] = useState('');
   const [nuevoAdicional, setNuevoAdicional] = useState({ descripcion: '', costo: '' });
+
+  // --- 2. NUEVO ESTADO Y REF PARA CONTROLAR EL MENÚ DE ACCIONES ---
+    const [openMenuId, setOpenMenuId] = useState(null);
+    const menuRef = useRef(null);
 
   const [filters, setFilters] = useState({
     tipoVehiculo: null,
@@ -65,6 +72,19 @@ const TarifaCosto = () => {
   // MODAL detalle
   const [showDetalleModal, setShowDetalleModal] = useState(false);
   const [selectedTarifa, setSelectedTarifa] = useState(null);
+
+  // --- 3. NUEVO HOOK PARA CERRAR EL MENÚ AL HACER CLIC FUERA ---
+  useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setOpenMenuId(null);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [menuRef]);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -456,8 +476,20 @@ const TarifaCosto = () => {
 
       {/* Tabla y Filtros */}
       <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
-        <div ref={tableHeaderRef} className={`bg-gradient-to-r from-emerald-700 to-emerald-800 text-white p-6`}>
-          <h2 className="text-2xl font-bold mb-4">Tarifas de Costo Registradas</h2>
+        <div ref={tableHeaderRef} className={`bg-gradient-to-r from-${tabColor}-700 to-${tabColor}-800 text-white p-6`}>
+          {/* Contenedor para alinear título y botón */}
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Tarifas de Costo Registradas</h2>
+            <button
+              onClick={() => navigate('/reports/tarifas')}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
+              title="Ver reporte de tarifas"
+            >
+              <BarChart3 size={18} />
+              <span>Reportes</span>
+            </button>
+            
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Select options={vehiculoOptions} placeholder="Filtrar por Vehículo" isClearable value={filters.tipoVehiculo} onChange={selectedOption => setFilters({ ...filters, tipoVehiculo: selectedOption })} styles={customSelectStyles} />
             <Select options={transportistaOptions} placeholder="Filtrar por Transportista" isClearable value={filters.transportista} onChange={selectedOption => setFilters({ ...filters, transportista: selectedOption })} styles={customSelectStyles} />
@@ -465,6 +497,7 @@ const TarifaCosto = () => {
             <Select options={cargaOptions} placeholder="Filtrar por Carga" isClearable value={filters.tipoCarga} onChange={selectedOption => setFilters({ ...filters, tipoCarga: selectedOption })} styles={customSelectStyles} />
           </div>
         </div>
+
         <div className='relative'>
           <div className="overflow-y-auto ">
             <table className="w-full">
@@ -491,6 +524,7 @@ const TarifaCosto = () => {
                           'N/A'
                         )}
                       </td>
+
                       <td className="px-4 py-3 text-sm text-neutral-200">
                             {item.zonaDeViaje ? (
                               !item.zonaDeViaje.deletedAt
@@ -517,21 +551,73 @@ const TarifaCosto = () => {
                           <button onClick={() => deleteEntity(item.id)} className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"><Trash2 size={14} /></button>
                         </div>
                       </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="px-4 py-12 text-center text-gray-400">
-                      <div className="flex flex-col items-center">
-                        <div className="text-6xl mb-4">📋</div>
-                        <h3 className="text-lg font-semibold mb-2 text-gray-300">No hay tarifas de costos registradas</h3>
-                        <p>Comienza agregando una nueva tarifa de costo usando el formulario</p>
+
+                    <td className="px-4 py-3 text-sm font-bold text-blue-400">${Number(item.valor_base).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-sm font-bold text-yellow-400">${Number(item.costo_total).toFixed(2)}</td>
+                    {/* --- 4. SECCIÓN DE ACCIONES CON MENÚ KEBAB --- */}
+                                    <td className="px-4 py-3 text-center">
+                                        <div className="relative inline-block text-left" ref={openMenuId === item.id ? menuRef : null}>
+                                            <button
+                                                type="button"
+                                                className="p-2 rounded-full text-gray-300 hover:bg-gray-600 focus:outline-none"
+                                                onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
+                                            >
+                                                <MoreVertical size={20} />
+                                            </button>
+                                            {openMenuId === item.id && (
+                                                <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#3a3a3a] ring-1 ring-black ring-opacity-5 z-20">
+                                                    <div className="py-1" role="menu" aria-orientation="vertical">
+                                                        <button
+                                                            onClick={() => { verDetalleTarifa(item); setOpenMenuId(null); }}
+                                                            className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-gray-200 hover:bg-gray-600"
+                                                        >
+                                                            <Eye size={16} className="text-blue-400" />
+                                                            Ver Detalle
+                                                        </button>
+                                                        <button
+                                                            onClick={() => { navigate(`/tarifas/historial/${item.id}`); setOpenMenuId(null); }}
+                                                            className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-gray-200 hover:bg-gray-600"
+                                                        >
+                                                            <HistoryIcon size={16} className="text-purple-400" />
+                                                            Ver Historial
+                                                        </button>
+                                                        <button
+                                                            onClick={() => { editEntity(item.id); setOpenMenuId(null); }}
+                                                            className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-gray-200 hover:bg-gray-600"
+                                                        >
+                                                            <Edit size={16} className="text-emerald-400" />
+                                                            Editar
+                                                        </button>
+                                                        <div className="border-t border-gray-600 my-1"></div>
+                                                        <button
+                                                            onClick={() => { deleteEntity(item.id); setOpenMenuId(null); }}
+                                                            className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-gray-600"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                            Eliminar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
                       </div>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="px-4 py-12 text-center text-gray-400">
+                    <div className="flex flex-col items-center">
+                      <div className="text-6xl mb-4">📋</div>
+                      <h3 className="text-lg font-semibold mb-2 text-gray-300">No hay tarifas de costos registradas</h3>
+                      <p>Comienza agregando una nueva tarifa de costo usando el formulario</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          
+          
             {/* Indicador de scroll si hay muchos elementos */}
           {filteredTarifas.length > 8 && (
             <div className="absolute bottom-2 right-2 bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs flex items-center gap-1">
@@ -540,6 +626,7 @@ const TarifaCosto = () => {
             </div>
           )}
           </div>
+          
         </div>
       </div>
 
