@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react';
-import { Search, Edit, Trash2, Plus, X, ChevronDown, ChevronUp,  Eye, BarChart3, History as HistoryIcon } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, X, ChevronDown, ChevronUp,  Eye, BarChart3, MoreVertical, History as HistoryIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import Select from 'react-select';
@@ -42,6 +42,10 @@ const TarifaCosto = () => {
   const [adicionalSearch, setAdicionalSearch] = useState('');
   const [nuevoAdicional, setNuevoAdicional] = useState({ descripcion: '', costo: '' });
 
+  // --- 2. NUEVO ESTADO Y REF PARA CONTROLAR EL MENÚ DE ACCIONES ---
+    const [openMenuId, setOpenMenuId] = useState(null);
+    const menuRef = useRef(null);
+
   const [filters, setFilters] = useState({
     tipoVehiculo: null,
     tipoCarga: null,
@@ -68,6 +72,19 @@ const TarifaCosto = () => {
   // MODAL detalle
   const [showDetalleModal, setShowDetalleModal] = useState(false);
   const [selectedTarifa, setSelectedTarifa] = useState(null);
+
+  // --- 3. NUEVO HOOK PARA CERRAR EL MENÚ AL HACER CLIC FUERA ---
+  useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setOpenMenuId(null);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [menuRef]);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -480,7 +497,7 @@ const TarifaCosto = () => {
             <Select options={cargaOptions} placeholder="Filtrar por Carga" isClearable value={filters.tipoCarga} onChange={selectedOption => setFilters({ ...filters, tipoCarga: selectedOption })} styles={customSelectStyles} />
           </div>
         </div>
-        <div className="overflow-y-auto" style={{ height: tableBodyHeight }}>
+        <div className="overflow-y-auto"> {/* style={{ height: tableBodyHeight }}> */}
           <table className="w-full">
             <thead className="bg-[#242423] sticky top-0">
               <tr>
@@ -524,25 +541,64 @@ const TarifaCosto = () => {
                       </td>
                     <td className="px-4 py-3 text-sm font-bold text-blue-400">${Number(item.valor_base).toFixed(2)}</td>
                     <td className="px-4 py-3 text-sm font-bold text-yellow-400">${Number(item.costo_total).toFixed(2)}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2 justify-center">
-                        <button onClick={() => verDetalleTarifa(item)} className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors" title="Ver detalle"><Eye size={14} /></button>
-                        <button onClick={() => editEntity(item.id)} className={`p-2 bg-${tabColor}-500 text-white rounded-lg hover:bg-${tabColor}-600 transition-colors`}><Edit size={14} /></button>
-                        <button onClick={() => deleteEntity(item.id)} className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"><Trash2 size={14} /></button>
-                        <button 
-                            onClick={() => navigate(`/tarifas/historial/${item.id}`)}
-                            className="p-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors" 
-                            title="Ver historial de cambios">
-                          <HistoryIcon size={14} />
-                        </button>
-
+                    {/* --- 4. SECCIÓN DE ACCIONES CON MENÚ KEBAB --- */}
+                                    <td className="px-4 py-3 text-center">
+                                        <div className="relative inline-block text-left" ref={openMenuId === item.id ? menuRef : null}>
+                                            <button
+                                                type="button"
+                                                className="p-2 rounded-full text-gray-300 hover:bg-gray-600 focus:outline-none"
+                                                onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
+                                            >
+                                                <MoreVertical size={20} />
+                                            </button>
+                                            {openMenuId === item.id && (
+                                                <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#3a3a3a] ring-1 ring-black ring-opacity-5 z-20">
+                                                    <div className="py-1" role="menu" aria-orientation="vertical">
+                                                        <button
+                                                            onClick={() => { verDetalleTarifa(item); setOpenMenuId(null); }}
+                                                            className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-gray-200 hover:bg-gray-600"
+                                                        >
+                                                            <Eye size={16} className="text-blue-400" />
+                                                            Ver Detalle
+                                                        </button>
+                                                        <button
+                                                            onClick={() => { navigate(`/tarifas/historial/${item.id}`); setOpenMenuId(null); }}
+                                                            className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-gray-200 hover:bg-gray-600"
+                                                        >
+                                                            <HistoryIcon size={16} className="text-purple-400" />
+                                                            Ver Historial
+                                                        </button>
+                                                        <button
+                                                            onClick={() => { editEntity(item.id); setOpenMenuId(null); }}
+                                                            className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-gray-200 hover:bg-gray-600"
+                                                        >
+                                                            <Edit size={16} className="text-emerald-400" />
+                                                            Editar
+                                                        </button>
+                                                        <div className="border-t border-gray-600 my-1"></div>
+                                                        <button
+                                                            onClick={() => { deleteEntity(item.id); setOpenMenuId(null); }}
+                                                            className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-gray-600"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                            Eliminar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
                       </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="px-4 py-12 text-center text-gray-500">No se encontraron tarifas</td>
+                  <td colSpan="6" className="px-4 py-12 text-center text-gray-400">
+                    <div className="flex flex-col items-center">
+                      <div className="text-6xl mb-4">📋</div>
+                      <h3 className="text-lg font-semibold mb-2 text-gray-300">No hay tarifas de costos registradas</h3>
+                      <p>Comienza agregando una nueva tarifa de costo usando el formulario</p>
+                    </div>
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -553,7 +609,7 @@ const TarifaCosto = () => {
       {/* modal adicional */}
       {showAdicionalesSelector && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex justify-center items-center">
-          <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900 h-full">
+          <div className="bg-[#444240] p-6 rounded-xl shadow-xl border border-gray-700 max-w-md w-full relative">
             <button
               className="absolute top-2 right-2 text-gray-300 hover:text-white"
               onClick={() => {
@@ -702,7 +758,16 @@ const TarifaCosto = () => {
                   <span className="text-red-400 italic">Transportista inactivo</span>
                 )}
               </div>
-              <div><strong>Tipo de Carga:</strong> {selectedTarifa.tipoCarga?.categoria || 'N/A'}</div>
+              <div>
+                <strong>Tipo de Carga: </strong> 
+                {selectedTarifa.tipoCarga?.categoria ? (
+                  !selectedTarifa.tipoCarga.deletedAt
+                    ? selectedTarifa.tipoCarga?.categoria 
+                    : <span className='text-red-400 italic'>{selectedTarifa.tipoCarga.categoria} (Eliminada)</span>
+                ) : (
+                  <span className='text-red-400 italic'>Tipo de carga eliminada</span>
+                )}
+              </div>
               <div><strong>Valor Base:</strong> ${Number(selectedTarifa.valor_base).toFixed(2)}</div>
               {/* --- CAMBIO: Se muestran las fechas de vigencia --- 
               <div className="border-t border-gray-600 pt-2 mt-2">
