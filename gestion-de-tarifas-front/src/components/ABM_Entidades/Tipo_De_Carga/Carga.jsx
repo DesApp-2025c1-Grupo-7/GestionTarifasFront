@@ -21,6 +21,7 @@ const numberInputStyles = {
 };
 
 const TiposCarga = () => { 
+  // 2. Obtienes todo lo que necesitas del context
   const { showNotification, tabColor } = useOutletContext(); 
 
   const [data, setData] = useState([]); // Lista original de cargas del backend
@@ -194,7 +195,6 @@ const TiposCarga = () => {
         input[type=number] {
           -moz-appearance: textfield;
         }
-
         /* Estilos personalizados para la barra de scroll */
         .custom-scrollbar::-webkit-scrollbar {
           width: 8px;
@@ -301,6 +301,9 @@ const TiposCarga = () => {
                 </div>
               )}
             </div>
+            {/*  ---- Como estaba escrito antes ----
+            <!div className="flex gap-4 pt-6 border-t border-gray-200">
+            */}
             <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-200 w-full">  
               <button
                 type="button"
@@ -408,15 +411,15 @@ const TiposCarga = () => {
                 )}
               </tbody>
             </table>
-
-            {/* Indicador de scroll si hay muchos elementos */}
-            {filteredData.length > 8 && (
-              <div className="absolute bottom-2 right-2 bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs flex items-center gap-1">
-                <span>↕</span>
-                <span>{filteredData.length} registros</span>
-              </div>
-            )}
           </div>
+          
+          {/* Indicador de scroll si hay muchos elementos */}
+          {filteredData.length > 8 && (
+            <div className="absolute bottom-2 right-2 bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs flex items-center gap-1">
+              <span>↕</span>
+              <span>{filteredData.length} registros</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

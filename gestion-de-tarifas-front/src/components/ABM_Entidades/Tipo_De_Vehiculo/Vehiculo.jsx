@@ -267,10 +267,8 @@ const TiposVehiculo = () => {
                 onChange={handleFormTipoCargaChange}
                 placeholder="Seleccionar..."
                 styles={customSelectStyles(true)}
-                maxMenuHeight={200} // Altura máxima del menú
               />
             </div>
-            
             <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-200 w-full">
               <button
                 type="button"

@@ -276,7 +276,6 @@ const Transportistas = () => {
           -moz-appearance: textfield;
         }
       `}</style>
-
       {/* Form Section */}
       <div className="lg:col-span-1">
         <div ref={formRef} className="bg-[#444240] p-8 rounded-2xl shadow-xl border border-gray-900">
@@ -324,7 +323,7 @@ const Transportistas = () => {
                 styles={customSelectStyles(true)} 
                 value={opcionesVehiculo.filter(opt => form.tipoVehiculos.includes(opt.value))} 
                 onChange={(selected) => handleFormSelectChange('tipoVehiculos', selected)}
-                maxMenuHeight={200} // Altura máxima del menú
+                maxMenuHeight={200} // Altura máxima del menú 
               />
             </div>
             <div>
@@ -336,7 +335,7 @@ const Transportistas = () => {
                 styles={customSelectStyles(true)} 
                 value={opcionesZonas.filter(opt => form.zonasDeViaje.includes(opt.value))} 
                 onChange={(selected) => handleFormSelectChange('zonasDeViaje', selected)}
-                maxMenuHeight={200} // Altura máxima del menú
+                maxMenuHeight={200} // Altura máxima del menú 
               />
             </div>
             {/* Botones del formulario */}
@@ -404,7 +403,6 @@ const Transportistas = () => {
             />
           </div>
         </div>
-
         {/* Contenedor de la tabla con scroll mejorado */}
         <div className="relative">
           <div className="overflow-y-auto custom-scrollbar" style={{ height: tableBodyHeight }}>
@@ -449,8 +447,7 @@ const Transportistas = () => {
           </div>
           
           {/* Indicador de scroll si hay muchos elementos */}
-
-          {filteredData.length > 10 && (
+          {filteredData.length > 8 && (
             <div className="absolute bottom-2 right-2 bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs flex items-center gap-1">
               <span>↕</span>
               <span>{filteredData.length} registros</span>
