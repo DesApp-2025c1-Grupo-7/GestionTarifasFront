@@ -26,14 +26,12 @@ const AdicionalesReport = () => {
   const [modalContent, setModalContent] = useState({ adicional: null, tarifas: [] });
   const [isLoadingModal, setIsLoadingModal] = useState(false);
 
-  // --- 1. LÓGICA DE NOTIFICACIÓN AÑADIDA ---
   const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
 
   const showNotification = (message, type = 'success') => {
     setNotification({ show: true, message, type });
     setTimeout(() => setNotification({ show: false, message: '', type: 'success' }), 3000);
   };
-  // --- FIN DE LA LÓGICA AÑADIDA ---
 
   useEffect(() => {
     fetchAdicionales();
@@ -242,7 +240,7 @@ const AdicionalesReport = () => {
         </div>
       </div>
 
-      {/* --- 2. RENDERIZADO DE LA NOTIFICACIÓN AÑADIDO --- */}
+
       {notification.show && (
         <div className={`fixed top-5 right-5 px-6 py-4 rounded-lg text-white font-semibold shadow-lg z-50 transition-all ${
             notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'

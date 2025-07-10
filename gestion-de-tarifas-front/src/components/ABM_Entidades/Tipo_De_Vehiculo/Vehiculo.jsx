@@ -6,7 +6,7 @@ import { getCargas } from '../../../services/tipoCarga.service';
 import Select from 'react-select';
 import { useOutletContext } from 'react-router-dom';
 
-// Estilos para los componentes Select, puedes reutilizarlos
+
 const customSelectStyles = (isMulti = false) => ({
   control: (base) => ({
     ...base,
@@ -24,13 +24,14 @@ const customSelectStyles = (isMulti = false) => ({
     ...base, 
     backgroundColor: '#242423', 
     color: 'white',
-    maxHeight: '200px' // Altura máxima del dropdown
+    maxHeight: '200px',
+    zIndex: 9999
   }),
   menuList: (base) => ({
     ...base,
-    maxHeight: '200px', // Altura máxima de la lista
-    overflowY: 'auto',  // Scroll vertical
-    // Estilos personalizados para la barra de scroll
+    maxHeight: '200px', 
+    overflowY: 'auto', 
+    
     '&::-webkit-scrollbar': {
       width: '8px',
     },
@@ -57,8 +58,8 @@ const customSelectStyles = (isMulti = false) => ({
 const TiposVehiculo = () => {
   const { showNotification, tabColor } = useOutletContext();
   // --- ESTADOS ---
-  const [data, setData] = useState([]); // Lista original de vehículos del backend
-  const [filteredData, setFilteredData] = useState([]); // Lista que se muestra en la tabla
+  const [data, setData] = useState([]); 
+  const [filteredData, setFilteredData] = useState([]); 
   const [editingId, setEditingId] = useState(null);
   
   // Estado para el formulario de creación/edición
@@ -78,7 +79,6 @@ const TiposVehiculo = () => {
           getCargas()
         ]);
         setData(vehiculosData);
-        // SOLUCIÓN: Inicialmente, la tabla muestra todos los datos
         setFilteredData(vehiculosData); 
         setTiposCarga(cargasData);
       } catch (error) {
@@ -88,7 +88,7 @@ const TiposVehiculo = () => {
     fetchInitialData();
   }, []);
 
-  // Lógica de filtrado centralizada: se activa cuando cambian los datos o los filtros
+  
   useEffect(() => {
     let dataToFilter = [...data];
 
@@ -121,7 +121,7 @@ const TiposVehiculo = () => {
     setForm({ ...form, tipoCargaIds: selectedIds });
   };
 
-  // --- LÓGICA DE SUBMIT (CRUD) ---
+  // --- LÓGICA DE CRUD ---
   const validateForm = () => form.descripcion && form.tipoCargaIds.length > 0;
 
   const handleSubmit = async () => {
@@ -205,7 +205,6 @@ const TiposVehiculo = () => {
 
   return (
     <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
-      {/* Estilos CSS para mejorar la barra de scroll */}
       <style jsx>{`
         /* Estilos personalizados para la barra de scroll */
         .custom-scrollbar::-webkit-scrollbar {
@@ -321,7 +320,7 @@ const TiposVehiculo = () => {
             />
           </div>
         </div>
-        {/* Contenedor de la tabla con scroll mejorado */}
+      
         <div className="relative">
           <div className="max-h-96 overflow-y-auto custom-scrollbar">
             <table className="w-full">
@@ -335,7 +334,7 @@ const TiposVehiculo = () => {
               <tbody>
                 {filteredData.length > 0 ? (
                   filteredData.map((item) => (
-                    <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-800 transition-colors">
+                    <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-600 transition-colors">
                       <td className="px-4 py-3 text-sm text-neutral-200">{item.descripcion}</td>
                       <td className="px-4 py-3 text-sm text-neutral-200">{getTipoCargaNombre(item.tipoCargas)}</td>
                       <td className="px-4 py-3">
@@ -361,7 +360,6 @@ const TiposVehiculo = () => {
             </table>
           </div>
           
-          {/* Indicador de scroll si hay muchos elementos */}
           {filteredData.length > 8 && (
             <div className="absolute bottom-2 right-2 bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs flex items-center gap-1">
               <span>↕</span>

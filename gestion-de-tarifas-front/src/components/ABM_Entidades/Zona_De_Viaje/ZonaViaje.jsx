@@ -5,7 +5,7 @@ import { getZonas, createZona, updateZona, deleteZona } from '../../../services/
 import Select from 'react-select';
 import { useOutletContext } from 'react-router-dom';
 
-// Estilos para los componentes Select, para mantener la consistencia
+
 const customSelectStyles = {
     control: (base) => ({
       ...base,
@@ -29,7 +29,6 @@ const ZonasViaje = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [editingId, setEditingId] = useState(null);
   
-  // Estado para el formulario (sin campos de costo)
   const [form, setForm] = useState({ origen: '', destino: '', distanciaKm: '' });
   
   // Estado separado para los filtros
@@ -40,7 +39,6 @@ const ZonasViaje = () => {
     const fetchZonas = async () => {
       try {
         const zonas = await getZonas();
-        // Adaptamos el nombre del campo del backend (distancia) al del frontend (distanciaKm)
         const zonasAdaptadas = zonas.map(zona => ({
           ...zona,
           distanciaKm: zona.distancia,
@@ -78,7 +76,7 @@ const ZonasViaje = () => {
     setForm({ ...form, [name]: value });
   };
 
-  // --- LÓGICA DE SUBMIT (CRUD) ---
+  // --- LÓGICA DE CRUD ---
   const validateForm = () => {
     return form.origen.trim() && form.destino.trim() && form.distanciaKm;
   };
@@ -88,7 +86,6 @@ const ZonasViaje = () => {
       showNotification('Por favor completa todos los campos requeridos', 'error');
       return;
     }
-    // Adaptamos el nombre del campo del frontend (distanciaKm) al del backend (distancia)
     const entityData = {
       origen: form.origen,
       destino: form.destino,
@@ -153,7 +150,7 @@ const ZonasViaje = () => {
     }
   };
 
-  // Opciones para los filtros desplegables
+
   const opcionesOrigen = useMemo(() => [
     { value: '', label: 'Todos los Orígenes' },
     ...[...new Set(data.map(item => item.origen))].map(origen => ({ value: origen, label: origen }))
@@ -166,7 +163,6 @@ const ZonasViaje = () => {
 
   return (
     <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
-      {/* Estilos CSS para personalizar la barra de scroll y ocultar flechas de inputs numéricos */}
       <style jsx>{`
         /* Personalización de la barra de scroll */
         .custom-scrollbar::-webkit-scrollbar {
@@ -318,7 +314,7 @@ const ZonasViaje = () => {
             <tbody>
               {filteredData.length > 0 ? (
                 filteredData.map((item) => (
-                  <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-800">
+                  <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-600">
                     <td className="px-4 py-3 text-sm font-medium text-neutral-200">{item.origen}</td>
                     <td className="px-4 py-3 text-sm font-medium text-neutral-200">{item.destino}</td>
                     <td className="px-4 py-3 text-sm text-neutral-200">{item.distanciaKm} km</td>

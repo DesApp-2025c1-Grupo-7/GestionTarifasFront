@@ -127,7 +127,6 @@ const Adicionales = () => {
 
   return (
     <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
-      {/* Estilos CSS para personalizar la barra de scroll y ocultar flechas de inputs numéricos */}
       <style jsx>{`
         /* Personalización de la barra de scroll */
         .custom-scrollbar::-webkit-scrollbar {
@@ -302,7 +301,7 @@ const Adicionales = () => {
                 </tr>
               ) : (
                 filteredData.map((item) => (
-                  <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-800">
+                  <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-600">
                     <td className="px-4 py-3 text-sm font-medium max-w-xs">
                       <div className="truncate text-neutral-200" title={item.descripcion}>
                         {item.descripcion}

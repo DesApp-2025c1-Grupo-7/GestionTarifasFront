@@ -14,7 +14,6 @@ import { getAdicionales, createAdicional as createAdicionalService } from '../..
 
 import { useOutletContext } from 'react-router-dom';
 
-// Helper para obtener la fecha de hoy en formato YYYY-MM-DD
 const getTodayString = () => {
   const today = new Date();
   const year = today.getFullYear();
@@ -26,7 +25,7 @@ const getTodayString = () => {
 
 const TarifaCosto = () => {
   const { showNotification, tabColor = 'emerald' } = useOutletContext();
-  const navigate = useNavigate(); // <-- AÑADE ESTA LÍNEA
+  const navigate = useNavigate(); 
 
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [tiposCarga, setTiposCargas] = useState([]);
@@ -42,7 +41,6 @@ const TarifaCosto = () => {
   const [adicionalSearch, setAdicionalSearch] = useState('');
   const [nuevoAdicional, setNuevoAdicional] = useState({ descripcion: '', costo: '' });
 
-  // --- 2. NUEVO ESTADO Y REF PARA CONTROLAR EL MENÚ DE ACCIONES ---
     const [openMenuId, setOpenMenuId] = useState(null);
     const menuRef = useRef(null);
 
@@ -57,7 +55,6 @@ const TarifaCosto = () => {
   const tableHeaderRef = useRef(null); // Referencia para medir la cabecera de la tabla
   const [tableBodyHeight, setTableBodyHeight] = useState('auto'); // Estado para guardar la altura calculada
 
-  // --- CAMBIO: Se añaden las fechas de vigencia al estado inicial ---
   const [form, setForm] = useState({
     tipoVehiculo: '',
     tipoCarga: '',
@@ -65,15 +62,11 @@ const TarifaCosto = () => {
     transportista: '',
     valorBase: '',
     adicionalesSeleccionados: [],
-  //  vigenciaDesde: getTodayString(), // Fecha de inicio por defecto
-  //  vigenciaHasta: '',            // Fecha de fin opcional
   });
 
-  // MODAL detalle
   const [showDetalleModal, setShowDetalleModal] = useState(false);
   const [selectedTarifa, setSelectedTarifa] = useState(null);
 
-  // --- 3. NUEVO HOOK PARA CERRAR EL MENÚ AL HACER CLIC FUERA ---
   useEffect(() => {
         const handleClickOutside = (event) => {
             if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -124,12 +117,8 @@ const TarifaCosto = () => {
   useLayoutEffect(() => {
     const updateHeight = () => {
       if (formRef.current && tableHeaderRef.current) {
-        // Medimos la altura total del contenedor del formulario
         const formHeight = formRef.current.offsetHeight;
-        // Medimos la altura de la sección de filtros de la tabla
         const headerHeight = tableHeaderRef.current.offsetHeight;
-        
-        // La altura del cuerpo de la tabla será la del formulario menos la de los filtros
         const calculatedHeight = formHeight - headerHeight;
 
         // Nos aseguramos de que sea un valor positivo antes de aplicarlo
@@ -139,16 +128,12 @@ const TarifaCosto = () => {
       }
     };
 
-    // Calculamos la altura al inicio
     updateHeight();
-    // Y volvemos a calcularla si cambia el tamaño de la ventana
     window.addEventListener('resize', updateHeight);
 
-    // Limpiamos el listener cuando el componente se desmonte
     return () => window.removeEventListener('resize', updateHeight);
-  }, [tarifas]); // Recalculamos si las tarifas cambian (por si afecta la altura del formulario o tabla)
+  }, [tarifas]); 
   
-  // --- CAMBIO: La función de limpiar también resetea las fechas ---
   const clearForm = () => {
     setForm({
       tipoVehiculo: '',
@@ -157,8 +142,6 @@ const TarifaCosto = () => {
       transportista: '',
       valorBase: '',
       adicionalesSeleccionados: [],
-    //  vigenciaDesde: getTodayString(),
-    //  vigenciaHasta: '',
     });
     setEditingId(null);
   };
@@ -239,7 +222,7 @@ const TarifaCosto = () => {
   };
 
   const validateForm = () => {
-    return form.tipoVehiculo && form.tipoCarga && form.zonaDeViaje && form.transportista && form.valorBase !== '';// && form.vigenciaDesde;
+    return form.tipoVehiculo && form.tipoCarga && form.zonaDeViaje && form.transportista && form.valorBase !== '';
   };
   
  
@@ -258,8 +241,8 @@ const TarifaCosto = () => {
           idAdicional: a.idAdicional,
           costo: parseFloat(a.costo)
       })),
-      vigenciaDesde: form.vigenciaDesde || null, // Se envía null si la fecha de inicio está vacía
-      vigenciaHasta: form.vigenciaHasta || null, // Se envía null si la fecha de fin está vacía
+      vigenciaDesde: form.vigenciaDesde || null, 
+      vigenciaHasta: form.vigenciaHasta || null, 
     };
     try {
       if (editingId) {
@@ -280,7 +263,6 @@ const TarifaCosto = () => {
     }
   };
   
-  // --- CAMBIO: Se leen las fechas al editar una tarifa ---
   const editEntity = (id) => {
     const tarifa = tarifas.find(item => item.id === id);
     if (tarifa) {
@@ -345,13 +327,68 @@ const TarifaCosto = () => {
   const customSelectStyles = {
     control: (base) => ({ ...base, backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.3)', color: 'white', minWidth: '160px', fontSize: '0.875rem' }),
     singleValue: (base) => ({ ...base, color: 'white' }),
-    menu: (base) => ({ ...base, backgroundColor: '#242423', color: 'white' }),
+    menu: (base) => ({ ...base, backgroundColor: '#242423', color: 'white', zIndex: 9999 }),
     option: (base, state) => ({ ...base, backgroundColor: state.isFocused ? 'rgba(255,255,255,0.2)' : '#242423', color: 'white' }),
     placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
   };
 
   return (
-    <div className="grid lg:grid-cols-3 gap-8">
+    <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
+      <style jsx>{`
+        /* Estilos personalizados para la barra de scroll */
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #4a5568 #2d3748;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #2d3748;
+          border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #4a5568;
+          border-radius: 4px;
+          border: 1px solid #2d3748;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #718096;
+        }
+
+        /* Alternativa con Tailwind CSS (si prefieres usar clases de Tailwind) */
+        .scrollbar-custom {
+          scrollbar-width: thin;
+          scrollbar-color: rgb(75 85 99) rgb(31 41 55);
+        }
+
+        .scrollbar-custom::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-track {
+          @apply bg-gray-800 rounded;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+          @apply bg-gray-600 rounded border border-gray-800;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+          @apply bg-gray-500;
+        }
+
+        /* Para mejorar la visualización en dispositivos móviles */
+        @media (max-width: 768px) {
+          .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+          }
+        }
+      `}</style>
       {/* Formulario */}
       <div className="lg:col-span-1">
         <div ref={formRef} className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
@@ -387,31 +424,6 @@ const TarifaCosto = () => {
                 {(transportistas || []).map(transportista => (<option key={transportista.id} value={transportista.id}>{transportista.nombre} {transportista.costoServicio}</option>))}
               </select>
             </div>
-            
-            {/* --- CAMBIO: Se añaden los campos de fecha al formulario --- 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-2">Vigencia Desde *</label>
-                    <input 
-                        type="date" 
-                        name="vigenciaDesde"
-                        value={form.vigenciaDesde} 
-                        onChange={handleInputChange} 
-                        className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-2">Vigencia Hasta</label>
-                    <input 
-                        type="date" 
-                        name="vigenciaHasta"
-                        value={form.vigenciaHasta} 
-                        onChange={handleInputChange} 
-                        className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}
-                    />
-                </div>
-            </div> 
-            */}
 
             <div className="bg-blue-900/20 p-4 rounded-lg border border-blue-400">
               <label className="block text-sm font-semibold text-blue-300 mb-2">Valor Base *</label>
@@ -476,8 +488,7 @@ const TarifaCosto = () => {
 
       {/* Tabla y Filtros */}
       <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
-        <div ref={tableHeaderRef} className={`bg-gradient-to-r from-${tabColor}-700 to-${tabColor}-800 text-white p-6`}>
-          {/* Contenedor para alinear título y botón */}
+        <div ref={tableHeaderRef} className={`bg-gradient-to-r from-emerald-700 to-emerald-800 text-white p-6`}>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Tarifas de Costo Registradas</h2>
             <button
@@ -488,7 +499,6 @@ const TarifaCosto = () => {
               <BarChart3 size={18} />
               <span>Reportes</span>
             </button>
-            
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Select options={vehiculoOptions} placeholder="Filtrar por Vehículo" isClearable value={filters.tipoVehiculo} onChange={selectedOption => setFilters({ ...filters, tipoVehiculo: selectedOption })} styles={customSelectStyles} />
@@ -497,22 +507,30 @@ const TarifaCosto = () => {
             <Select options={cargaOptions} placeholder="Filtrar por Carga" isClearable value={filters.tipoCarga} onChange={selectedOption => setFilters({ ...filters, tipoCarga: selectedOption })} styles={customSelectStyles} />
           </div>
         </div>
-        <div className="overflow-y-auto"> {/* style={{ height: tableBodyHeight }}> */}
+        
+        {/* Contenedor de la tabla con scroll */}
+        <div 
+          className="overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 hover:scrollbar-thumb-gray-500" 
+          style={{ 
+            height: tableBodyHeight,
+            maxHeight: tableBodyHeight !== 'auto' ? tableBodyHeight : '500px'
+          }}
+        > 
           <table className="w-full">
-            <thead className="bg-[#242423] sticky top-0">
+            <thead className="bg-[#242423] sticky top-0 z-10">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Vehículo</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Zona</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Transportista</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Valor Base</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Total</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold text-gray-300">Acciones</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300 border-b border-gray-600">Vehículo</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300 border-b border-gray-600">Zona</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300 border-b border-gray-600">Transportista</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300 border-b border-gray-600">Valor Base</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300 border-b border-gray-600">Total</th>
+                <th className="px-4 py-3 text-center text-sm font-semibold text-gray-300 border-b border-gray-600">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filteredTarifas.length > 0 ? (
-                filteredTarifas.map(item => (
-                  <tr key={item.id} className={`border-b border-gray-700 hover:bg-${tabColor}-500/10 transition-colors`}>
+                filteredTarifas.map((item, index) => (
+                  <tr key={item.id} className={`border-b border-gray-700 hover:bg-gray-600 transition-colors ${index % 2 === 0 ? 'bg-gray-800/20' : 'bg-gray-900/20'}`}>
                     <td className="px-4 py-3 text-sm text-neutral-200">
                       {item.tipoVehiculo ? (
                         !item.tipoVehiculo.deletedAt
@@ -523,69 +541,67 @@ const TarifaCosto = () => {
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm text-neutral-200">
-                          {item.zonaDeViaje ? (
-                            !item.zonaDeViaje.deletedAt
-                              ? `${item.zonaDeViaje.origen} - ${item.zonaDeViaje.destino}`
-                              : <span className="italic text-red-400">{item.zonaDeViaje.origen} - {item.zonaDeViaje.destino} (Zona eliminada)</span>
-                          ) : (
-                            'N/A'
-                          )}
-                     </td>
-
-                      <td className="px-4 py-3 text-sm text-neutral-200">
-                          {item.transportista ? (
-                            !item.transportista.deletedAt
-                              ? item.transportista.nombre
-                              : <span className="italic text-red-400">{item.transportista.nombre} (Eliminado)</span>
-                          ) : ('N/A')}
-                      </td>
+                      {item.zonaDeViaje ? (
+                        !item.zonaDeViaje.deletedAt
+                          ? `${item.zonaDeViaje.origen} - ${item.zonaDeViaje.destino}`
+                          : <span className="italic text-red-400">{item.zonaDeViaje.origen} - {item.zonaDeViaje.destino} (Zona eliminada)</span>
+                      ) : (
+                        'N/A'
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-neutral-200">
+                      {item.transportista ? (
+                        !item.transportista.deletedAt
+                          ? item.transportista.nombre
+                          : <span className="italic text-red-400">{item.transportista.nombre} (Eliminado)</span>
+                      ) : ('N/A')}
+                    </td>
                     <td className="px-4 py-3 text-sm font-bold text-blue-400">${Number(item.valor_base).toFixed(2)}</td>
                     <td className="px-4 py-3 text-sm font-bold text-yellow-400">${Number(item.costo_total).toFixed(2)}</td>
-                    {/* --- 4. SECCIÓN DE ACCIONES CON MENÚ KEBAB --- */}
-                                    <td className="px-4 py-3 text-center">
-                                        <div className="relative inline-block text-left" ref={openMenuId === item.id ? menuRef : null}>
-                                            <button
-                                                type="button"
-                                                className="p-2 rounded-full text-gray-300 hover:bg-gray-600 focus:outline-none"
-                                                onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
-                                            >
-                                                <MoreVertical size={20} />
-                                            </button>
-                                            {openMenuId === item.id && (
-                                                <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#3a3a3a] ring-1 ring-black ring-opacity-5 z-20">
-                                                    <div className="py-1" role="menu" aria-orientation="vertical">
-                                                        <button
-                                                            onClick={() => { verDetalleTarifa(item); setOpenMenuId(null); }}
-                                                            className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-gray-200 hover:bg-gray-600"
-                                                        >
-                                                            <Eye size={16} className="text-blue-400" />
-                                                            Ver Detalle
-                                                        </button>
-                                                        <button
-                                                            onClick={() => { navigate(`/tarifas/historial/${item.id}`); setOpenMenuId(null); }}
-                                                            className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-gray-200 hover:bg-gray-600"
-                                                        >
-                                                            <HistoryIcon size={16} className="text-purple-400" />
-                                                            Ver Historial
-                                                        </button>
-                                                        <button
-                                                            onClick={() => { editEntity(item.id); setOpenMenuId(null); }}
-                                                            className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-gray-200 hover:bg-gray-600"
-                                                        >
-                                                            <Edit size={16} className="text-emerald-400" />
-                                                            Editar
-                                                        </button>
-                                                        <div className="border-t border-gray-600 my-1"></div>
-                                                        <button
-                                                            onClick={() => { deleteEntity(item.id); setOpenMenuId(null); }}
-                                                            className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-gray-600"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                            Eliminar
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )}
+                    <td className="px-4 py-3 text-center">
+                      <div className="relative inline-block text-left" ref={openMenuId === item.id ? menuRef : null}>
+                        <button
+                          type="button"
+                          className="p-2 rounded-full text-gray-300 hover:bg-gray-600 focus:outline-none"
+                          onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
+                        >
+                          <MoreVertical size={20} />
+                        </button>
+                        {openMenuId === item.id && (
+                          <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-[#3a3a3a] ring-1 ring-black ring-opacity-5 z-20">
+                            <div className="py-1" role="menu" aria-orientation="vertical">
+                              <button
+                                onClick={() => { verDetalleTarifa(item); setOpenMenuId(null); }}
+                                className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-gray-200 hover:bg-gray-600"
+                              >
+                                <Eye size={16} className="text-blue-400" />
+                                Ver Detalle
+                              </button>
+                              <button
+                                onClick={() => { navigate(`/tarifas/historial/${item.id}`); setOpenMenuId(null); }}
+                                className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-gray-200 hover:bg-gray-600"
+                              >
+                                <HistoryIcon size={16} className="text-purple-400" />
+                                Ver Historial
+                              </button>
+                              <button
+                                onClick={() => { editEntity(item.id); setOpenMenuId(null); }}
+                                className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-gray-200 hover:bg-gray-600"
+                              >
+                                <Edit size={16} className="text-emerald-400" />
+                                Editar
+                              </button>
+                              <div className="border-t border-gray-600 my-1"></div>
+                              <button
+                                onClick={() => { deleteEntity(item.id); setOpenMenuId(null); }}
+                                className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-gray-600"
+                              >
+                                <Trash2 size={16} />
+                                Eliminar
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -769,17 +785,7 @@ const TarifaCosto = () => {
                 )}
               </div>
               <div><strong>Valor Base:</strong> ${Number(selectedTarifa.valor_base).toFixed(2)}</div>
-              {/* --- CAMBIO: Se muestran las fechas de vigencia --- 
-              <div className="border-t border-gray-600 pt-2 mt-2">
-                <strong>Período de Vigencia:</strong>
-                <div className='pl-2'>
-                  <span>Desde: {selectedTarifa.vigenciaDesde ? new Date(selectedTarifa.vigenciaDesde).toLocaleDateString('es-AR') : 'No definida'}</span>
-                  <span className="mx-2">|</span>
-                  <span>Hasta: {selectedTarifa.vigenciaHasta ? new Date(selectedTarifa.vigenciaHasta).toLocaleDateString('es-AR') : 'Indefinida'}</span>
-                </div>
-              </div>
-              */}
-              {/* --- CAMBIO: Se muestra solo la fecha de creación --- */}
+              
               <div className="border-t border-gray-600 pt-2 mt-2">
                 <strong>Fecha de Creación:</strong>
                 <span className='pl-2'>{selectedTarifa.createdAt ? new Date(selectedTarifa.createdAt).toLocaleDateString('es-AR') : 'No definida'}</span>

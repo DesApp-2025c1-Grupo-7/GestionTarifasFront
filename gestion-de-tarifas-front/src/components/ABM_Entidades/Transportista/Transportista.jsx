@@ -17,7 +17,7 @@ const customSelectStyles = (isMulti = false) => ({
     width: '100%',
     minWidth: '200px',
     fontSize: '0.875rem',
-    minHeight: '42px', // Altura mínima consistente
+    minHeight: '42px', 
   }),
   singleValue: (base) => ({ ...base, color: 'white' }),
   multiValue: (base) => ({ ...base, backgroundColor: 'rgba(255,255,255,0.2)' }),
@@ -26,12 +26,13 @@ const customSelectStyles = (isMulti = false) => ({
     ...base, 
     backgroundColor: '#242423', 
     color: 'white',
-    maxHeight: '200px' // Altura máxima del dropdown
+    maxHeight: '200px',
+    zIndex: 9999
   }),
   menuList: (base) => ({
     ...base,
-    maxHeight: '200px', // Altura máxima de la lista
-    overflowY: 'auto',  // Scroll vertical
+    maxHeight: '200px', 
+    overflowY: 'auto',  
     // Estilos personalizados para la barra de scroll
     '&::-webkit-scrollbar': {
       width: '8px',
@@ -58,7 +59,6 @@ const customSelectStyles = (isMulti = false) => ({
 
 const Transportistas = () => {
   const { showNotification, tabColor } = useOutletContext();
-  // --- ESTADOS ---
   const [data, setData] = useState([]); // Datos originales del backend
   const [editingId, setEditingId] = useState(null);
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
@@ -134,7 +134,7 @@ const Transportistas = () => {
     setShowModal(true);
   };
 
-  // --- LÓGICA DE SUBMIT (CRUD) ---
+  // --- LÓGICA DE CRUD ---
   const validateForm = () => form.nombre && form.contacto && form.telefono && form.tipoVehiculos.length > 0 && form.zonasDeViaje.length > 0;
 
   const handleSubmit = async () => {
@@ -211,12 +211,8 @@ const Transportistas = () => {
   useLayoutEffect(() => {
     const updateHeight = () => {
       if (formRef.current && tableHeaderRef.current) {
-        // 1. Medimos la altura total del contenedor del formulario
         const formHeight = formRef.current.offsetHeight;
-        // 2. Medimos la altura de la sección de filtros de la tabla
         const headerHeight = tableHeaderRef.current.offsetHeight;
-        
-        // 3. La altura del cuerpo de la tabla será la del formulario menos la de los filtros
         const calculatedHeight = formHeight - headerHeight;
 
         if (calculatedHeight > 0) {
@@ -229,7 +225,7 @@ const Transportistas = () => {
     window.addEventListener('resize', updateHeight);
 
     return () => window.removeEventListener('resize', updateHeight);
-  }, [editingId, filteredData]); // Recalcula si cambia el modo de edición o los datos
+  }, [editingId, filteredData]); 
 
   return (
     <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
@@ -323,7 +319,7 @@ const Transportistas = () => {
                 styles={customSelectStyles(true)} 
                 value={opcionesVehiculo.filter(opt => form.tipoVehiculos.includes(opt.value))} 
                 onChange={(selected) => handleFormSelectChange('tipoVehiculos', selected)}
-                maxMenuHeight={200} // Altura máxima del menú 
+                maxMenuHeight={200} 
               />
             </div>
             <div>
@@ -335,7 +331,7 @@ const Transportistas = () => {
                 styles={customSelectStyles(true)} 
                 value={opcionesZonas.filter(opt => form.zonasDeViaje.includes(opt.value))} 
                 onChange={(selected) => handleFormSelectChange('zonasDeViaje', selected)}
-                maxMenuHeight={200} // Altura máxima del menú 
+                maxMenuHeight={200} 
               />
             </div>
             {/* Botones del formulario */}
@@ -376,7 +372,6 @@ const Transportistas = () => {
           <h2 className="text-2xl font-bold mb-4">Transportistas Registrados</h2>
           {/* --- SECCIÓN DE FILTROS --- */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Input de búsqueda con estilos consistentes */}
             <div className="relative">
               <input 
                 type="text" 
@@ -403,7 +398,6 @@ const Transportistas = () => {
             />
           </div>
         </div>
-        {/* Contenedor de la tabla con scroll mejorado */}
         <div className="relative">
           <div className="overflow-y-auto custom-scrollbar" style={{ height: tableBodyHeight }}>
             <table className="w-full">
@@ -428,7 +422,7 @@ const Transportistas = () => {
                   </tr>
                 ) : (
                   filteredData.map((item) => (
-                    <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-800 transition-colors">
+                    <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-600 transition-colors">
                       <td className="px-4 py-3 text-sm font-medium text-neutral-200">{item.nombre}</td>
                       <td className="px-4 py-3 text-sm text-neutral-200">{item.contacto}</td>
                       <td className="px-4 py-3 text-sm text-neutral-200">{item.telefono}</td>
@@ -446,7 +440,6 @@ const Transportistas = () => {
             </table>
           </div>
           
-          {/* Indicador de scroll si hay muchos elementos */}
           {filteredData.length > 8 && (
             <div className="absolute bottom-2 right-2 bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs flex items-center gap-1">
               <span>↕</span>

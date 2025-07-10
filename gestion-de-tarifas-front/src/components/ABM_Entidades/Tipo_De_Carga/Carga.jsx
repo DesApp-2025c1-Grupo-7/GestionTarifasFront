@@ -9,29 +9,24 @@ import { useOutletContext } from 'react-router-dom';
 const customSelectStyles = {
     control: (base) => ({ ...base, backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.3)', color: 'white', width: '100%', minWidth: '180px', fontSize: '0.875rem' }),
     singleValue: (base) => ({ ...base, color: 'white' }),
-    menu: (base) => ({ ...base, backgroundColor: '#242423', color: 'white' }),
+    menu: (base) => ({ ...base, backgroundColor: '#242423', color: 'white', zIndex: 9999 }),
     option: (base, state) => ({ ...base, backgroundColor: state.isFocused ? 'rgba(255,255,255,0.2)' : '#242423', color: 'white' }),
     placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
 };
 
-// Estilos para remover las flechas de los inputs number
 const numberInputStyles = {
     WebkitAppearance: 'none',
     MozAppearance: 'textfield',
 };
 
 const TiposCarga = () => { 
-  // 2. Obtienes todo lo que necesitas del context
   const { showNotification, tabColor } = useOutletContext(); 
-
-  const [data, setData] = useState([]); // Lista original de cargas del backend
-  const [filteredData, setFilteredData] = useState([]); // Lista que se muestra en la tabla
+  const [data, setData] = useState([]); 
+  const [filteredData, setFilteredData] = useState([]); 
   const [editingId, setEditingId] = useState(null);
   
-  // Estado para el formulario de creación/edición
   const [form, setForm] = useState({ categoria: '', pesoTotal: '', volumenTotal: '', esEspecial: false, requisitoEspecial: '' });
   
-  // Estado separado para los filtros de la tabla
   const [filters, setFilters] = useState({ categoria: '', esEspecial: null });
 
   // Carga inicial de datos
@@ -167,7 +162,6 @@ const TiposCarga = () => {
     }
   };
 
-  // --- FUNCIONES AUXILIARES Y OPCIONES PARA SELECTS ---
   const formatWeight = (weight) => `${weight} kg`;
   const formatVolume = (volume) => `${volume} m³`;
   
@@ -184,7 +178,6 @@ const TiposCarga = () => {
 
   return (
     <div className="grid lg:grid-cols-3 gap-8">
-      {/* Estilos CSS para remover las flechas y mejorar el scroll */}
       <style jsx>{`
         input[type=number]::-webkit-outer-spin-button,
         input[type=number]::-webkit-inner-spin-button {
@@ -301,9 +294,7 @@ const TiposCarga = () => {
                 </div>
               )}
             </div>
-            {/*  ---- Como estaba escrito antes ----
-            <!div className="flex gap-4 pt-6 border-t border-gray-200">
-            */}
+          
             <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-200 w-full">  
               <button
                 type="button"
@@ -357,7 +348,6 @@ const TiposCarga = () => {
           </div>
         </div>
 
-        {/* Contenedor de la tabla con scroll mejorado */}
         <div className="relative">
           <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
             <table className="w-full">
@@ -372,7 +362,7 @@ const TiposCarga = () => {
               <tbody>
                 {filteredData.length > 0 ? (
                   filteredData.map((item) => (
-                    <tr key={item.id} className="border-b border-gray-700 transition-colors">
+                    <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-600 transition-colors">
                       <td className="px-4 py-3">
                         <div className="text-sm text-neutral-200">{item.categoria}</div>
                         {item.esEspecial && item.requisitoEspecial && (
