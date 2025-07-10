@@ -209,6 +209,7 @@ const ZonasViaje = () => {
           -moz-appearance: textfield;
         }
       `}</style>
+
       {/* Form Section */}
       <div className="lg:col-span-1">
         <div className="bg-[#444240] p-8 rounded-2xl shadow-xl border border-gray-900">
@@ -285,7 +286,7 @@ const ZonasViaje = () => {
       </div>
 
       {/* Table Section */}
-      <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
+      <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden relative">
         <div className={`bg-gradient-to-r from-purple-700 to-purple-800 text-white p-6`}>
           <h2 className="text-2xl font-bold mb-4">Zonas de Viaje Registradas</h2>
           <div className="flex gap-4 items-center">
@@ -353,6 +354,13 @@ const ZonasViaje = () => {
               )}
             </tbody>
           </table>
+          {/* Indicador de scroll si hay muchos elementos */}
+          {filteredData.length > 8 && (
+            <div className="absolute bottom-2 right-2 bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs flex items-center gap-1">
+              <span>↕</span>
+              <span>{filteredData.length} registros</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
