@@ -126,7 +126,51 @@ const Adicionales = () => {
   });
 
   return (
-    <div className="grid lg:grid-cols-3 gap-8">
+    <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
+      {/* Estilos CSS para personalizar la barra de scroll y ocultar flechas de inputs numéricos */}
+      <style jsx>{`
+        /* Personalización de la barra de scroll */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #2d2d2d;
+          border-radius: 4px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #4a5568;
+          border-radius: 4px;
+          border: 1px solid #2d2d2d;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #6b7280;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:active {
+          background: #9ca3af;
+        }
+
+        /* Para Firefox */
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #4a5568 #2d2d2d;
+        }
+        
+        /* Ocultar flechas de input numérico */
+        .no-arrows::-webkit-outer-spin-button,
+        .no-arrows::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        
+        .no-arrows[type=number] {
+          -moz-appearance: textfield;
+        }
+      `}</style>
+      
       {/* Formulario */}
       <div className="lg:col-span-1">
         <div className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
@@ -146,7 +190,7 @@ const Adicionales = () => {
                   onChange={handleInputChange}
                   placeholder="Describe el servicio adicional"
                   rows="3"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-indigo-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-600 rounded-lg text-gray-300 focus:border-indigo-500 focus:outline-none transition-all`}
                 />
               </div>
 
@@ -162,7 +206,7 @@ const Adicionales = () => {
                   placeholder="Costo del servicio adicional"
                   min="0"
                   step="0.01"
-                  className={`w-full p-3 border-2 border-gray-200 rounded-lg text-gray-300 focus:border-indigo-500 focus:outline-none transition-all`}
+                  className={`w-full p-3 border-2 border-gray-600 rounded-lg text-gray-300 focus:border-indigo-500 focus:outline-none transition-all no-arrows`}
                 />
               </div>
 
@@ -236,7 +280,7 @@ const Adicionales = () => {
           </div>
         </div>
 
-        <div className="max-h-96 overflow-y-auto">
+        <div className="max-h-96 overflow-y-auto bg-[#444240] custom-scrollbar">
           <table className="w-full">
             <thead className="bg-[#242423] sticky top-0">
               <tr>
@@ -248,7 +292,7 @@ const Adicionales = () => {
             <tbody>
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan="3" className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan="3" className="px-4 py-12 text-center text-gray-300">
                     <div className="flex flex-col items-center">
                       <div className="text-6xl mb-4">🛎️</div>
                       <h3 className="text-lg font-semibold mb-2">No hay servicios adicionales registrados</h3>

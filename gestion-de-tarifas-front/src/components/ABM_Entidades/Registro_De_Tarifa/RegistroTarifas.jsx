@@ -520,7 +520,13 @@ const TarifaCosto = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="px-4 py-12 text-center text-gray-500">No se encontraron tarifas</td>
+                  <td colSpan="6" className="px-4 py-12 text-center text-gray-400">
+                    <div className="flex flex-col items-center">
+                      <div className="text-6xl mb-4">📋</div>
+                      <h3 className="text-lg font-semibold mb-2 text-gray-300">No hay tarifas de costos registradas</h3>
+                      <p>Comienza agregando una nueva tarifa de costo usando el formulario</p>
+                    </div>
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -680,7 +686,16 @@ const TarifaCosto = () => {
                   <span className="text-red-400 italic">Transportista inactivo</span>
                 )}
               </div>
-              <div><strong>Tipo de Carga:</strong> {selectedTarifa.tipoCarga?.categoria || 'N/A'}</div>
+              <div>
+                <strong>Tipo de Carga: </strong> 
+                {selectedTarifa.tipoCarga?.categoria ? (
+                  !selectedTarifa.tipoCarga.deletedAt
+                    ? selectedTarifa.tipoCarga?.categoria 
+                    : <span className='text-red-400 italic'>{selectedTarifa.tipoCarga.categoria} (Eliminada)</span>
+                ) : (
+                  <span className='text-red-400 italic'>Tipo de carga eliminada</span>
+                )}
+              </div>
               <div><strong>Valor Base:</strong> ${Number(selectedTarifa.valor_base).toFixed(2)}</div>
               {/* --- CAMBIO: Se muestran las fechas de vigencia --- 
               <div className="border-t border-gray-600 pt-2 mt-2">

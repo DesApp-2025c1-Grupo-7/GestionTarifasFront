@@ -166,6 +166,50 @@ const ZonasViaje = () => {
 
   return (
     <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
+      {/* Estilos CSS para personalizar la barra de scroll y ocultar flechas de inputs numéricos */}
+      <style jsx>{`
+        /* Personalización de la barra de scroll */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #2d2d2d;
+          border-radius: 4px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #4a5568;
+          border-radius: 4px;
+          border: 1px solid #2d2d2d;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #6b7280;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:active {
+          background: #9ca3af;
+        }
+
+        /* Para Firefox */
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #4a5568 #2d2d2d;
+        }
+        
+        /* Ocultar flechas de input numérico */
+        .no-arrows::-webkit-outer-spin-button,
+        .no-arrows::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        
+        .no-arrows[type=number] {
+          -moz-appearance: textfield;
+        }
+      `}</style>
+
       {/* Form Section */}
       <div className="lg:col-span-1">
         <div className="bg-[#444240] p-8 rounded-2xl shadow-xl border border-gray-900">
@@ -176,15 +220,38 @@ const ZonasViaje = () => {
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">Origen *</label>
-                <input type="text" name="origen" value={form.origen} onChange={handleInputChange} placeholder="Ciudad o zona de origen" className="w-full p-3 border-2 text-gray-300 bg-transparent border-gray-600 rounded-lg focus:border-purple-500 focus:outline-none transition-all" />
+                <input 
+                  type="text" 
+                  name="origen" 
+                  value={form.origen} 
+                  onChange={handleInputChange} 
+                  placeholder="Ciudad o zona de origen" 
+                  className="w-full p-3 border-2 text-gray-300 bg-transparent border-gray-600 rounded-lg focus:border-purple-500 focus:outline-none transition-all" 
+                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">Destino *</label>
-                <input type="text" name="destino" value={form.destino} onChange={handleInputChange} placeholder="Ciudad o zona de destino" className="w-full p-3 border-2 text-gray-300 bg-transparent border-gray-600 rounded-lg focus:border-purple-500 focus:outline-none transition-all" />
+                <input 
+                  type="text" 
+                  name="destino" 
+                  value={form.destino} 
+                  onChange={handleInputChange} 
+                  placeholder="Ciudad o zona de destino" 
+                  className="w-full p-3 border-2 text-gray-300 bg-transparent border-gray-600 rounded-lg focus:border-purple-500 focus:outline-none transition-all" 
+                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">Distancia (Km) *</label>
-                <input type="number" name="distanciaKm" value={form.distanciaKm} onChange={handleInputChange} placeholder="Distancia en kilómetros" min="0" step="0.1" className="w-full p-3 border-2 text-gray-300 bg-transparent border-gray-600 rounded-lg focus:border-purple-500 focus:outline-none transition-all" />
+                <input 
+                  type="number" 
+                  name="distanciaKm" 
+                  value={form.distanciaKm} 
+                  onChange={handleInputChange} 
+                  placeholder="Distancia en kilómetros" 
+                  min="0" 
+                  step="0.1" 
+                  className="w-full p-3 border-2 text-gray-300 bg-transparent border-gray-600 rounded-lg focus:border-purple-500 focus:outline-none transition-all no-arrows" 
+                />
               </div>
             </div>
             <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-200 w-full">
@@ -223,11 +290,23 @@ const ZonasViaje = () => {
         <div className={`bg-gradient-to-r from-purple-700 to-purple-800 text-white p-6`}>
           <h2 className="text-2xl font-bold mb-4">Zonas de Viaje Registradas</h2>
           <div className="flex gap-4 items-center">
-            <Select options={opcionesOrigen} isClearable placeholder="Filtrar por origen..." onChange={(opt) => setFilters(f => ({ ...f, origen: opt ? opt.value : '' }))} styles={customSelectStyles} />
-            <Select options={opcionesDestino} isClearable placeholder="Filtrar por destino..." onChange={(opt) => setFilters(f => ({ ...f, destino: opt ? opt.value : '' }))} styles={customSelectStyles} />
+            <Select 
+              options={opcionesOrigen} 
+              isClearable 
+              placeholder="Filtrar por origen..." 
+              onChange={(opt) => setFilters(f => ({ ...f, origen: opt ? opt.value : '' }))} 
+              styles={customSelectStyles} 
+            />
+            <Select 
+              options={opcionesDestino} 
+              isClearable 
+              placeholder="Filtrar por destino..." 
+              onChange={(opt) => setFilters(f => ({ ...f, destino: opt ? opt.value : '' }))} 
+              styles={customSelectStyles} 
+            />
           </div>
         </div>
-        <div className="max-h-96 overflow-y-auto bg-[#444240]">
+        <div className="max-h-96 overflow-y-auto bg-[#444240] custom-scrollbar">
           <table className="w-full">
             <thead className="bg-[#242423] sticky top-0">
               <tr>
@@ -246,8 +325,18 @@ const ZonasViaje = () => {
                     <td className="px-4 py-3 text-sm text-neutral-200">{item.distanciaKm} km</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2 justify-center">
-                        <button onClick={() => editEntity(item.id)} className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><Edit size={14} /></button>
-                        <button onClick={() => deleteEntity(item.id)} className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700"><Trash2 size={14} /></button>
+                        <button 
+                          onClick={() => editEntity(item.id)} 
+                          className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          <Edit size={14} />
+                        </button>
+                        <button 
+                          onClick={() => deleteEntity(item.id)} 
+                          className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </td>
                   </tr>

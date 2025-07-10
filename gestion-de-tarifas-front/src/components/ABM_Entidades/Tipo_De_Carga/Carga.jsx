@@ -20,8 +20,7 @@ const numberInputStyles = {
     MozAppearance: 'textfield',
 };
 
-const TiposCarga = () => { // <-- 1. Los paréntesis quedan vacíos
-  // 2. Obtienes todo lo que necesitas del context
+const TiposCarga = () => { 
   const { showNotification, tabColor } = useOutletContext(); 
 
   const [data, setData] = useState([]); // Lista original de cargas del backend
@@ -184,7 +183,7 @@ const TiposCarga = () => { // <-- 1. Los paréntesis quedan vacíos
 
   return (
     <div className="grid lg:grid-cols-3 gap-8">
-      {/* Estilos CSS para remover las flechas */}
+      {/* Estilos CSS para remover las flechas y mejorar el scroll */}
       <style jsx>{`
         input[type=number]::-webkit-outer-spin-button,
         input[type=number]::-webkit-inner-spin-button {
@@ -194,6 +193,36 @@ const TiposCarga = () => { // <-- 1. Los paréntesis quedan vacíos
         
         input[type=number] {
           -moz-appearance: textfield;
+        }
+
+        /* Estilos personalizados para la barra de scroll */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #2d2d2d;
+          border-radius: 4px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #4a5568;
+          border-radius: 4px;
+          border: 1px solid #2d2d2d;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #6b7280;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:active {
+          background: #9ca3af;
+        }
+
+        /* Para Firefox */
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #4a5568 #2d2d2d;
         }
       `}</style>
 
@@ -213,7 +242,7 @@ const TiposCarga = () => { // <-- 1. Los paréntesis quedan vacíos
                   value={form.categoria} 
                   onChange={handleInputChange} 
                   placeholder="Ej: Electrodomésticos, Productos químicos..." 
-                  className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all" 
+                  className="w-full p-3 border-2 border-gray-600 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all" 
                 />
               </div>
               <div>
@@ -227,7 +256,7 @@ const TiposCarga = () => { // <-- 1. Los paréntesis quedan vacíos
                   min="0" 
                   step="0.1" 
                   style={numberInputStyles}
-                  className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all" 
+                  className="w-full p-3 border-2 border-gray-600 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all" 
                 />
               </div>
               <div>
@@ -241,7 +270,7 @@ const TiposCarga = () => { // <-- 1. Los paréntesis quedan vacíos
                   min="0" 
                   step="0.1" 
                   style={numberInputStyles}
-                  className="w-full p-3 border-2 border-gray-200 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all" 
+                  className="w-full p-3 border-2 border-gray-600 text-gray-300 rounded-lg focus:border-blue-500 focus:outline-none transition-all" 
                 />
               </div>
               <div className="flex items-center space-x-3 p-4 rounded-lg">
@@ -272,9 +301,6 @@ const TiposCarga = () => { // <-- 1. Los paréntesis quedan vacíos
                 </div>
               )}
             </div>
-            {/*  ---- Como estaba escrito antes ----
-            <!div className="flex gap-4 pt-6 border-t border-gray-200">
-            */}
             <div className="flex flex-wrap gap-4 pt-6 border-t border-gray-200 w-full">  
               <button
                 type="button"
@@ -328,58 +354,69 @@ const TiposCarga = () => { // <-- 1. Los paréntesis quedan vacíos
           </div>
         </div>
 
-        <div className="max-h-96 overflow-y-auto">
-          <table className="w-full">
-            <thead className="bg-[#242423] sticky top-0">
-              <tr className="text-gray-300">
-                <th className="px-4 py-3 text-left text-sm font-semibold">Categoría</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Especificaciones</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Tipo</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <tr key={item.id} className="border-b border-gray-700 hover:bg-gray-800">
-                    <td className="px-4 py-3">
-                      <div className="text-sm text-neutral-200">{item.categoria}</div>
-                      {item.esEspecial && item.requisitoEspecial && (
-                        <div className="text-xs text-orange-400 mt-1 max-w-xs">{item.requisitoEspecial}</div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <div className="space-y-1 text-neutral-300">
-                        <div><strong>Peso:</strong> {formatWeight(item.pesoTotal)}</div>
-                        <div><strong>Volumen:</strong> {formatVolume(item.volumenTotal)}</div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${item.esEspecial ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}`}>
-                        {item.esEspecial ? 'Especial' : 'Regular'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2 justify-center">
-                        <button onClick={() => editEntity(item.id)} className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"><Edit size={14} /></button>
-                        <button onClick={() => deleteEntity(item.id)} className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700"><Trash2 size={14} /></button>
+        {/* Contenedor de la tabla con scroll mejorado */}
+        <div className="relative">
+          <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
+            <table className="w-full">
+              <thead className="bg-[#242423] sticky top-0 z-10">
+                <tr className="text-gray-300">
+                  <th className="px-4 py-3 text-left text-sm font-semibold">Categoría</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">Especificaciones</th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold">Tipo</th>
+                  <th className="px-4 py-3 text-center text-sm font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredData.length > 0 ? (
+                  filteredData.map((item) => (
+                    <tr key={item.id} className="border-b border-gray-700 transition-colors">
+                      <td className="px-4 py-3">
+                        <div className="text-sm text-neutral-200">{item.categoria}</div>
+                        {item.esEspecial && item.requisitoEspecial && (
+                          <div className="text-xs text-orange-400 mt-1 max-w-xs">{item.requisitoEspecial}</div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm">
+                        <div className="space-y-1 text-neutral-300">
+                          <div><strong>Peso:</strong> {formatWeight(item.pesoTotal)}</div>
+                          <div><strong>Volumen:</strong> {formatVolume(item.volumenTotal)}</div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${item.esEspecial ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}`}>
+                          {item.esEspecial ? 'Especial' : 'Regular'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2 justify-center">
+                          <button onClick={() => editEntity(item.id)} className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"><Edit size={14} /></button>
+                          <button onClick={() => deleteEntity(item.id)} className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"><Trash2 size={14} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="px-4 py-12 text-center text-gray-400">
+                      <div className="flex flex-col items-center">
+                        <div className="text-6xl mb-4">📦</div>
+                        <h3 className="text-lg font-semibold mb-2 text-gray-300">No se encontraron tipos de carga</h3>
+                        <p>Intenta ajustar los filtros o agrega un nuevo tipo de carga.</p>
                       </div>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="4" className="px-4 py-12 text-center text-gray-400">
-                    <div className="flex flex-col items-center">
-                      <div className="text-6xl mb-4">📦</div>
-                      <h3 className="text-lg font-semibold mb-2 text-gray-300">No se encontraron tipos de carga</h3>
-                      <p>Intenta ajustar los filtros o agrega un nuevo tipo de carga.</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Indicador de scroll si hay muchos elementos */}
+          {filteredData.length > 8 && (
+            <div className="absolute bottom-2 right-2 bg-gray-800 text-gray-300 px-3 py-1 rounded-full text-xs flex items-center gap-1">
+              <span>↕</span>
+              <span>{filteredData.length} registros</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
