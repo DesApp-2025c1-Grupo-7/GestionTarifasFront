@@ -14,6 +14,7 @@ import { getAdicionales, createAdicional as createAdicionalService } from '../..
 
 import { useOutletContext } from 'react-router-dom';
 
+
 const getTodayString = () => {
   const today = new Date();
   const year = today.getFullYear();
@@ -21,6 +22,7 @@ const getTodayString = () => {
   const day = String(today.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 };
+
 
 
 const TarifaCosto = () => {
@@ -66,6 +68,47 @@ const TarifaCosto = () => {
 
   const [showDetalleModal, setShowDetalleModal] = useState(false);
   const [selectedTarifa, setSelectedTarifa] = useState(null);
+
+  // Estilos para el scrollbar personalizado
+    const scrollbarStyles = {
+      overflowY: 'auto',
+      height: tableBodyHeight,
+      maxHeight: tableBodyHeight !== 'auto' ? tableBodyHeight : '500px',
+      scrollbarWidth: 'thin',
+      scrollbarColor: '#4a5568 #2d3748',
+    };
+  
+  // Crear estilos globales para webkit
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #2d3748;
+        border-radius: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #4a5568;
+        border-radius: 4px;
+        border: 1px solid #2d3748;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #718096;
+      }
+      @media (max-width: 768px) {
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   useEffect(() => {
         const handleClickOutside = (event) => {
@@ -334,61 +377,7 @@ const TarifaCosto = () => {
 
   return (
     <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
-      <style jsx>{`
-        /* Estilos personalizados para la barra de scroll */
-        .custom-scrollbar {
-          scrollbar-width: thin;
-          scrollbar-color: #4a5568 #2d3748;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #2d3748;
-          border-radius: 4px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #4a5568;
-          border-radius: 4px;
-          border: 1px solid #2d3748;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #718096;
-        }
-
-        /* Alternativa con Tailwind CSS (si prefieres usar clases de Tailwind) */
-        .scrollbar-custom {
-          scrollbar-width: thin;
-          scrollbar-color: rgb(75 85 99) rgb(31 41 55);
-        }
-
-        .scrollbar-custom::-webkit-scrollbar {
-          width: 8px;
-        }
-
-        .scrollbar-custom::-webkit-scrollbar-track {
-          @apply bg-gray-800 rounded;
-        }
-
-        .scrollbar-custom::-webkit-scrollbar-thumb {
-          @apply bg-gray-600 rounded border border-gray-800;
-        }
-
-        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-          @apply bg-gray-500;
-        }
-
-        /* Para mejorar la visualización en dispositivos móviles */
-        @media (max-width: 768px) {
-          .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-          }
-        }
-      `}</style>
+      
       {/* Formulario */}
       <div className="lg:col-span-1">
         <div ref={formRef} className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
@@ -510,12 +499,13 @@ const TarifaCosto = () => {
         
         {/* Contenedor de la tabla con scroll */}
         <div 
-          className="overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 hover:scrollbar-thumb-gray-500" 
+          className="custom-scrollbar overflow-y-auto"
           style={{ 
             height: tableBodyHeight,
             maxHeight: tableBodyHeight !== 'auto' ? tableBodyHeight : '500px'
           }}
-        > 
+        
+        >
           <table className="w-full">
             <thead className="bg-[#242423] sticky top-0 z-10">
               <tr>
