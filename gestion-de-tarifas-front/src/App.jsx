@@ -38,6 +38,9 @@ const App = () => {
         <Route path="reports/adicionales" element={<ReportesAdicionales />} />
         <Route path="/reports/tarifas" element={<TarifasReport />} />
         <Route path="/tarifas/historial/:id" element={<HistorialTarifaReport />} />
+
+        <Route path="/reporte-tarifas" element={<TarifasReport />} />
+        <Route path="/historial-tarifa/:id" element={<HistorialTarifaReport />} />
     </Routes>
   );
 };

@@ -3,12 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { History as HistoryIcon, Loader2, ArrowLeft, Calendar, User, Truck, MapPin } from 'lucide-react';
 import { getTarifaById, getHistorialDeTarifa } from '../../../../services/tarifaCosto.service';
 
-
+// --- LÓGICA DE COMPARACIÓN MEJORADA ---
 const compararVersiones = (versionNueva, versionAnterior) => {
     if (!versionAnterior) return [<p key="init">Versión inicial creada.</p>];
     
     const cambios = [];
 
+    // 1. Comparar valor base
     const valorBaseNuevo = Number(versionNueva.valor_base);
     const valorBaseAnterior = Number(versionAnterior.valor_base);
 
@@ -20,18 +21,19 @@ const compararVersiones = (versionNueva, versionAnterior) => {
         );
     }
     
+    // 2. Preparar mapas para una búsqueda eficiente de adicionales
     const adicionalesNuevosMap = new Map((versionNueva.adicionales || []).map(a => [a.idAdicional, a]));
     const adicionalesAnterioresMap = new Map((versionAnterior.adicionales || []).map(a => [a.idAdicional, a]));
 
-    
+    // 3. Detectar agregados y modificaciones de costo
     for (const [id, adicionalNuevo] of adicionalesNuevosMap) {
         const adicionalAnterior = adicionalesAnterioresMap.get(id);
         
         if (!adicionalAnterior) {
-            
+            // Caso 1: Adicional Agregado
             cambios.push(<p key={`add-${id}`}>+ Se agregó: <strong className="text-green-400">{adicionalNuevo.descripcion}</strong> (Costo: ${Number(adicionalNuevo.costo).toFixed(2)})</p>);
         } else {
-           
+            // Caso 2: Adicional existe en ambas versiones, comparar su costo
             const costoNuevo = Number(adicionalNuevo.costo);
             const costoAnterior = Number(adicionalAnterior.costo);
             if (costoNuevo !== costoAnterior) {
@@ -46,6 +48,7 @@ const compararVersiones = (versionNueva, versionAnterior) => {
         }
     }
 
+    // 4. Detectar eliminados
     for (const [id, adicionalAnterior] of adicionalesAnterioresMap) {
         if (!adicionalesNuevosMap.has(id)) {
             cambios.push(<p key={`del-${id}`}>- Se eliminó: <strong className="text-red-400">{adicionalAnterior.descripcion}</strong></p>);
@@ -101,11 +104,20 @@ const HistorialTarifaReport = () => {
     <div className="min-h-screen bg-[#242423] p-8 text-white">
       <div className="max-w-5xl mx-auto">
         <div className="mb-8 flex items-center justify-between">
-          <button onClick={() => navigate('/tarifas')} className="flex items-center gap-2 text-gray-300 hover:text-white">
-            <ArrowLeft size={20} />
-            Volver a Tarifas
-          </button>
-        </div>
+    <button onClick={() => navigate('/tarifas')} className="flex items-center gap-2 text-gray-300 hover:text-white">
+        <ArrowLeft size={20} />
+        Volver a Tarifas
+    </button>
+    
+    {/* --- AÑADE ESTE BOTÓN AQUÍ (Línea 110) --- */}
+    <button 
+        onClick={() => navigate('/reporte-tarifas')} 
+        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-semibold"
+    >
+        Ir a Reportes
+    </button>
+</div>
+
 
         {loading ? (
           <div className="flex justify-center items-center h-64"><Loader2 className="animate-spin text-purple-400" size={40} /></div>
