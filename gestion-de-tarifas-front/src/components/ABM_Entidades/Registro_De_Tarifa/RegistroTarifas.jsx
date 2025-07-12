@@ -389,6 +389,25 @@ const TarifaCosto = () => {
     placeholder: (base) => ({ ...base, color: 'rgba(255,255,255,0.7)' }),
   };
 
+  const customInputStyles = {
+    control: (styles) => ({
+    ...styles,
+    backgroundColor: '#444240',
+    borderColor: '#4B5563',
+    color: '#D1D5DB',
+    paddingTop: '2px',
+    paddingBottom: '2px',
+  }),
+  singleValue: (styles) => ({ ...styles, color: '#D1D5DB' }),
+  menu: (styles) => ({ ...styles, backgroundColor: '#242423' }),
+  option: (styles, { isFocused }) => ({
+    ...styles,
+    backgroundColor: isFocused ? 'rgba(255,255,255,0.2)' : '#242423',
+    color: '#D1D5DB',
+  }),
+  input: (styles) => ({ ...styles, color: '#D1D5DB' }),
+  };
+
   return (
     <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
 
@@ -401,36 +420,93 @@ const TarifaCosto = () => {
           <div className="space-y-5">
             <div>
               <label className="block text-sm font-semibold text-gray-300 mb-2">Tipo de Vehículo *</label>
-              <select name="tipoVehiculo" value={form.tipoVehiculo} onChange={handleInputChange} className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}>
-                <option value="">Seleccionar tipo de vehículo</option>
-                {(tiposVehiculo || []).map(vehiculo => (<option key={vehiculo.id} value={vehiculo.id}>{vehiculo.descripcion} {vehiculo.precioBase}</option>))}
-              </select>
+              <Select
+                name="tipoVehiculo"
+                value={tiposVehiculo.find(v => v.id === form.tipoVehiculo) ? {
+                  value: form.tipoVehiculo,
+                  label: tiposVehiculo.find(v => v.id === form.tipoVehiculo)?.descripcion 
+                } : null}
+                onChange={(selected) =>
+                  handleInputChange({ target: { name: 'tipoVehiculo', value: selected?.value || '' } })
+                }
+                options={tiposVehiculo.map(v => ({
+                  value: v.id,
+                  label: `${v.descripcion}`
+                }))}
+                styles={customInputStyles}
+                placeholder="Seleccionar tipo de vehículo"
+                isClearable
+              />
             </div>
+
             <div>
               <label className="block text-sm font-semibold text-gray-300 mb-2">Tipo de Carga *</label>
-              <select name="tipoCarga" value={form.tipoCarga} onChange={handleInputChange} className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}>
-                <option value="">Seleccionar tipo de carga</option>
-                {(tiposCarga || []).map(carga => (<option key={carga.id} value={carga.id}>{carga.categoria} {carga.valorBase}</option>))}
-              </select>
+              <Select
+                name="tipoCarga"
+                value={tiposCarga.find(c => c.id === form.tipoCarga) ? {
+                  value: form.tipoCarga,
+                  label: tiposCarga.find(c => c.id === form.tipoCarga)?.categoria 
+                } : null}
+                onChange={(selected) =>
+                  handleInputChange({ target: { name: 'tipoCarga', value: selected?.value || '' } })
+                }
+                options={tiposCarga.map(c => ({
+                  value: c.id,
+                  label: `${c.categoria}`
+                }))}
+                styles={customInputStyles}
+                placeholder="Seleccionar tipo de carga"
+                isClearable
+              />
+              
             </div>
+
             <div>
               <label className="block text-sm font-semibold text-gray-300 mb-2">Zona de Viaje *</label>
-              <select name="zonaDeViaje" value={form.zonaDeViaje} onChange={handleInputChange} className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}>
-                <option value="">Seleccionar zona de viaje</option>
-                {(zonasDeViaje || []).map(zona => (<option key={zona.id} value={zona.id}>{zona.origen} - {zona.destino} | {zona.distancia} km</option>))}
-              </select>
+              <Select
+                name="zonaDeViaje"
+                value={zonasDeViaje.find(z => z.id === form.zonaDeViaje) ? {
+                  value: form.zonaDeViaje,
+                  label: zonasDeViaje.find(z => z.id === form.zonaDeViaje)?.origen + ' - ' + zonasDeViaje.find(z => z.id === form.zonaDeViaje)?.destino 
+                } : null}
+                onChange={(selected) =>
+                  handleInputChange({ target: { name: 'zonaDeViaje', value: selected?.value || '' } })
+                }
+                options={(zonasDeViaje || []).map(z => ({
+                  value: z.id,
+                  label: `${z.origen} - ${z.destino} `
+                }))}
+                styles={customInputStyles}
+                placeholder="Seleccionar zona de viaje"
+                isClearable
+              />
             </div>
+
             <div>
               <label className="block text-sm font-semibold text-gray-300 mb-2">Transportista *</label>
-              <select name="transportista" value={form.transportista} onChange={handleInputChange} className={`w-full p-3 bg-[#242423] border-2 border-gray-600 rounded-lg text-gray-300 focus:border-${tabColor}-500 focus:outline-none transition-all`}>
-                <option value="">Seleccionar transportista</option>
-                {(transportistas || []).map(transportista => (<option key={transportista.id} value={transportista.id}>{transportista.nombre} {transportista.costoServicio}</option>))}
-              </select>
+              <Select
+                name="transportista"
+                value={transportistas.find(t => t.id === form.transportista) ? {
+                  value: form.transportista,
+                  label: transportistas.find(t => t.id === form.transportista)?.nombre 
+                } : null}
+                onChange={(selected) =>
+                  handleInputChange({ target: { name: 'transportista', value: selected?.value || '' } })
+                }
+                options={(transportistas || []).map(t => ({
+                  value: t.id,
+                  label: `${t.nombre}`
+                }))}
+                styles={customInputStyles}
+                placeholder="Seleccionar transportista"
+                isClearable
+              />
             </div>
+
 
             <div className="bg-blue-900/20 p-4 rounded-lg border border-blue-400">
               <label className="block text-sm font-semibold text-blue-300 mb-2">Valor Base *</label>
-              <input type="number" value={form.valorBase} onChange={handleValorBaseChange} min="0" step="0.01" className="w-full p-3 bg-transparent border-2 border-blue-400 rounded-lg focus:border-blue-300 focus:outline-none transition-all text-xl font-bold text-blue-300" placeholder="0.00" />
+              <input type="number" value={form.valorBase} onChange={handleValorBaseChange} min="0" step="0.01" className="w-full p-3 bg-transparent border-2 border-blue-400 rounded-lg focus:border-blue-300 focus:outline-none transition-all text-xl font-bold text-blue-300" placeholder="0.00"/>
             </div>
 
             <div className="bg-green-900/20 p-4 rounded-lg border border-green-400">
@@ -448,22 +524,22 @@ const TarifaCosto = () => {
                     <div key={adicional.idAdicional} className="flex items-center justify-between p-2 bg-black/20 rounded-lg">
                       <span className="text-sm text-gray-200 flex-grow pr-2">{adicional.descripcion}</span>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-sm text-green-300">$</span>
-                        <input
-                          type="number"
-                          value={adicional.costo}
-                          onChange={(e) => handleAdicionalCostoChange(adicional.idAdicional, e.target.value)}
-                          className="w-24 p-1 rounded bg-[#242423] text-white text-right border border-gray-600 focus:outline-none focus:border-green-400"
-                          min="0"
-                          step="0.01"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removerAdicionalSeleccionado(adicional.idAdicional)}
-                          className="text-red-400 hover:text-red-500"
-                        >
-                          <X size={16} />
-                        </button>
+                          <span className="text-sm text-green-300">$</span>
+                          <input
+                              type="number"
+                              value={adicional.costo}
+                              onChange={(e) => handleAdicionalCostoChange(adicional.idAdicional, e.target.value)}
+                              className="w-24 p-1 rounded bg-[#242423] text-white text-right border border-gray-600 focus:outline-none focus:border-green-400"
+                              min="0"
+                              step="0.01"
+                          />
+                          <button
+                              type="button"
+                              onClick={() => removerAdicionalSeleccionado(adicional.idAdicional)}
+                              className="text-red-400 hover:text-red-500"
+                          >
+                              <X size={16} />
+                          </button>
                       </div>
                     </div>
                   ))}
@@ -475,7 +551,7 @@ const TarifaCosto = () => {
               <label className="block text-sm font-semibold text-yellow-300 mb-2">Costo Total</label>
               <div className="text-2xl font-bold text-yellow-300">${calcularCostoTotal().toFixed(2)}</div>
               <div className="text-xs text-yellow-400 mt-1">
-                Base: ${(parseFloat(form.valorBase) || 0).toFixed(2)} +
+                Base: ${(parseFloat(form.valorBase) || 0).toFixed(2)} + 
                 Adicionales: ${form.adicionalesSeleccionados.reduce((sum, item) => sum + parseFloat(item.costo), 0).toFixed(2)}
               </div>
             </div>
