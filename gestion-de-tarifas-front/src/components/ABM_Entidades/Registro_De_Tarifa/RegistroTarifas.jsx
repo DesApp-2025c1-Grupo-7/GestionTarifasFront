@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react';
-import { Search, Edit, Trash2, Plus, X, ChevronDown, ChevronUp,  Eye, BarChart3, MoreVertical, History as HistoryIcon } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, X, ChevronDown, ChevronUp, Eye, BarChart3, MoreVertical, History as HistoryIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import Select from 'react-select';
@@ -27,7 +27,7 @@ const getTodayString = () => {
 
 const TarifaCosto = () => {
   const { showNotification, tabColor = 'emerald' } = useOutletContext();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [tiposCarga, setTiposCargas] = useState([]);
@@ -43,8 +43,8 @@ const TarifaCosto = () => {
   const [adicionalSearch, setAdicionalSearch] = useState('');
   const [nuevoAdicional, setNuevoAdicional] = useState({ descripcion: '', costo: '' });
 
-    const [openMenuId, setOpenMenuId] = useState(null);
-    const menuRef = useRef(null);
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const menuRef = useRef(null);
 
   const [filters, setFilters] = useState({
     tipoVehiculo: null,
@@ -68,16 +68,17 @@ const TarifaCosto = () => {
 
   const [showDetalleModal, setShowDetalleModal] = useState(false);
   const [selectedTarifa, setSelectedTarifa] = useState(null);
+  const [ordenCostoAsc, setOrdenCostoAsc] = useState(true);
 
   // Estilos para el scrollbar personalizado
-    const scrollbarStyles = {
-      overflowY: 'auto',
-      height: tableBodyHeight,
-      maxHeight: tableBodyHeight !== 'auto' ? tableBodyHeight : '500px',
-      scrollbarWidth: 'thin',
-      scrollbarColor: '#4a5568 #2d3748',
-    };
-  
+  const scrollbarStyles = {
+    overflowY: 'auto',
+    height: tableBodyHeight,
+    maxHeight: tableBodyHeight !== 'auto' ? tableBodyHeight : '500px',
+    scrollbarWidth: 'thin',
+    scrollbarColor: '#4a5568 #2d3748',
+  };
+
   // Crear estilos globales para webkit
   useEffect(() => {
     const style = document.createElement('style');
@@ -104,23 +105,23 @@ const TarifaCosto = () => {
       }
     `;
     document.head.appendChild(style);
-    
+
     return () => {
       document.head.removeChild(style);
     };
   }, []);
 
   useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
-                setOpenMenuId(null);
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [menuRef]);
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenuId(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuRef]);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -150,12 +151,25 @@ const TarifaCosto = () => {
 
   useEffect(() => {
     let dataToFilter = [...(tarifas || [])].filter(item => item.deletedAt === null);
-    if (filters.tipoVehiculo) dataToFilter = dataToFilter.filter(item => item.tipoVehiculo?.id === filters.tipoVehiculo.value);
-    if (filters.transportista) dataToFilter = dataToFilter.filter(item => item.transportista?.id === filters.transportista.value);
-    if (filters.zonaDeViaje) dataToFilter = dataToFilter.filter(item => item.zonaDeViaje?.id === filters.zonaDeViaje.value);
-    if (filters.tipoCarga) dataToFilter = dataToFilter.filter(item => item.tipoCarga?.id === filters.tipoCarga.value);
+
+    if (filters.tipoVehiculo)
+      dataToFilter = dataToFilter.filter(item => item.tipoVehiculo?.id === filters.tipoVehiculo.value);
+    if (filters.transportista)
+      dataToFilter = dataToFilter.filter(item => item.transportista?.id === filters.transportista.value);
+    if (filters.zonaDeViaje)
+      dataToFilter = dataToFilter.filter(item => item.zonaDeViaje?.id === filters.zonaDeViaje.value);
+    if (filters.tipoCarga)
+      dataToFilter = dataToFilter.filter(item => item.tipoCarga?.id === filters.tipoCarga.value);
+
+    dataToFilter.sort((a, b) => {
+      const costoA = parseFloat(a.valor_base) || 0;
+      const costoB = parseFloat(b.valor_base) || 0;
+      return ordenCostoAsc ? costoB - costoA : costoA - costoB;
+    });
+
     setFilteredTarifas(dataToFilter);
-  }, [filters, tarifas]);
+  }, [filters, tarifas, ordenCostoAsc]);
+
 
   useLayoutEffect(() => {
     const updateHeight = () => {
@@ -175,8 +189,8 @@ const TarifaCosto = () => {
     window.addEventListener('resize', updateHeight);
 
     return () => window.removeEventListener('resize', updateHeight);
-  }, [tarifas]); 
-  
+  }, [tarifas]);
+
   const clearForm = () => {
     setForm({
       tipoVehiculo: '',
@@ -193,12 +207,12 @@ const TarifaCosto = () => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
   };
-  
+
   const handleValorBaseChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
     setForm({ ...form, valorBase: value });
   };
-  
+
   const handleAdicionalCostoChange = (idAdicional, nuevoCosto) => {
     const costoNumerico = parseFloat(nuevoCosto) || 0;
     const adicionalesActualizados = form.adicionalesSeleccionados.map(ad => {
@@ -267,8 +281,8 @@ const TarifaCosto = () => {
   const validateForm = () => {
     return form.tipoVehiculo && form.tipoCarga && form.zonaDeViaje && form.transportista && form.valorBase !== '';
   };
-  
- 
+
+
   const handleSubmit = async () => {
     if (!validateForm()) {
       showNotification('Por favor completa todos los campos obligatorios', 'error');
@@ -281,11 +295,11 @@ const TarifaCosto = () => {
       transportista: Number(form.transportista),
       tipoCarga: Number(form.tipoCarga),
       adicionales: form.adicionalesSeleccionados.map(a => ({
-          idAdicional: a.idAdicional,
-          costo: parseFloat(a.costo)
+        idAdicional: a.idAdicional,
+        costo: parseFloat(a.costo)
       })),
-      vigenciaDesde: form.vigenciaDesde || null, 
-      vigenciaHasta: form.vigenciaHasta || null, 
+      vigenciaDesde: form.vigenciaDesde || null,
+      vigenciaHasta: form.vigenciaHasta || null,
     };
     try {
       if (editingId) {
@@ -305,15 +319,15 @@ const TarifaCosto = () => {
       showNotification(errorMessage, 'error');
     }
   };
-  
+
   const editEntity = (id) => {
     const tarifa = tarifas.find(item => item.id === id);
     if (tarifa) {
-      const adicionalesParaForm = tarifa.tarifaAdicionales 
+      const adicionalesParaForm = tarifa.tarifaAdicionales
         ? tarifa.tarifaAdicionales.map(ta => ({
-            ...(ta.adicional || {}),
-            costo: ta.costoPersonalizado
-          })).filter(ad => ad && ad.idAdicional)
+          ...(ta.adicional || {}),
+          costo: ta.costoPersonalizado
+        })).filter(ad => ad && ad.idAdicional)
         : [];
 
       // Formatear las fechas que vienen del backend para el input
@@ -377,7 +391,7 @@ const TarifaCosto = () => {
 
   return (
     <div className="grid lg:grid-cols-3 gap-8 bg-[#242423]">
-      
+
       {/* Formulario */}
       <div className="lg:col-span-1">
         <div ref={formRef} className="bg-[#444240] p-8 rounded-2xl shadow-lg border border-gray-900">
@@ -416,7 +430,7 @@ const TarifaCosto = () => {
 
             <div className="bg-blue-900/20 p-4 rounded-lg border border-blue-400">
               <label className="block text-sm font-semibold text-blue-300 mb-2">Valor Base *</label>
-              <input type="number" value={form.valorBase} onChange={handleValorBaseChange} min="0" step="0.01" className="w-full p-3 bg-transparent border-2 border-blue-400 rounded-lg focus:border-blue-300 focus:outline-none transition-all text-xl font-bold text-blue-300" placeholder="0.00"/>
+              <input type="number" value={form.valorBase} onChange={handleValorBaseChange} min="0" step="0.01" className="w-full p-3 bg-transparent border-2 border-blue-400 rounded-lg focus:border-blue-300 focus:outline-none transition-all text-xl font-bold text-blue-300" placeholder="0.00" />
             </div>
 
             <div className="bg-green-900/20 p-4 rounded-lg border border-green-400">
@@ -434,22 +448,22 @@ const TarifaCosto = () => {
                     <div key={adicional.idAdicional} className="flex items-center justify-between p-2 bg-black/20 rounded-lg">
                       <span className="text-sm text-gray-200 flex-grow pr-2">{adicional.descripcion}</span>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                          <span className="text-sm text-green-300">$</span>
-                          <input
-                              type="number"
-                              value={adicional.costo}
-                              onChange={(e) => handleAdicionalCostoChange(adicional.idAdicional, e.target.value)}
-                              className="w-24 p-1 rounded bg-[#242423] text-white text-right border border-gray-600 focus:outline-none focus:border-green-400"
-                              min="0"
-                              step="0.01"
-                          />
-                          <button
-                              type="button"
-                              onClick={() => removerAdicionalSeleccionado(adicional.idAdicional)}
-                              className="text-red-400 hover:text-red-500"
-                          >
-                              <X size={16} />
-                          </button>
+                        <span className="text-sm text-green-300">$</span>
+                        <input
+                          type="number"
+                          value={adicional.costo}
+                          onChange={(e) => handleAdicionalCostoChange(adicional.idAdicional, e.target.value)}
+                          className="w-24 p-1 rounded bg-[#242423] text-white text-right border border-gray-600 focus:outline-none focus:border-green-400"
+                          min="0"
+                          step="0.01"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removerAdicionalSeleccionado(adicional.idAdicional)}
+                          className="text-red-400 hover:text-red-500"
+                        >
+                          <X size={16} />
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -461,7 +475,7 @@ const TarifaCosto = () => {
               <label className="block text-sm font-semibold text-yellow-300 mb-2">Costo Total</label>
               <div className="text-2xl font-bold text-yellow-300">${calcularCostoTotal().toFixed(2)}</div>
               <div className="text-xs text-yellow-400 mt-1">
-                Base: ${(parseFloat(form.valorBase) || 0).toFixed(2)} + 
+                Base: ${(parseFloat(form.valorBase) || 0).toFixed(2)} +
                 Adicionales: ${form.adicionalesSeleccionados.reduce((sum, item) => sum + parseFloat(item.costo), 0).toFixed(2)}
               </div>
             </div>
@@ -489,22 +503,35 @@ const TarifaCosto = () => {
               <span>Reportes</span>
             </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <Select options={vehiculoOptions} placeholder="Filtrar por Vehículo" isClearable value={filters.tipoVehiculo} onChange={selectedOption => setFilters({ ...filters, tipoVehiculo: selectedOption })} styles={customSelectStyles} />
             <Select options={transportistaOptions} placeholder="Filtrar por Transportista" isClearable value={filters.transportista} onChange={selectedOption => setFilters({ ...filters, transportista: selectedOption })} styles={customSelectStyles} />
             <Select options={zonaOptions} placeholder="Filtrar por Zona" isClearable value={filters.zonaDeViaje} onChange={selectedOption => setFilters({ ...filters, zonaDeViaje: selectedOption })} styles={customSelectStyles} />
             <Select options={cargaOptions} placeholder="Filtrar por Carga" isClearable value={filters.tipoCarga} onChange={selectedOption => setFilters({ ...filters, tipoCarga: selectedOption })} styles={customSelectStyles} />
+            <Select
+              options={[
+                { value: 'asc', label: 'Costo Total ↑' },
+                { value: 'desc', label: 'Costo Total ↓' },
+              ]}
+              placeholder="Ordenar por Costo"
+              isClearable
+              value={ordenCostoAsc ? { value: 'asc', label: 'Costo Total ↑' } : { value: 'desc', label: 'Costo Total ↓' }}
+              onChange={selected =>
+                setOrdenCostoAsc(selected?.value === 'asc')
+              }
+              styles={customSelectStyles}
+            />
           </div>
         </div>
-        
+
         {/* Contenedor de la tabla con scroll */}
-        <div 
+        <div
           className="custom-scrollbar overflow-y-auto"
-          style={{ 
+          style={{
             height: tableBodyHeight,
             maxHeight: tableBodyHeight !== 'auto' ? tableBodyHeight : '500px'
           }}
-        
+
         >
           <table className="w-full">
             <thead className="bg-[#242423] sticky top-0 z-10">
@@ -694,9 +721,8 @@ const TarifaCosto = () => {
                   <div
                     key={adicional.idAdicional}
                     onClick={() => seleccionarAdicional(adicional)}
-                    className={`p-2 rounded cursor-pointer text-sm transition-colors ${
-                      isSelected ? 'bg-green-500/30 border border-green-400' : 'hover:bg-gray-500/20'
-                    }`}
+                    className={`p-2 rounded cursor-pointer text-sm transition-colors ${isSelected ? 'bg-green-500/30 border border-green-400' : 'hover:bg-gray-500/20'
+                      }`}
                   >
                     <div className="flex justify-between items-center">
                       <span className={isSelected ? 'font-medium text-green-200' : 'text-gray-300'}>
@@ -725,7 +751,7 @@ const TarifaCosto = () => {
           </div>
         </div>
       )}
-      
+
       {showDetalleModal && selectedTarifa && (
         <div className="fixed inset-0 z-50 backdrop-blur-sm bg-black/20 flex justify-center items-center">
           <div className="bg-[#444240] p-6 rounded-xl shadow-xl border border-gray-700 max-w-md w-full relative">
@@ -765,17 +791,17 @@ const TarifaCosto = () => {
                 )}
               </div>
               <div>
-                <strong>Tipo de Carga: </strong> 
+                <strong>Tipo de Carga: </strong>
                 {selectedTarifa.tipoCarga?.categoria ? (
                   !selectedTarifa.tipoCarga.deletedAt
-                    ? selectedTarifa.tipoCarga?.categoria 
+                    ? selectedTarifa.tipoCarga?.categoria
                     : <span className='text-red-400 italic'>{selectedTarifa.tipoCarga.categoria} (Eliminada)</span>
                 ) : (
                   <span className='text-red-400 italic'>Tipo de carga eliminada</span>
                 )}
               </div>
               <div><strong>Valor Base:</strong> ${Number(selectedTarifa.valor_base).toFixed(2)}</div>
-              
+
               <div className="border-t border-gray-600 pt-2 mt-2">
                 <strong>Fecha de Creación:</strong>
                 <span className='pl-2'>{selectedTarifa.createdAt ? new Date(selectedTarifa.createdAt).toLocaleDateString('es-AR') : 'No definida'}</span>

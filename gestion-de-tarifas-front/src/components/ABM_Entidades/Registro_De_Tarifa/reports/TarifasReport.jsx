@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ArrowLeft, RefreshCw, Loader2, DollarSign, ArrowDownUp, TrendingUp, TrendingDown, BarChart3, X as CloseIcon, History as HistoryIcon } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Loader2, BarChart3, History as HistoryIcon, X as CloseIcon } from 'lucide-react';
 import Select from 'react-select';
 import { getTarifas, getAnalisisTarifas, getHistorialDeTarifa, getTarifaById } from '../../../../services/tarifaCosto.service';
 
+// Funciones compararVersiones y demás componentes auxiliares aquí (igual que antes)...
 
-// --- LÓGICA DE COMPARACIÓN (TRAÍDA DESDE HistorialTarifaReport) ---
 const compararVersiones = (versionNueva, versionAnterior) => {
     if (!versionAnterior) return [<p key="init" className="text-gray-300">Versión inicial creada.</p>];
-    
+
     const cambios = [];
 
     const valorBaseNuevo = Number(versionNueva.valor_base);
@@ -22,13 +22,13 @@ const compararVersiones = (versionNueva, versionAnterior) => {
             </p>
         );
     }
-    
+
     const adicionalesNuevosMap = new Map((versionNueva.adicionales || []).map(a => [a.idAdicional, a]));
     const adicionalesAnterioresMap = new Map((versionAnterior.adicionales || []).map(a => [a.idAdicional, a]));
 
     for (const [id, adicionalNuevo] of adicionalesNuevosMap) {
         const adicionalAnterior = adicionalesAnterioresMap.get(id);
-        
+
         if (!adicionalAnterior) {
             cambios.push(<p key={`add-${id}`}><span className="text-green-400">+ Añadido:</span> {adicionalNuevo.descripcion} (${Number(adicionalNuevo.costo).toFixed(2)})</p>);
         } else {
@@ -54,28 +54,25 @@ const compararVersiones = (versionNueva, versionAnterior) => {
     return cambios;
 };
 
-
-// --- TOOLTIP PERSONALIZADO DEL GRÁFICO ---
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    const dataPoint = payload[0].payload;
-    return (
-      <div className="p-4 bg-[#1f1f1f] border border-gray-600 rounded-lg shadow-xl max-w-sm">
-        <div className="flex justify-between items-center mb-2">
-            <p className="text-sm text-gray-400">{`Fecha: ${dataPoint.fecha}`}</p>
-            <p className="font-bold text-lg text-purple-400">{`Costo Total: $${dataPoint.Costo}`}</p>
-        </div>
-        <div className="mt-2 pt-2 border-t border-gray-700 space-y-1 text-xs text-gray-200">
-            <p className="font-semibold text-gray-300 mb-1">Cambios en esta versión:</p>
-            {dataPoint.cambios.map((cambio, index) => <div key={index}>{cambio}</div>)}
-        </div>
-      </div>
-    );
-  }
-  return null;
+const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+        const dataPoint = payload[0].payload;
+        return (
+            <div className="p-4 bg-[#1f1f1f] border border-gray-600 rounded-lg shadow-xl max-w-sm">
+                <div className="flex justify-between items-center mb-2">
+                    <p className="text-sm text-gray-400">{`Fecha: ${dataPoint.fecha}`}</p>
+                    <p className="font-bold text-lg text-purple-400">{`Costo Total: $${dataPoint.Costo}`}</p>
+                </div>
+                <div className="mt-2 pt-2 border-t border-gray-700 space-y-1 text-xs text-gray-200">
+                    <p className="font-semibold text-gray-300 mb-1">Cambios en esta versión:</p>
+                    {dataPoint.cambios.map((cambio, index) => <div key={index}>{cambio}</div>)}
+                </div>
+            </div>
+        );
+    }
+    return null;
 };
 
-// --- MODAL DE EVOLUCIÓN DE TARIFA (CON CORRECCIÓN DE NAN) ---
 const TarifaEvolucionModal = ({ tarifa, onClose }) => {
     const [historialData, setHistorialData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -90,7 +87,6 @@ const TarifaEvolucionModal = ({ tarifa, onClose }) => {
                     getHistorialDeTarifa(tarifa.id_tarifa)
                 ]);
 
-                // 1. Extraemos los datos de la tarifa actual de forma segura
                 const valorBaseActual = Number(tarifaActualData.valor_base) || 0;
                 const adicionalesActuales = tarifaActualData.tarifaAdicionales?.map(ta => ({
                     idAdicional: ta.adicional?.idAdicional,
@@ -98,13 +94,9 @@ const TarifaEvolucionModal = ({ tarifa, onClose }) => {
                     costo: ta.costoPersonalizado
                 })).filter(a => a.idAdicional) || [];
 
-                // 2. Calculamos el costo de los adicionales
                 const costoAdicionalesActual = adicionalesActuales.reduce((sum, ad) => sum + (Number(ad.costo) || 0), 0);
-                
-                // 3. Calculamos el costo total para la versión actual
                 const costoTotalCalculado = valorBaseActual + costoAdicionalesActual;
 
-                // Construimos un objeto para la versión actual usando el costo que calculamos
                 const versionActual = {
                     version: (historial[0]?.version || 0) + 1,
                     costo_total: costoTotalCalculado,
@@ -119,7 +111,7 @@ const TarifaEvolucionModal = ({ tarifa, onClose }) => {
                     .map((version, index) => {
                         const versionAnterior = historialCompleto[index + 1] || null;
                         const cambios = compararVersiones(version, versionAnterior);
-                        
+
                         return {
                             name: `Ver. ${version.version}`,
                             Costo: Number(version.costo_total).toFixed(2),
@@ -172,222 +164,374 @@ const TarifaEvolucionModal = ({ tarifa, onClose }) => {
     );
 };
 
-
-// --- COMPONENTE PRINCIPAL DEL REPORTE ---
 const TarifasReport = () => {
-  const [tarifas, setTarifas] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-  const [fechaInicio, setFechaInicio] = useState('');
-  const [fechaFin, setFechaFin] = useState('');
-  const [analisisData, setAnalisisData] = useState([]);
-  const [loadingAnalisis, setLoadingAnalisis] = useState(false);
-  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
-  const [selectedTarifaForChart, setSelectedTarifaForChart] = useState(null);
-
-  // CÓDIGO DEL RELOJ EN SU LUGAR CORRECTO
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  useEffect(() => {
-    const timerId = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => { clearInterval(timerId); };
-  }, []);
-
-  const showNotification = (message, type = 'error') => {
-    setNotification({ show: true, message, type });
-    setTimeout(() => setNotification({ show: false, message: '', type: 'success' }), 3000);
-  };
-
-  const fetchTarifas = async () => {
-    try {
-        setLoading(true);
-        const data = await getTarifas();
-        setTarifas(data || []);
-    } catch (error) {
-        console.error('Error al cargar el reporte de tarifas:', error);
-        showNotification('Error al cargar el reporte', 'error');
-    } finally {
-        setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTarifas();
-  }, []);
-  
-  const handleGenerarAnalisis = async () => {
-    if (!fechaInicio || !fechaFin) {
-        showNotification('Por favor, selecciona ambas fechas.');
-        return;
-    }
-    if (new Date(fechaFin) < new Date(fechaInicio)) {
-        showNotification('La fecha de fin no puede ser anterior a la fecha de inicio.');
-        return;
-    }
-
-    // --- INICIO DE LA SOLUCIÓN FINAL (FRONTEND) ---
-
-  // 1. Procesar Fecha de Inicio
-  // La convertimos al inicio exacto de ese día en la zona horaria local.
-  const [startYear, startMonth, startDay] = fechaInicio.split('-').map(Number);
-  const fechaInicioLocal = new Date(startYear, startMonth - 1, startDay);
-  fechaInicioLocal.setHours(0, 0, 0, 0); // Establece la hora a 00:00:00.000
-  const fechaInicioParaAPI = fechaInicioLocal.toISOString();
-
-  // 2. Procesar Fecha de Fin
-  // La convertimos al final exacto de ese día en la zona horaria local.
-  const [endYear, endMonth, endDay] = fechaFin.split('-').map(Number);
-  const fechaFinLocal = new Date(endYear, endMonth - 1, endDay);
-  fechaFinLocal.setHours(23, 59, 59, 999); // Establece la hora a 23:59:59.999
-  const fechaFinParaAPI = fechaFinLocal.toISOString();
-
-  // --- FIN DE LA SOLUCIÓN ---
-
-  setLoadingAnalisis(true);
-  try {
-    // 3. Usamos ambos strings de fecha/hora ISO en la llamada a la API.
-    const data = await getAnalisisTarifas(fechaInicioParaAPI, fechaFinParaAPI);
-    
-    setAnalisisData(data);
-    if (data.length === 0) {
-      showNotification('No se encontraron variaciones de tarifas en el período seleccionado.', 'info');
-    }
-  } catch (error) {
-    console.error("Error al generar análisis", error);
-    showNotification('No se pudo generar el análisis.');
-  } finally {
-    setLoadingAnalisis(false);
-  }
-};
-
-  const handleViewHistory = (e, tarifaId) => {
-    e.stopPropagation(); // Evita que se abra el modal del gráfico al hacer clic en el botón
-    navigate(`/historial-tarifa/${tarifaId}`);
-  };
-
-  
+    const [tarifas, setTarifas] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+    const [fechaInicio, setFechaInicio] = useState('');
+    const [fechaFin, setFechaFin] = useState('');
+    const [analisisData, setAnalisisData] = useState([]);
+    const [loadingAnalisis, setLoadingAnalisis] = useState(false);
+    const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+    const [selectedTarifaForChart, setSelectedTarifaForChart] = useState(null);
+    const [currentTime, setCurrentTime] = useState(new Date());
+    const [promedioPorZona, setPromedioPorZona] = useState([]);
+    const [promedioPorTransportista, setPromedioPorTransportista] = useState([]);
+    const [ordenPromedioTransportista, setOrdenPromedioTransportista] = useState('asc');
+    const [ordenPromedioZona, setOrdenPromedioZona] = useState('asc');
 
 
-  return (
-    <>
-      <div className="min-h-screen bg-[#242423] p-8">
-        <div className="max-w-7xl mx-auto">
-            <div className="mb-8 flex items-center justify-between">
-                <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/tarifas')}>
-                    <ArrowLeft size={24} className="text-gray-300 hover:text-gray-200" />
-                    <h1 className="text-3xl font-bold text-gray-200">Reporte de Tarifas</h1>
-                </div>
-                {/* Contenedor para el reloj y el botón a la derecha */}
-    <div className="flex items-center gap-6">
-        {/* --- ASEGÚRATE DE QUE ESTA PARTE EXISTA --- */}
-        <div className="flex items-center gap-3 text-lg font-mono text-emerald-400">
-  {/* La fecha */}
-  <span>{currentTime.toLocaleDateString('es-AR')}</span>
-  
-  {/* La hora */}
-  <span>{currentTime.toLocaleTimeString('es-AR')}</span>
-</div>
+    useEffect(() => {
+        const timerId = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+        return () => { clearInterval(timerId); };
+    }, []);
 
-        {/* El botón de actualizar que ya tenías */}
-        <button onClick={fetchTarifas} disabled={loading} className="flex items-center space-x-2 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:bg-emerald-800">
-            {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
-            <span>Actualizar Datos</span>
-        </button>
-    </div>
-            </div>
+    const showNotification = (message, type = 'error') => {
+        setNotification({ show: true, message, type });
+        setTimeout(() => setNotification({ show: false, message: '', type: 'success' }), 3000);
+    };
 
-            <div className="bg-[#444240] p-6 rounded-xl border border-gray-700 mb-8">
-                <div className="flex items-center gap-3 mb-4">
-                    <BarChart3 className="text-purple-400" size={24} />
-                    <h2 className="text-xl font-bold text-gray-200">Análisis Comparativo de Aumentos</h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                    <div>
-                        <label className="text-sm font-medium text-gray-400 block mb-1">Fecha de Inicio</label>
-                        <input type="date" value={fechaInicio} onChange={e => setFechaInicio(e.target.value)} className="w-full mt-1 p-2 bg-white/10 border border-white/30 rounded-lg text-white" />
+    const fetchTarifas = async () => {
+        try {
+            setLoading(true);
+            const data = await getTarifas();
+            setTarifas(data || []);
+        } catch (error) {
+            console.error('Error al cargar el reporte de tarifas:', error);
+            showNotification('Error al cargar el reporte', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchTarifas();
+    }, []);
+
+    useEffect(() => {
+        if (!tarifas.length) {
+            setPromedioPorZona([]);
+            return;
+        }
+
+        const agrupado = {};
+
+        tarifas.forEach(tarifa => {
+            if (!tarifa.zonaDeViaje) return;
+            const zona = tarifa.zonaDeViaje.origen;
+
+            if (!agrupado[zona]) {
+                agrupado[zona] = { suma: 0, cantidad: 0 };
+            }
+
+            agrupado[zona].suma += Number(tarifa.valor_base) || 0;
+            agrupado[zona].cantidad += 1;
+        });
+
+        const resultado = Object.entries(agrupado).map(([zona, { suma, cantidad }]) => ({
+            zona,
+            promedio: cantidad ? suma / cantidad : 0,
+            cantidad,
+        }));
+
+        resultado.sort((a, b) =>
+            ordenPromedioZona === 'asc' ? a.promedio - b.promedio : b.promedio - a.promedio
+        );
+
+        setPromedioPorZona(resultado);
+    }, [tarifas, ordenPromedioZona]);
+
+    useEffect(() => {
+        if (!tarifas) return;
+
+        const tarifasValidas = tarifas.filter(t => t.deletedAt === null && t.transportista);
+
+        const agrupadas = {};
+
+        tarifasValidas.forEach(t => {
+            const nombre = t.transportista.nombre;
+            if (!agrupadas[nombre]) {
+                agrupadas[nombre] = { total: 0, cantidad: 0 };
+            }
+            agrupadas[nombre].total += parseFloat(t.valor_base);
+            agrupadas[nombre].cantidad += 1;
+        });
+
+        let resumen = Object.entries(agrupadas).map(([nombre, { total, cantidad }]) => ({
+            transportista: nombre,
+            promedio: total / cantidad,
+            cantidad,
+        }));
+
+        resumen.sort((a, b) =>
+            ordenPromedioTransportista === 'asc'
+                ? a.promedio - b.promedio
+                : b.promedio - a.promedio
+        );
+
+        setPromedioPorTransportista(resumen);
+    }, [tarifas, ordenPromedioTransportista]);
+
+    const handleGenerarAnalisis = async () => {
+        if (!fechaInicio || !fechaFin) {
+            showNotification('Por favor, selecciona ambas fechas.');
+            return;
+        }
+        if (new Date(fechaFin) < new Date(fechaInicio)) {
+            showNotification('La fecha de fin no puede ser anterior a la fecha de inicio.');
+            return;
+        }
+
+        const [startYear, startMonth, startDay] = fechaInicio.split('-').map(Number);
+        const fechaInicioLocal = new Date(startYear, startMonth - 1, startDay);
+        fechaInicioLocal.setHours(0, 0, 0, 0);
+        const fechaInicioParaAPI = fechaInicioLocal.toISOString();
+
+        const [endYear, endMonth, endDay] = fechaFin.split('-').map(Number);
+        const fechaFinLocal = new Date(endYear, endMonth - 1, endDay);
+        fechaFinLocal.setHours(23, 59, 59, 999);
+        const fechaFinParaAPI = fechaFinLocal.toISOString();
+
+        setLoadingAnalisis(true);
+        try {
+            const data = await getAnalisisTarifas(fechaInicioParaAPI, fechaFinParaAPI);
+
+            setAnalisisData(data);
+            if (data.length === 0) {
+                showNotification('No se encontraron variaciones de tarifas en el período seleccionado.', 'info');
+            }
+        } catch (error) {
+            console.error("Error al generar análisis", error);
+            showNotification('No se pudo generar el análisis.');
+        } finally {
+            setLoadingAnalisis(false);
+        }
+    };
+
+    const handleViewHistory = (e, tarifaId) => {
+        e.stopPropagation();
+        navigate(`/historial-tarifa/${tarifaId}`);
+    };
+
+    return (
+        <>
+            <div className="min-h-screen bg-[#242423] p-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="mb-8 flex items-center justify-between">
+                        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/tarifas')}>
+                            <ArrowLeft size={24} className="text-gray-300 hover:text-gray-200" />
+                            <h1 className="text-3xl font-bold text-gray-200">Reporte de Tarifas</h1>
+                        </div>
+                        <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-3 text-lg font-mono text-emerald-400">
+                                <span>{currentTime.toLocaleDateString('es-AR')}</span>
+                                <span>{currentTime.toLocaleTimeString('es-AR')}</span>
+                            </div>
+                            <button onClick={fetchTarifas} disabled={loading} className="flex items-center space-x-2 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:bg-emerald-800">
+                                {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                                <span>Actualizar Datos</span>
+                            </button>
+                        </div>
                     </div>
-                    <div>
-                        <label className="text-sm font-medium text-gray-400 block mb-1">Fecha de Fin</label>
-                        <input type="date" value={fechaFin} onChange={e => setFechaFin(e.target.value)} className="w-full mt-1 p-2 bg-white/10 border border-white/30 rounded-lg text-white" />
-                    </div>
-                    <button onClick={handleGenerarAnalisis} disabled={loadingAnalisis} className="h-[42px] px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-purple-800 flex items-center justify-center">
-                        {loadingAnalisis ? <Loader2 className="animate-spin" /> : 'Generar Análisis'}
-                    </button>
-                </div>
-            </div>
 
-            {loadingAnalisis ? (
-                 <div className="text-center p-8"><Loader2 className="animate-spin text-purple-400 mx-auto" size={32}/></div>
-            ) : analisisData.length > 0 && (
-                <div className="bg-[#444240] rounded-xl border border-gray-700 overflow-hidden mb-8">
-                    <div className="p-6 border-b border-gray-700">
-                        <h2 className="text-xl font-bold text-gray-200">Resultados del Análisis</h2>
-                        <p className="text-sm text-gray-400">Haz clic en una fila para ver la evolución gráfica o en el ícono de historial para ver el detalle completo.</p>
+                    <div className="bg-[#444240] p-6 rounded-xl border border-gray-700 mb-8">
+                        <div className="flex items-center gap-3 mb-4">
+                            <BarChart3 className="text-purple-400" size={24} />
+                            <h2 className="text-xl font-bold text-gray-200">Análisis Comparativo de Aumentos</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div>
+                                <label className="text-sm font-medium text-gray-400 block mb-1">Fecha de Inicio</label>
+                                <input type="date" value={fechaInicio} onChange={e => setFechaInicio(e.target.value)} className="w-full mt-1 p-2 bg-white/10 border border-white/30 rounded-lg text-white" />
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-400 block mb-1">Fecha de Fin</label>
+                                <input type="date" value={fechaFin} onChange={e => setFechaFin(e.target.value)} className="w-full mt-1 p-2 bg-white/10 border border-white/30 rounded-lg text-white" />
+                            </div>
+                            <button onClick={handleGenerarAnalisis} disabled={loadingAnalisis} className="h-[42px] px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-purple-800 flex items-center justify-center">
+                                {loadingAnalisis ? <Loader2 className="animate-spin" /> : 'Generar Análisis'}
+                            </button>
+                        </div>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-gray-800">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Tarifa</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Costo Inicial</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Costo Final</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Variación ($)</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Variación (%)</th>
-                                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase">Historial</th>
+
+                    {loadingAnalisis ? (
+                        <div className="text-center p-8"><Loader2 className="animate-spin text-purple-400 mx-auto" size={32} /></div>
+                    ) : analisisData.length > 0 && (
+                        <div className="bg-[#444240] rounded-xl border border-gray-700 overflow-hidden mb-8">
+                            <div className="p-6 border-b border-gray-700">
+                                <h2 className="text-xl font-bold text-gray-200">Resultados del Análisis</h2>
+                                <p className="text-sm text-gray-400">Haz clic en una fila para ver la evolución gráfica o en el ícono de historial para ver el detalle completo.</p>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className="bg-gray-800">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Tarifa</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Costo Inicial</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Costo Final</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Variación ($)</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase">Variación (%)</th>
+                                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase">Historial</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-[#444240] divide-y divide-gray-700">
+                                        {analisisData.map(item => {
+                                            const esPositivo = item.variacion_absoluta >= 0;
+                                            return (
+                                                <tr key={item.id_tarifa} onClick={() => setSelectedTarifaForChart(item)} className="cursor-pointer hover:bg-gray-700/50 transition-colors">
+                                                    <td className="px-6 py-4 text-sm text-gray-300">{item.descripcion}</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-400">${item.costo_inicial.toFixed(2)}</td>
+                                                    <td className="px-6 py-4 text-sm text-gray-200 font-semibold">${item.costo_final.toFixed(2)}</td>
+                                                    <td className={`px-6 py-4 text-sm font-semibold ${esPositivo ? 'text-green-400' : 'text-red-400'}`}>
+                                                        {esPositivo ? '+' : ''}{item.variacion_absoluta.toFixed(2)}
+                                                    </td>
+                                                    <td className={`px-6 py-4 text-sm font-semibold ${esPositivo ? 'text-green-400' : 'text-red-400'}`}>
+                                                        {esPositivo ? '+' : ''}{item.variacion_porcentual.toFixed(2)}%
+                                                    </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        <button onClick={(e) => handleViewHistory(e, item.id_tarifa)} title="Ver Historial" className="text-purple-400 hover:text-purple-600">
+                                                            <HistoryIcon size={18} />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Tabla con promedio por zona */}
+                    <div className="bg-[#444240] p-6 rounded-xl border border-gray-700 mb-8">
+                        <h2 className="text-xl font-bold text-gray-200 mb-4">Costos por Zona (Valor Base)</h2>
+                        <div className="mb-4 w-64">
+                            <Select
+                                options={[
+                                    { value: 'asc', label: 'Menor a Mayor ↑' },
+                                    { value: 'desc', label: 'Mayor a Menor ↓' },
+                                ]}
+                                value={
+                                    ordenPromedioZona === 'asc'
+                                        ? { value: 'asc', label: 'Menor a Mayor ↑' }
+                                        : { value: 'desc', label: 'Mayor a Menor ↓' }
+                                }
+                                onChange={(selected) => setOrdenPromedioZona(selected?.value || 'asc')}
+                                isClearable={false}
+                                styles={{
+                                    control: (base) => ({
+                                        ...base,
+                                        backgroundColor: '#242423',
+                                        borderColor: '#555',
+                                        color: '#fff',
+                                    }),
+                                    singleValue: (base) => ({
+                                        ...base,
+                                        color: '#fff',
+                                    }),
+                                    menu: (base) => ({
+                                        ...base,
+                                        backgroundColor: '#333',
+                                        color: '#fff',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <table className="w-full text-gray-300 text-sm table-fixed">
+                            <thead>
+                                <tr className="border-b border-gray-700">
+                                    <th className="text-left py-2 w-1/3">Zona</th>
+                                    <th className="text-center py-2 w-1/3">Promedio Valor Base</th>
+                                    <th className="text-right py-2 w-1/3">Cantidad de Tarifas</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-[#444240] divide-y divide-gray-700">
-                                {analisisData.map(item => {
-                                    const esPositivo = item.variacion_absoluta >= 0;
-                                    return (
-                                        <tr key={item.id_tarifa} onClick={() => setSelectedTarifaForChart(item)} className="cursor-pointer hover:bg-gray-700/50 transition-colors">
-                                            <td className="px-6 py-4 text-sm text-gray-300">{item.descripcion}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-400">${item.costo_inicial.toFixed(2)}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-200 font-semibold">${item.costo_final.toFixed(2)}</td>
-                                            <td className={`px-6 py-4 text-sm font-bold ${esPositivo ? 'text-green-400' : 'text-red-400'}`}>
-                                                {esPositivo ? '+' : ''}${item.variacion_absoluta.toFixed(2)}
-                                            </td>
-                                            <td className={`px-6 py-4 text-sm font-bold ${esPositivo ? 'text-green-400' : 'text-red-400'}`}>
-                                                {item.variacion_porcentual.toFixed(2)}%
-                                            </td>
-                                            <td className="px-6 py-4 text-center">
-                                                <button 
-                                                  onClick={(e) => handleViewHistory(e, item.id_tarifa)} 
-                                                  className="p-2 text-gray-400 hover:text-purple-400 hover:bg-gray-600 rounded-full transition-colors"
-                                                  title="Ver historial detallado"
-                                                >
-                                                    <HistoryIcon size={18} />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                            <tbody>
+                                {promedioPorZona.map(({ zona, promedio, cantidad }) => (
+                                    <tr key={zona} className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors cursor-default">
+                                        <td className="py-2">{zona}</td>
+                                        <td className="py-2 text-center">${promedio.toFixed(2)}</td>
+                                        <td className="py-2 text-right">{cantidad}</td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
-                </div>
-            )}
-        </div>
-      </div>
-      
-      {selectedTarifaForChart && (
-        <TarifaEvolucionModal 
-            tarifa={selectedTarifaForChart}
-            onClose={() => setSelectedTarifaForChart(null)}
-        />
-      )}
 
-      {notification.show && (
-        <div className={`fixed top-5 right-5 px-6 py-4 rounded-lg text-white font-semibold shadow-lg z-50 transition-all ${
-            notification.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-          }`}>
-          {notification.message}
-        </div>
-      )}
-    </>
-  );
+                    <div className="bg-[#444240] p-6 rounded-xl border border-gray-700 mb-8">
+                        <h2 className="text-xl font-bold text-gray-200 mb-4">Promedio por Transportista (Valor Base)</h2>
+
+                        <div className="mb-4 w-64">
+                            <Select
+                                options={[
+                                    { value: 'asc', label: 'Más económico primero ↑' },
+                                    { value: 'desc', label: 'Más caro primero ↓' },
+                                ]}
+                                value={
+                                    ordenPromedioTransportista === 'asc'
+                                        ? { value: 'asc', label: 'Más económico primero ↑' }
+                                        : { value: 'desc', label: 'Más caro primero ↓' }
+                                }
+                                onChange={(selected) => setOrdenPromedioTransportista(selected?.value || 'asc')}
+                                isClearable={false}
+                                styles={{
+                                    control: (base) => ({
+                                        ...base,
+                                        backgroundColor: '#242423',
+                                        borderColor: '#555',
+                                        color: '#fff',
+                                    }),
+                                    singleValue: (base) => ({
+                                        ...base,
+                                        color: '#fff',
+                                    }),
+                                    menu: (base) => ({
+                                        ...base,
+                                        backgroundColor: '#333',
+                                        color: '#fff',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        <table className="w-full text-gray-300 text-sm table-fixed">
+                            <thead>
+                                <tr className="border-b border-gray-700">
+                                    <th className="text-left py-2 w-1/3">Transportista</th>
+                                    <th className="text-center py-2 w-1/3">Promedio Costo Total</th>
+                                    <th className="text-right py-2 w-1/3">Cantidad de Tarifas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {promedioPorTransportista.map(({ transportista, promedio, cantidad }) => (
+                                    <tr key={transportista} className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors cursor-default">
+                                        <td className="py-2">{transportista}</td>
+                                        <td className="py-2 text-center">${promedio.toFixed(2)}</td>
+                                        <td className="py-2 text-right">{cantidad}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+
+
+
+                    {selectedTarifaForChart && (
+                        <TarifaEvolucionModal tarifa={selectedTarifaForChart} onClose={() => setSelectedTarifaForChart(null)} />
+                    )}
+
+                    {notification.show && (
+                        <div className={`fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white ${notification.type === 'error' ? 'bg-red-600' : 'bg-green-600'}`}>
+                            {notification.message}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </>
+    );
 };
 
 export default TarifasReport;
