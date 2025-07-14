@@ -422,9 +422,9 @@ const TarifaCosto = () => {
               <label className="block text-sm font-semibold text-gray-300 mb-2">Tipo de Vehículo *</label>
               <Select
                 name="tipoVehiculo"
-                value={tiposVehiculo.find(v => v.id === form.tipoVehiculo) ? {
+                value={tiposVehiculo.find(v => v.id == form.tipoVehiculo) ? {
                   value: form.tipoVehiculo,
-                  label: tiposVehiculo.find(v => v.id === form.tipoVehiculo)?.descripcion 
+                  label: tiposVehiculo.find(v => v.id == form.tipoVehiculo)?.descripcion 
                 } : null}
                 onChange={(selected) =>
                   handleInputChange({ target: { name: 'tipoVehiculo', value: selected?.value || '' } })
@@ -443,9 +443,9 @@ const TarifaCosto = () => {
               <label className="block text-sm font-semibold text-gray-300 mb-2">Tipo de Carga *</label>
               <Select
                 name="tipoCarga"
-                value={tiposCarga.find(c => c.id === form.tipoCarga) ? {
+                value={tiposCarga.find(c => c.id == form.tipoCarga) ? {
                   value: form.tipoCarga,
-                  label: tiposCarga.find(c => c.id === form.tipoCarga)?.categoria 
+                  label: tiposCarga.find(c => c.id == form.tipoCarga)?.categoria 
                 } : null}
                 onChange={(selected) =>
                   handleInputChange({ target: { name: 'tipoCarga', value: selected?.value || '' } })
@@ -465,9 +465,9 @@ const TarifaCosto = () => {
               <label className="block text-sm font-semibold text-gray-300 mb-2">Zona de Viaje *</label>
               <Select
                 name="zonaDeViaje"
-                value={zonasDeViaje.find(z => z.id === form.zonaDeViaje) ? {
+                value={zonasDeViaje.find(z => z.id == form.zonaDeViaje) ? {
                   value: form.zonaDeViaje,
-                  label: zonasDeViaje.find(z => z.id === form.zonaDeViaje)?.origen + ' - ' + zonasDeViaje.find(z => z.id === form.zonaDeViaje)?.destino 
+                  label: zonasDeViaje.find(z => z.id == form.zonaDeViaje)?.origen + ' - ' + zonasDeViaje.find(z => z.id === form.zonaDeViaje)?.destino 
                 } : null}
                 onChange={(selected) =>
                   handleInputChange({ target: { name: 'zonaDeViaje', value: selected?.value || '' } })
@@ -486,9 +486,9 @@ const TarifaCosto = () => {
               <label className="block text-sm font-semibold text-gray-300 mb-2">Transportista *</label>
               <Select
                 name="transportista"
-                value={transportistas.find(t => t.id === form.transportista) ? {
+                value={transportistas.find(t => t.id == form.transportista) ? {
                   value: form.transportista,
-                  label: transportistas.find(t => t.id === form.transportista)?.nombre 
+                  label: transportistas.find(t => t.id == form.transportista)?.nombre 
                 } : null}
                 onChange={(selected) =>
                   handleInputChange({ target: { name: 'transportista', value: selected?.value || '' } })
