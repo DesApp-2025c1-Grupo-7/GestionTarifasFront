@@ -175,9 +175,9 @@ const TarifasReport = () => {
     const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
     const [selectedTarifaForChart, setSelectedTarifaForChart] = useState(null);
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [promedioPorZona, setPromedioPorZona] = useState([]);
     const [promedioPorTransportista, setPromedioPorTransportista] = useState([]);
     const [ordenPromedioTransportista, setOrdenPromedioTransportista] = useState('asc');
+    const [promedioPorZona, setPromedioPorZona] = useState([]);
     const [ordenPromedioZona, setOrdenPromedioZona] = useState('asc');
 
 
@@ -219,15 +219,18 @@ const TarifasReport = () => {
         const agrupado = {};
 
         tarifas.forEach(tarifa => {
-            if (!tarifa.zonaDeViaje) return;
-            const zona = tarifa.zonaDeViaje.origen;
+            const origen = tarifa.zonaDeViaje?.origen;
+            const destino = tarifa.zonaDeViaje?.destino;
+            if (!origen || !destino) return;
 
-            if (!agrupado[zona]) {
-                agrupado[zona] = { suma: 0, cantidad: 0 };
+            const clave = `${origen} → ${destino}`;
+
+            if (!agrupado[clave]) {
+                agrupado[clave] = { suma: 0, cantidad: 0 };
             }
 
-            agrupado[zona].suma += Number(tarifa.valor_base) || 0;
-            agrupado[zona].cantidad += 1;
+            agrupado[clave].suma += Number(tarifa.valor_base) || 0;
+            agrupado[clave].cantidad += 1;
         });
 
         const resultado = Object.entries(agrupado).map(([zona, { suma, cantidad }]) => ({
@@ -443,7 +446,7 @@ const TarifasReport = () => {
                         <table className="w-full text-gray-300 text-sm table-fixed">
                             <thead>
                                 <tr className="border-b border-gray-700">
-                                    <th className="text-left py-2 w-1/3">Zona</th>
+                                    <th className="text-left py-2 w-1/3">Zona (Origen → Destino)</th>
                                     <th className="text-center py-2 w-1/3">Promedio Valor Base</th>
                                     <th className="text-right py-2 w-1/3">Cantidad de Tarifas</th>
                                 </tr>

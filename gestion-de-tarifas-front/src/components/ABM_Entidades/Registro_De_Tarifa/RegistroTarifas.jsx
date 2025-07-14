@@ -510,12 +510,12 @@ const TarifaCosto = () => {
             <Select options={cargaOptions} placeholder="Filtrar por Carga" isClearable value={filters.tipoCarga} onChange={selectedOption => setFilters({ ...filters, tipoCarga: selectedOption })} styles={customSelectStyles} />
             <Select
               options={[
-                { value: 'asc', label: 'Costo Total ↑' },
-                { value: 'desc', label: 'Costo Total ↓' },
+                { value: 'asc', label: 'Costo Base ↑' },
+                { value: 'desc', label: 'Costo Base ↓' },
               ]}
               placeholder="Ordenar por Costo"
               isClearable
-              value={ordenCostoAsc ? { value: 'asc', label: 'Costo Total ↑' } : { value: 'desc', label: 'Costo Total ↓' }}
+              value={ordenCostoAsc ? { value: 'asc', label: 'Costo Base ↑' } : { value: 'desc', label: 'Costo Base ↓' }}
               onChange={selected =>
                 setOrdenCostoAsc(selected?.value === 'asc')
               }

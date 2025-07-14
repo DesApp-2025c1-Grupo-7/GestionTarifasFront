@@ -8,7 +8,7 @@ import { useOutletContext } from 'react-router-dom';
 
 const Adicionales = () => {
   const { showNotification, tabColor } = useOutletContext();
-  
+
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -56,13 +56,15 @@ const Adicionales = () => {
     try {
       if (editingId) {
         const updatedAdicional = await updateAdicional(editingId, entityData);
+        const mapped = { ...updatedAdicional, id: updatedAdicional.idAdicional };
         setData(data.map(item =>
-          item.id === editingId ? { ...item, ...updatedAdicional } : item
+          item.id === editingId ? { ...item, ...mapped } : item
         ));
         showNotification('Adicional actualizado correctamente');
       } else {
         const nuevoAdicional = await createAdicional(entityData);
-        setData([...data, nuevoAdicional]);
+        const mapped = { ...nuevoAdicional, id: nuevoAdicional.idAdicional };
+        setData([...data, mapped]);
         showNotification('Adicional agregado correctamente');
       }
 
@@ -319,7 +321,7 @@ const Adicionales = () => {
                           <Edit size={14} />
                         </button>
                         <button
-                          onClick={() => deleteEntity(item.idAdicional)}
+                          onClick={() => deleteEntity(item.id)}
                           className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
                         >
                           <Trash2 size={14} />
