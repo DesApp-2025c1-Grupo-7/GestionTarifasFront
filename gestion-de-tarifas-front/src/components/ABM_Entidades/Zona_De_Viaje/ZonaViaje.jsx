@@ -28,11 +28,8 @@ const ZonasViaje = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [editingId, setEditingId] = useState(null);
-  
   const [form, setForm] = useState({ origen: '', destino: '', distanciaKm: '' });
-  
-  // Estado separado para los filtros
-  const [filters, setFilters] = useState({ origen: '', destino: '' });
+  const [filters, setFilters] = useState({ origen: [], destino: [] }); // Estado para los filtros
 
   // Carga inicial de datos
   useEffect(() => {
@@ -53,19 +50,24 @@ const ZonasViaje = () => {
     fetchZonas();
   }, []);
 
-  // Lógica de filtrado que se activa cuando cambian los datos o los filtros
+  // Lógica de filtrado 
   useEffect(() => {
     let dataToFilter = [...data];
-    if (filters.origen) {
-      dataToFilter = dataToFilter.filter(item => item.origen === filters.origen);
+
+    if (filters.origen.length > 0) {
+      const selectedOrigenes = filters.origen.map(o => o.value);
+      dataToFilter = dataToFilter.filter(item => selectedOrigenes.includes(item.origen));
     }
-    if (filters.destino) {
-      dataToFilter = dataToFilter.filter(item => item.destino === filters.destino);
+    
+    if (filters.destino.length > 0) {
+      const selectedDestinos = filters.destino.map(d => d.value);
+      dataToFilter = dataToFilter.filter(item => selectedDestinos.includes(item.destino));
     }
+
     setFilteredData(dataToFilter);
   }, [data, filters]);
 
-  //  MANEJADORES DE FORMULARIO 
+  // FORMULARIO 
   const clearForm = () => {
     setForm({ origen: '', destino: '', distanciaKm: '' });
     setEditingId(null);
@@ -149,7 +151,6 @@ const ZonasViaje = () => {
       }
     }
   };
-
 
   const opcionesOrigen = useMemo(() => [
     { value: '', label: 'Todos los Orígenes' },
@@ -286,17 +287,19 @@ const ZonasViaje = () => {
           <h2 className="text-2xl font-bold mb-4">Zonas de Viaje Registradas</h2>
           <div className="flex gap-4 items-center">
             <Select 
-              options={opcionesOrigen} 
-              isClearable 
-              placeholder="Filtrar por origen..." 
-              onChange={(opt) => setFilters(f => ({ ...f, origen: opt ? opt.value : '' }))} 
+              isMulti
+              closeMenuOnSelect={false}
+              options={opcionesOrigen.filter(opt => opt.value)} 
+              placeholder="Filtrar por origen(es)..." 
+              onChange={(selectedOptions) => setFilters(f => ({ ...f, origen: selectedOptions || [] }))} 
               styles={customSelectStyles} 
             />
             <Select 
-              options={opcionesDestino} 
-              isClearable 
-              placeholder="Filtrar por destino..." 
-              onChange={(opt) => setFilters(f => ({ ...f, destino: opt ? opt.value : '' }))} 
+              isMulti
+              closeMenuOnSelect={false}
+              options={opcionesDestino.filter(opt => opt.value)} 
+              placeholder="Filtrar por destino(s)..." 
+              onChange={(selectedOptions) => setFilters(f => ({ ...f, destino: selectedOptions || [] }))} 
               styles={customSelectStyles} 
             />
           </div>

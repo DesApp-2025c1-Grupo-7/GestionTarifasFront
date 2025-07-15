@@ -3,12 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { History as HistoryIcon, Loader2, ArrowLeft, Calendar, User, Truck, MapPin } from 'lucide-react';
 import { getTarifaById, getHistorialDeTarifa } from '../../../../services/tarifaCosto.service';
 
-// LÓGICA DE COMPARACIÓN 
+//COMPARACIÓN 
 const compararVersiones = (versionNueva, versionAnterior) => {
     if (!versionAnterior) return [<p key="init">Versión inicial creada.</p>];
     
     const cambios = [];
-
+    
     // Comparar valor base
     const valorBaseNuevo = Number(versionNueva.valor_base);
     const valorBaseAnterior = Number(versionAnterior.valor_base);
@@ -21,21 +21,22 @@ const compararVersiones = (versionNueva, versionAnterior) => {
         );
     }
     
-    // Búsqueda eficiente de adicionales
+    // Búsqueda de adicionales
     const adicionalesNuevosMap = new Map((versionNueva.adicionales || []).map(a => [a.idAdicional, a]));
     const adicionalesAnterioresMap = new Map((versionAnterior.adicionales || []).map(a => [a.idAdicional, a]));
 
     // Detectar agregados y modificaciones de costo
     for (const [id, adicionalNuevo] of adicionalesNuevosMap) {
         const adicionalAnterior = adicionalesAnterioresMap.get(id);
-        
+        // Si no existe en la versión anterior, es un agregado
         if (!adicionalAnterior) {
-            // Caso 1: Adicional Agregado
+          
             cambios.push(<p key={`add-${id}`}>+ Se agregó: <strong className="text-green-400">{adicionalNuevo.descripcion}</strong> (Costo: ${Number(adicionalNuevo.costo).toFixed(2)})</p>);
         } else {
-            // Caso 2: Adicional existe en ambas versiones, comparar su costo
+
             const costoNuevo = Number(adicionalNuevo.costo);
             const costoAnterior = Number(adicionalAnterior.costo);
+
             if (costoNuevo !== costoAnterior) {
                 cambios.push(
                     <p key={`mod-${id}`}>

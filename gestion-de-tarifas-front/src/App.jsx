@@ -26,7 +26,7 @@ const App = () => {
         {/* Ruta por defecto: Tipos de Carga */}
         <Route index element={<TiposCarga />} />
 
-        {/* Definimos una ruta para cada entidad */}
+        {/* Ruta para cada entidad */}
         <Route path="tipos-de-carga" element={<TiposCarga />} />
         <Route path="tipos-de-vehiculo" element={<TiposVehiculo />} />
         <Route path="zonas" element={<ZonasViaje />} />

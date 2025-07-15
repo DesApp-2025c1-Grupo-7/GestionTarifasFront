@@ -7,10 +7,7 @@ import Transportistas from './Transportista/Transportista';
 import Adicionales from './Adicionales/Adicionales';
 import RegistroTarifas from './Registro_De_Tarifa/RegistroTarifas';
 import logo from '../../assets/logo.png';
-
 import { Outlet, Link, useLocation } from 'react-router-dom';
-
-
 
 const ABMEntidades = () => {
   const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });

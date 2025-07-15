@@ -4,9 +4,7 @@ const API_URL = '/api';
 
 /**
  * Obtiene todos los vínculos Tarifa-Adicional.
- * NOTA: Para optimizar, lo ideal sería que el backend tuviera un endpoint 
- * que devuelva solo los adicionales para una tarifa específica.
- * Por ahora, traemos todos y filtramos en el frontend.
+ * traemos todos y filtramos en el frontend.
  * @returns {Promise<Array>} - Una promesa que resuelve a un array de todos los vínculos.
  */
 export const getTodosLosTarifaAdicionales = async () => {

@@ -66,7 +66,7 @@ const TiposVehiculo = () => {
   const [form, setForm] = useState({ descripcion: '', tipoCargaIds: [] });
   
   // Estado separado para los filtros de la tabla
-  const [filters, setFilters] = useState({ descripcion: '', tipoCarga: '' });
+  const [filters, setFilters] = useState({ descripcion: [], tipoCarga: [] });
 
   const [tiposCarga, setTiposCarga] = useState([]);
 
@@ -92,20 +92,24 @@ const TiposVehiculo = () => {
   useEffect(() => {
     let dataToFilter = [...data];
 
-    if (filters.descripcion) {
+    if (filters.descripcion.length > 0) {
+      const selectedDescriptions = filters.descripcion.map(d => d.value);
       dataToFilter = dataToFilter.filter(item => 
-        item.descripcion.toLowerCase().includes(filters.descripcion.toLowerCase())
+        selectedDescriptions.includes(item.descripcion)
       );
     }
-    if (filters.tipoCarga) {
+
+    if (filters.tipoCarga.length > 0) {
+      const selectedCargas = filters.tipoCarga.map(c => c.value);
       dataToFilter = dataToFilter.filter(item =>
-        item.tipoCargas?.some(tc => tc.categoria.toLowerCase().includes(filters.tipoCarga.toLowerCase()))
+        item.tipoCargas?.some(tc => selectedCargas.includes(tc.categoria))
       );
     }
+    
     setFilteredData(dataToFilter);
   }, [data, filters]);
 
-  // MANEJADORES DE FORMULARIO 
+  // FORMULARIO 
   const clearForm = () => {
     setForm({ descripcion: '', tipoCargaIds: [] });
     setEditingId(null);
@@ -305,17 +309,19 @@ const TiposVehiculo = () => {
           <h2 className="text-2xl font-bold mb-4">Tipos de Vehículo Registrados</h2>
           <div className='flex gap-4 items-center'>
             <Select
-              options={opcionesVehiculoFilter}
-              isClearable
-              placeholder="Filtrar por vehículo..."
-              onChange={(selected) => setFilters(prev => ({ ...prev, descripcion: selected ? selected.value : '' }))}
+              isMulti
+              closeMenuOnSelect={false}
+              options={opcionesVehiculoFilter.filter(opt => opt.value)}
+              placeholder="Filtrar por vehículo(s)..."
+              onChange={(selectedOptions) => setFilters(prev => ({ ...prev, descripcion: selectedOptions || [] }))}
               styles={customSelectStyles()}
             />
             <Select
-              options={opcionesCargaFilter}
-              isClearable
-              placeholder="Filtrar por tipo de carga..."
-              onChange={(selected) => setFilters(prev => ({ ...prev, tipoCarga: selected ? selected.value : '' }))}
+              isMulti
+              closeMenuOnSelect={false}
+              options={opcionesCargaFilter.filter(opt => opt.value)}
+              placeholder="Filtrar por tipo de carga(s)..."
+              onChange={(selectedOptions) => setFilters(prev => ({ ...prev, tipoCarga: selectedOptions || [] }))}
               styles={customSelectStyles()}
             />
           </div>

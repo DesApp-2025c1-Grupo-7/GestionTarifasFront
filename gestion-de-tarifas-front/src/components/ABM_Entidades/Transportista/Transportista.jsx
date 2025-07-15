@@ -7,7 +7,6 @@ import Swal from 'sweetalert2';
 import Select from 'react-select';
 import { useOutletContext } from 'react-router-dom';
 
-// Estilos para los componentes Select
 const customSelectStyles = (isMulti = false) => ({
   control: (base) => ({
     ...base,
@@ -96,7 +95,6 @@ const Transportistas = () => {
   }, []);
 
   
-
   // LÓGICA DE FILTRADO 
   const filteredData = useMemo(() => {
     return data.filter((item) => {
@@ -113,7 +111,7 @@ const Transportistas = () => {
     });
   }, [data, filters]);
 
-  //  MANEJADORES 
+  //  formulario  
   const clearForm = () => {
     setForm({ nombre: '', contacto: '', telefono: '', tipoVehiculos: [], zonasDeViaje: [] });
     setEditingId(null);
@@ -272,6 +270,7 @@ const Transportistas = () => {
           -moz-appearance: textfield;
         }
       `}</style>
+
       {/* Form Section */}
       <div className="lg:col-span-1">
         <div ref={formRef} className="bg-[#444240] p-8 rounded-2xl shadow-xl border border-gray-900">
@@ -370,7 +369,8 @@ const Transportistas = () => {
       <div className="lg:col-span-2 bg-[#444240] rounded-2xl shadow-lg border border-gray-900 overflow-hidden">
         <div ref={tableHeaderRef} className={`bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6`}>
           <h2 className="text-2xl font-bold mb-4">Transportistas Registrados</h2>
-          {/* --- SECCIÓN DE FILTROS --- */}
+          
+          {/* SECCIÓN DE FILTROS */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
               <input 

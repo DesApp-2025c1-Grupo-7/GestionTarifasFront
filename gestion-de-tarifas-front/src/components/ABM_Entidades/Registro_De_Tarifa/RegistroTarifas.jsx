@@ -647,8 +647,8 @@ const TarifaCosto = () => {
                       { value: 'costo_asc', label: 'Costo Base ↑' },
                       { value: 'creacion_desc', label: 'Fecha Creación ↓' },
                       { value: 'creacion_asc', label: 'Fecha Creación ↑' },
-                      { value: 'modificacion_desc', label: 'Fecha Modificación ↓' },
-                      { value: 'modificacion_asc', label: 'Fecha Modificación ↑' },
+                      { value: 'modificacion_desc', label: 'Ultima Modificación ↓' },
+                      { value: 'modificacion_asc', label: 'Ultima Modificación ↑' },
                     ]}
                     placeholder="Ordenar por"
                     isClearable

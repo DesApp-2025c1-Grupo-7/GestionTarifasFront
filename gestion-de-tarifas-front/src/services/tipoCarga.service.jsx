@@ -2,8 +2,6 @@ import axios from 'axios';
 
 const API_URL = '/api';
 
-
-
 export const getCargas = async () => {
   const res = await axios.get(`${API_URL}/tipo-carga/all`);
   return res.data;

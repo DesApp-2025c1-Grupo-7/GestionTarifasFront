@@ -27,7 +27,7 @@ const TiposCarga = () => {
   
   const [form, setForm] = useState({ categoria: '', pesoTotal: '', volumenTotal: '', esEspecial: false, requisitoEspecial: '' });
   
-  const [filters, setFilters] = useState({ categoria: '', esEspecial: null });
+  const [filters, setFilters] = useState({ categoria: [], esEspecial: null });
 
   // Carga inicial de datos
   useEffect(() => {
@@ -47,8 +47,9 @@ const TiposCarga = () => {
   useEffect(() => {
     let dataToFilter = [...data];
 
-    if (filters.categoria) {
-      dataToFilter = dataToFilter.filter(item => item.categoria.toLowerCase().includes(filters.categoria.toLowerCase()));
+    if (filters.categoria.length > 0) {
+      const selectedCategories = filters.categoria.map(c => c.value);
+      dataToFilter = dataToFilter.filter(item => selectedCategories.includes(item.categoria));
     }
     if (filters.esEspecial !== null) {
       dataToFilter = dataToFilter.filter(item => item.esEspecial === filters.esEspecial);
@@ -332,10 +333,11 @@ const TiposCarga = () => {
           <h2 className="text-2xl font-bold mb-4">Tipos de Carga Registrados</h2>
           <div className='flex gap-4 items-center'>
             <Select
-              options={opcionesCategoria}
-              isClearable
-              placeholder="Filtrar por categoría..."
-              onChange={(opt) => setFilters(f => ({ ...f, categoria: opt ? opt.value : '' }))}
+              isMulti
+              closeMenuOnSelect={false}
+              options={opcionesCategoria.filter(opt => opt.value)} // Excluimos la opción "Todas"
+              placeholder="Filtrar por categoría(s)..."
+              onChange={(selectedOptions) => setFilters(f => ({ ...f, categoria: selectedOptions || [] }))}
               styles={customSelectStyles}
             />
             <Select

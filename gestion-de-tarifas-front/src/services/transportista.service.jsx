@@ -23,7 +23,7 @@ export const deleteTransportista = async (id) => {
   return res.data;
 };
 
-// nueva
+// nueva función para obtener el reporte de tarifas por transportista
 export const getTransportistaReport = async () => {
   const res = await axios.get(`${API_URL}/transportista/reporte-tarifas`);
   return res.data;

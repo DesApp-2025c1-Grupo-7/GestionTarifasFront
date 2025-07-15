@@ -5,7 +5,7 @@ import { ArrowLeft, RefreshCw, Loader2, BarChart3, History as HistoryIcon, X as 
 import Select from 'react-select';
 import { getTarifas, getAnalisisTarifas, getHistorialDeTarifa, getTarifaById } from '../../../../services/tarifaCosto.service';
 
-// Funciones compararVersiones y demás componentes auxiliares aquí (igual que antes)...
+
 
 const compararVersiones = (versionNueva, versionAnterior) => {
     if (!versionAnterior) return [<p key="init" className="text-gray-300">Versión inicial creada.</p>];
@@ -154,7 +154,7 @@ const TarifaEvolucionModal = ({ tarifa, onClose }) => {
                                 <YAxis stroke="#888" tickFormatter={(value) => `$${value}`} />
                                 <Tooltip content={<CustomTooltip />} />
                                 <Legend />
-                                <Line type="monotone" dataKey="Costo" stroke="#8884d8" strokeWidth={2} activeDot={{ r: 8 }} />
+                                <Line type="monotone" dataKey="Costo" stroke="#8884d8" strokeWidth={2} activeDot={{ r: 8 }} isAnimationActive={false} />
                             </LineChart>
                         </ResponsiveContainer>
                     )}

@@ -1,11 +1,7 @@
 import axios from 'axios';
 
-// La URL base de tu backend. 
 const API_URL = '/api'; 
 
-/*
- * Obtiene todas las tarifas de costo desde el backend.
- */
 export const getTarifas = async () => {
   const response = await axios.get(`${API_URL}/tarifa-costo`);
   return response.data;
@@ -46,7 +42,6 @@ export const deleteTarifa = async (id) => {
  */
 export const getTarifaById = async (id) => {
   try {
-    // CORRECCIÓN: Se añade el segmento /tarifa-costo a la URL
     const response = await axios.get(`${API_URL}/tarifa-costo/${id}`);
     return response.data;
   } catch (error) {
@@ -62,7 +57,6 @@ Obtiene el historial de versiones de una tarifa específica.
  */
 export const getHistorialDeTarifa = async (id) => {
   try {
-    // CORRECCIÓN: Se añade el segmento /tarifa-costo a la URL
     const response = await axios.get(`${API_URL}/tarifa-costo/historial/${id}`);
     return response.data;
   } catch (error) {
