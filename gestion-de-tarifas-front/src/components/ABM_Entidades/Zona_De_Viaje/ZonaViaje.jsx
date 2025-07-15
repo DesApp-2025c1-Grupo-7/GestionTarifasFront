@@ -24,7 +24,7 @@ const customSelectStyles = {
 
 const ZonasViaje = () => {
   const { showNotification, tabColor } = useOutletContext();
-  // --- ESTADOS ---
+  // ESTADOS 
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -65,7 +65,7 @@ const ZonasViaje = () => {
     setFilteredData(dataToFilter);
   }, [data, filters]);
 
-  // --- MANEJADORES DE FORMULARIO ---
+  //  MANEJADORES DE FORMULARIO 
   const clearForm = () => {
     setForm({ origen: '', destino: '', distanciaKm: '' });
     setEditingId(null);
@@ -76,7 +76,7 @@ const ZonasViaje = () => {
     setForm({ ...form, [name]: value });
   };
 
-  // --- LÓGICA DE CRUD ---
+  // CRUD  
   const validateForm = () => {
     return form.origen.trim() && form.destino.trim() && form.distanciaKm;
   };

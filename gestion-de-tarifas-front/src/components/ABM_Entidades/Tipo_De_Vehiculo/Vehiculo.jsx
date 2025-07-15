@@ -105,7 +105,7 @@ const TiposVehiculo = () => {
     setFilteredData(dataToFilter);
   }, [data, filters]);
 
-  // --- MANEJADORES DE FORMULARIO ---
+  // MANEJADORES DE FORMULARIO 
   const clearForm = () => {
     setForm({ descripcion: '', tipoCargaIds: [] });
     setEditingId(null);
@@ -121,7 +121,7 @@ const TiposVehiculo = () => {
     setForm({ ...form, tipoCargaIds: selectedIds });
   };
 
-  // --- LÓGICA DE CRUD ---
+  // LÓGICA DE CRUD 
   const validateForm = () => form.descripcion && form.tipoCargaIds.length > 0;
 
   const handleSubmit = async () => {

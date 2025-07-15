@@ -47,15 +47,15 @@ const TarifaCosto = () => {
   const menuRef = useRef(null);
 
   const [filters, setFilters] = useState({
-    tipoVehiculo: null,
-    tipoCarga: null,
-    zonaDeViaje: null,
-    transportista: null,
+    tipoVehiculo: [], //Le saque null asi busca por varios transportistas, no por uno solo.
+    tipoCarga: [],
+    zonaDeViaje: [],
+    transportista: [],
   });
 
-  const formRef = useRef(null); // Referencia para medir el div del formulario
-  const tableHeaderRef = useRef(null); // Referencia para medir la cabecera de la tabla
-  const [tableBodyHeight, setTableBodyHeight] = useState('auto'); // Estado para guardar la altura calculada
+  const formRef = useRef(null); 
+  const tableHeaderRef = useRef(null); 
+  const [tableBodyHeight, setTableBodyHeight] = useState('auto'); 
 
   const [form, setForm] = useState({
     tipoVehiculo: '',
@@ -68,7 +68,7 @@ const TarifaCosto = () => {
 
   const [showDetalleModal, setShowDetalleModal] = useState(false);
   const [selectedTarifa, setSelectedTarifa] = useState(null);
-  const [ordenCostoAsc, setOrdenCostoAsc] = useState(true);
+  const [orden, setOrden] = useState('costo_desc');
 
   // Estilos para el scrollbar personalizado
   const scrollbarStyles = {
@@ -152,23 +152,47 @@ const TarifaCosto = () => {
   useEffect(() => {
     let dataToFilter = [...(tarifas || [])].filter(item => item.deletedAt === null);
 
-    if (filters.tipoVehiculo)
-      dataToFilter = dataToFilter.filter(item => item.tipoVehiculo?.id === filters.tipoVehiculo.value);
-    if (filters.transportista)
-      dataToFilter = dataToFilter.filter(item => item.transportista?.id === filters.transportista.value);
-    if (filters.zonaDeViaje)
-      dataToFilter = dataToFilter.filter(item => item.zonaDeViaje?.id === filters.zonaDeViaje.value);
-    if (filters.tipoCarga)
-      dataToFilter = dataToFilter.filter(item => item.tipoCarga?.id === filters.tipoCarga.value);
+    if (filters.tipoVehiculo.length > 0) {
+      const selectedIds = filters.tipoVehiculo.map(v => v.value);
+      dataToFilter = dataToFilter.filter(item => selectedIds.includes(item.tipoVehiculo?.id));
+    }
+    if (filters.transportista.length > 0) {
+      const selectedIds = filters.transportista.map(t => t.value);
+      dataToFilter = dataToFilter.filter(item => selectedIds.includes(item.transportista?.id));
+    }
+    if (filters.zonaDeViaje.length > 0) {
+      const selectedIds = filters.zonaDeViaje.map(z => z.value);
+      dataToFilter = dataToFilter.filter(item => selectedIds.includes(item.zonaDeViaje?.id));
+    }
+    if (filters.tipoCarga.length > 0) {
+      const selectedIds = filters.tipoCarga.map(c => c.value);
+      dataToFilter = dataToFilter.filter(item => selectedIds.includes(item.tipoCarga?.id));
+    }
 
     dataToFilter.sort((a, b) => {
-      const costoA = parseFloat(a.valor_base) || 0;
-      const costoB = parseFloat(b.valor_base) || 0;
-      return ordenCostoAsc ? costoB - costoA : costoA - costoB;
-    });
+      const [criterio, direccion] = orden.split('_');
+      const dir = direccion === 'asc' ? 1 : -1;
+
+      switch (criterio) {
+        case 'costo':
+          const costoA = parseFloat(a.valor_base) || 0;
+          const costoB = parseFloat(b.valor_base) || 0;
+          return (costoA - costoB) * dir;
+        case 'creacion':
+          const fechaA = new Date(a.createdAt).getTime();
+          const fechaB = new Date(b.createdAt).getTime();
+          return (fechaA - fechaB) * dir;
+        case 'modificacion':
+          const fechaModA = new Date(a.updatedAt).getTime();
+          const fechaModB = new Date(b.updatedAt).getTime();
+          return (fechaModA - fechaModB) * dir;
+        default:
+          return 0;
+      }
+  });
 
     setFilteredTarifas(dataToFilter);
-  }, [filters, tarifas, ordenCostoAsc]);
+  }, [filters, tarifas, orden]);
 
 
   useLayoutEffect(() => {
@@ -580,23 +604,67 @@ const TarifaCosto = () => {
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <Select options={vehiculoOptions} placeholder="Filtrar por Vehículo" isClearable value={filters.tipoVehiculo} onChange={selectedOption => setFilters({ ...filters, tipoVehiculo: selectedOption })} styles={customSelectStyles} />
-            <Select options={transportistaOptions} placeholder="Filtrar por Transportista" isClearable value={filters.transportista} onChange={selectedOption => setFilters({ ...filters, transportista: selectedOption })} styles={customSelectStyles} />
-            <Select options={zonaOptions} placeholder="Filtrar por Zona" isClearable value={filters.zonaDeViaje} onChange={selectedOption => setFilters({ ...filters, zonaDeViaje: selectedOption })} styles={customSelectStyles} />
-            <Select options={cargaOptions} placeholder="Filtrar por Carga" isClearable value={filters.tipoCarga} onChange={selectedOption => setFilters({ ...filters, tipoCarga: selectedOption })} styles={customSelectStyles} />
+            {/* Filtros de búsqueda, los cambie para permitir selecionar varios */}
             <Select
-              options={[
-                { value: 'asc', label: 'Costo Base ↑' },
-                { value: 'desc', label: 'Costo Base ↓' },
-              ]}
-              placeholder="Ordenar por Costo"
-              isClearable
-              value={ordenCostoAsc ? { value: 'asc', label: 'Costo Base ↑' } : { value: 'desc', label: 'Costo Base ↓' }}
-              onChange={selected =>
-                setOrdenCostoAsc(selected?.value === 'asc')
-              }
+              isMulti
+              closeMenuOnSelect={false}
+              options={vehiculoOptions}
+              placeholder="Filtrar por Vehículo(s)"
+              value={filters.tipoVehiculo}
+              onChange={selectedOptions => setFilters(prev => ({ ...prev, tipoVehiculo: selectedOptions || [] }))}
               styles={customSelectStyles}
             />
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={transportistaOptions}
+              placeholder="Filtrar por Transportista(s)"
+              value={filters.transportista}
+              onChange={selectedOptions => setFilters(prev => ({ ...prev, transportista: selectedOptions || [] }))}
+              styles={customSelectStyles}
+            />
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={zonaOptions}
+              placeholder="Filtrar por Zona(s)"
+              value={filters.zonaDeViaje}
+              onChange={selectedOptions => setFilters(prev => ({ ...prev, zonaDeViaje: selectedOptions || [] }))}
+              styles={customSelectStyles}
+            />
+            <Select
+              isMulti
+              closeMenuOnSelect={false}
+              options={cargaOptions}
+              placeholder="Filtrar por Carga(s)"
+              value={filters.tipoCarga}
+              onChange={selectedOptions => setFilters(prev => ({ ...prev, tipoCarga: selectedOptions || [] }))}
+              styles={customSelectStyles}
+            />
+            <Select
+                    options={[
+                      { value: 'costo_desc', label: 'Costo Base ↓' },
+                      { value: 'costo_asc', label: 'Costo Base ↑' },
+                      { value: 'creacion_desc', label: 'Fecha Creación ↓' },
+                      { value: 'creacion_asc', label: 'Fecha Creación ↑' },
+                      { value: 'modificacion_desc', label: 'Fecha Modificación ↓' },
+                      { value: 'modificacion_asc', label: 'Fecha Modificación ↑' },
+                    ]}
+                    placeholder="Ordenar por"
+                    isClearable
+                    value={
+                      [
+                        { value: 'costo_desc', label: 'Costo Base ↓' },
+                        { value: 'costo_asc', label: 'Costo Base ↑' },
+                        { value: 'creacion_desc', label: 'Fecha Creación ↓' },
+                        { value: 'creacion_asc', label: 'Fecha Creación ↑' },
+                        { value: 'modificacion_desc', label: 'Fecha Modificación ↓' },
+                        { value: 'modificacion_asc', label: 'Fecha Modificación ↑' },
+                      ].find(opt => opt.value === orden)
+                    }
+                    onChange={selected => setOrden(selected ? selected.value : 'costo_desc')}
+                    styles={customSelectStyles}
+                  />
           </div>
         </div>
 

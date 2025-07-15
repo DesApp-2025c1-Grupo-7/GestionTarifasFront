@@ -3,13 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { History as HistoryIcon, Loader2, ArrowLeft, Calendar, User, Truck, MapPin } from 'lucide-react';
 import { getTarifaById, getHistorialDeTarifa } from '../../../../services/tarifaCosto.service';
 
-// --- LÓGICA DE COMPARACIÓN MEJORADA ---
+// LÓGICA DE COMPARACIÓN 
 const compararVersiones = (versionNueva, versionAnterior) => {
     if (!versionAnterior) return [<p key="init">Versión inicial creada.</p>];
     
     const cambios = [];
 
-    // 1. Comparar valor base
+    // Comparar valor base
     const valorBaseNuevo = Number(versionNueva.valor_base);
     const valorBaseAnterior = Number(versionAnterior.valor_base);
 
@@ -21,11 +21,11 @@ const compararVersiones = (versionNueva, versionAnterior) => {
         );
     }
     
-    // 2. Preparar mapas para una búsqueda eficiente de adicionales
+    // Búsqueda eficiente de adicionales
     const adicionalesNuevosMap = new Map((versionNueva.adicionales || []).map(a => [a.idAdicional, a]));
     const adicionalesAnterioresMap = new Map((versionAnterior.adicionales || []).map(a => [a.idAdicional, a]));
 
-    // 3. Detectar agregados y modificaciones de costo
+    // Detectar agregados y modificaciones de costo
     for (const [id, adicionalNuevo] of adicionalesNuevosMap) {
         const adicionalAnterior = adicionalesAnterioresMap.get(id);
         
@@ -48,7 +48,7 @@ const compararVersiones = (versionNueva, versionAnterior) => {
         }
     }
 
-    // 4. Detectar eliminados
+    // Detectar eliminados
     for (const [id, adicionalAnterior] of adicionalesAnterioresMap) {
         if (!adicionalesNuevosMap.has(id)) {
             cambios.push(<p key={`del-${id}`}>- Se eliminó: <strong className="text-red-400">{adicionalAnterior.descripcion}</strong></p>);
@@ -108,8 +108,6 @@ const HistorialTarifaReport = () => {
         <ArrowLeft size={20} />
         Volver a Tarifas
     </button>
-    
-    {/* --- AÑADE ESTE BOTÓN AQUÍ (Línea 110) --- */}
     <button 
         onClick={() => navigate('/reporte-tarifas')} 
         className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-semibold"

@@ -97,7 +97,7 @@ const Transportistas = () => {
 
   
 
-  // --- LÓGICA DE FILTRADO CENTRALIZADA ---
+  // LÓGICA DE FILTRADO 
   const filteredData = useMemo(() => {
     return data.filter((item) => {
       const nombreMatch = filters.nombreContacto === '' || item.nombre.toLowerCase().includes(filters.nombreContacto.toLowerCase());
@@ -113,7 +113,7 @@ const Transportistas = () => {
     });
   }, [data, filters]);
 
-  // --- MANEJADORES ---
+  //  MANEJADORES 
   const clearForm = () => {
     setForm({ nombre: '', contacto: '', telefono: '', tipoVehiculos: [], zonasDeViaje: [] });
     setEditingId(null);
@@ -134,7 +134,7 @@ const Transportistas = () => {
     setShowModal(true);
   };
 
-  // --- LÓGICA DE CRUD ---
+  // CRUD 
   const validateForm = () => form.nombre && form.contacto && form.telefono && form.tipoVehiculos.length > 0 && form.zonasDeViaje.length > 0;
 
   const handleSubmit = async () => {

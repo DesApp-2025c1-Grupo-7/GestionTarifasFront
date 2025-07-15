@@ -23,7 +23,7 @@ const App = () => {
       {/* La ruta padre renderiza el Layout (ABMEntidades) */}
       <Route path="/" element={<Entidades />}>
         
-        {/* Ruta por defecto: al entrar a la web, se mostrará Tipos de Carga */}
+        {/* Ruta por defecto: Tipos de Carga */}
         <Route index element={<TiposCarga />} />
 
         {/* Definimos una ruta para cada entidad */}

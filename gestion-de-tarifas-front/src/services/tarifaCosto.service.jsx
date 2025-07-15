@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-// La URL base de tu backend. Es consistente con tus otros servicios.
+// La URL base de tu backend. 
 const API_URL = '/api'; 
 
-/**
+/*
  * Obtiene todas las tarifas de costo desde el backend.
  */
 export const getTarifas = async () => {
@@ -72,7 +72,7 @@ export const getHistorialDeTarifa = async (id) => {
 };
 
 /*
- Obtiene el análisis comparativo de tarifas entre dos fechas.
+ Obtiene el análisis comparativo de tarifas entre dos fechas (lo voy a usar luego)
  @param {string} fechaInicio - Fecha de inicio en formato YYYY-MM-DD
  @param {string} fechaFin - Fecha de fin en formato YYYY-MM-DD
  */
